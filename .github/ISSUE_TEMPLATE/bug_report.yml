@@ -52,4 +52,3 @@ body:
       options:
         - label: I removed private page content and account information.
           required: true
-

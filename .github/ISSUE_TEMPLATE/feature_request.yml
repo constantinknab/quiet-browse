@@ -23,4 +23,3 @@ body:
       options:
         - label: I did not include private page content or account information.
           required: true
-

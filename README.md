@@ -2,14 +2,16 @@
 
 A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.2 is an unsubmitted alpha, not a Google-approved product, legal certification, or tamper-proof parental control.**
 
+[Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
+
 The extension code and build/test scripts are MIT licensed. Documentation, the public website, icon, and store graphics are available under CC BY 4.0; see `CONTENT-LICENSE.md`. The public-site source is in `website/`, promotional assets are in `store-assets/`, and the complete release workflow is in `docs/STORE-SUBMISSION-GUIDE.md`.
 
 ## Install it locally — no coding tools needed
 
-1. Open Chrome and type `chrome://extensions` into its address bar.
-2. Turn on **Developer mode** in the top-right corner.
-3. Click **Load unpacked**.
-4. Select **`/Users/constantin/Projects/quiet-browse/extension`**, the folder containing `manifest.json`. Do not select the project root or the ZIP.
+1. Download the release ZIP from [GitHub releases](https://github.com/constantinknab/quiet-browse/releases) and extract it into a dedicated folder. Alternatively, clone this repository and use its `extension/` folder.
+2. Open Chrome and type `chrome://extensions` into its address bar.
+3. Turn on **Developer mode** in the top-right corner.
+4. Click **Load unpacked**, then select the extracted folder containing `manifest.json` (or this repository's `extension/` folder). Do not select the ZIP or repository root.
 5. Open Chrome's puzzle-piece Extensions menu and pin **Quiet Browse**.
 6. Review Chrome's install warnings. Built-in profiles start enabled for the exact HTTPS social and shopping hosts listed below. Open any other ordinary website, click the extension icon, and choose **Enable on this site** to request that host separately.
 7. Turn on **Instant page-by-page navigation** if you want wheel gestures and the page arrows to jump one screen at a time.
@@ -76,20 +78,14 @@ quiet-browse/
 With Node 20+ and Python 3 installed:
 
 ```sh
-cd /Users/constantin/Projects/quiet-browse
+cd quiet-browse
 npm test
 npm run check
 npm run demo
 npm run package
 ```
 
-There are no third-party runtime or test dependencies. `npm` only runs the scripts; it does not need to install anything. On this machine, Node is also available at:
-
-```text
-/Users/constantin/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node
-```
-
-Run `node --test tests/*.test.mjs` and `node scripts/check.mjs` with that full executable path if `node` is not on your PATH. Packaging and the local demo use Python directly:
+There are no third-party runtime or test dependencies. `npm` only runs the scripts; it does not need to install anything. You can also run `node --test tests/*.test.mjs` and `node scripts/check.mjs` directly. Packaging and the local demo use Python:
 
 ```sh
 python3 scripts/serve_demo.py
@@ -113,6 +109,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the step-by-step store guide](docs/CHROME-WEB-STORE.md), [the listing draft](docs/STORE-LISTING.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). The release checklist deliberately remains incomplete until the publisher performs the live checks and supplies real contact information. No account has been created and no submission has been made.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). The source repository, support channel, and privacy website are public. The Chrome Web Store checklist remains incomplete until the publisher performs the live Chrome and website checks and completes the developer-dashboard disclosures. No Chrome Web Store submission has been made.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.
