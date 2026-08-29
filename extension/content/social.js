@@ -1,0 +1,154 @@
+(() => {
+  'use strict';
+  const ROOT = 'data-qb-social';
+  const HIDDEN = 'data-qb-social-hidden';
+  const ROUTE = 'data-qb-social-route';
+
+  function platform(hostname) {
+    const host = hostname.replace(/^www\./, '');
+    if (host === 'instagram.com') return 'instagram';
+    if (host === 'facebook.com') return 'facebook';
+    if (host === 'tiktok.com') return 'tiktok';
+    return null;
+  }
+
+  function routeFor(name, pathname) {
+    const path = pathname.replace(/\/+$/, '') || '/';
+    if (name === 'instagram') {
+      if (/^\/direct(?:\/|$)/.test(path)) return 'messages';
+      if (/^\/(?:p|reel|tv|stories)\//.test(path)) return 'direct';
+      if (/^\/reels(?:\/|$)/.test(path)) return 'short';
+      if (/^\/explore(?:\/|$)/.test(path)) return 'explore';
+      return path === '/' ? 'home' : 'other';
+    }
+    if (name === 'facebook') {
+      if (/^\/(?:messages|messenger)(?:\/|$)/.test(path)) return 'messages';
+      if (/^\/reel\/[^/]+/.test(path) || /^\/(?:share|permalink)\//.test(path) || /\/posts\//.test(path)) return 'direct';
+      if (/^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
+      if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
+      return path === '/' || path === '/home.php' ? 'home' : 'other';
+    }
+    if (name === 'tiktok') {
+      if (/^\/messages(?:\/|$)/.test(path)) return 'messages';
+      if (/^\/@[^/]+\/video\/[^/]+/.test(path)) return 'direct';
+      if (/^\/(?:foryou|following|live)(?:\/|$)/.test(path)) return 'short';
+      if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
+      return path === '/' ? 'home' : 'other';
+    }
+    return 'other';
+  }
+
+  function categoryForLink(name, pathname) {
+    if (/^\/stories(?:\/|$)/.test(pathname)) return 'stories';
+    if (name === 'instagram' && /^\/reels(?:\/|$)/.test(pathname)) return 'short';
+    if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(pathname)) return 'short';
+    if (name === 'tiktok' && /^\/(?:foryou|following|live)(?:\/|$)/.test(pathname)) return 'short';
+    if (/^\/(?:explore|discover)(?:\/|$)/.test(pathname)) return 'explore';
+    return null;
+  }
+
+  function create() {
+    const name = platform(location.hostname);
+    const changed = new Map();
+    let originalRoot = null;
+    let originalRoute = null;
+    let markedRoot = false;
+    let notice = null;
+
+    function navTarget(anchor) {
+      return anchor.closest('li') || anchor.closest('[role="tab"],[role="menuitem"]') || anchor;
+    }
+    function want(map, element, category) {
+      if (element && element.isConnected && element !== document.body && element !== document.documentElement) map.set(element, category);
+    }
+    function reconcile(desired) {
+      for (const [element, original] of changed) {
+        if (desired.has(element) && element.isConnected) continue;
+        if (original === null) element.removeAttribute(HIDDEN); else element.setAttribute(HIDDEN, original);
+        changed.delete(element);
+      }
+      for (const [element, category] of desired) {
+        if (!changed.has(element)) changed.set(element, element.getAttribute(HIDDEN));
+        if (element.getAttribute(HIDDEN) !== category) element.setAttribute(HIDDEN, category);
+      }
+    }
+    function surface(category) {
+      const fixture = document.querySelector(`[data-qb-social-surface="${category}"]`);
+      if (fixture) return fixture;
+      if (category === 'stories') {
+        return document.querySelector('[aria-label*="Stories" i],[data-e2e*="story" i]');
+      }
+      if (name === 'facebook') return document.querySelector('[role="feed"]');
+      if (name === 'tiktok') return document.querySelector('[data-e2e="recommend-list"],[data-e2e="explore-item-list"],main');
+      if (name === 'instagram') return document.querySelector('main');
+      return null;
+    }
+    function showNotice(target, route) {
+      if (!target?.parentElement || !['home', 'short', 'explore'].includes(route)) { notice?.remove(); notice = null; return; }
+      if (!notice) {
+        notice = document.createElement('aside');
+        notice.setAttribute('data-qb-social-notice', '');
+        notice.setAttribute('role', 'status');
+      }
+      const labels = { home: 'Home feed', short: 'Short-video feed', explore: 'Explore feed' };
+      const message = `${labels[route]} hidden by Quiet Browse. Messages, profiles, and direct links still work.`;
+      if (notice.textContent !== message) notice.textContent = message;
+      if (notice.parentElement !== target.parentElement || notice.nextSibling !== target) target.before(notice);
+    }
+
+    function sync(settings = {}, now = new Date()) {
+      if (!name) return;
+      const route = routeFor(name, location.pathname);
+      const desired = new Map();
+      const at = key => globalThis.QuietBrowseComfort.settingAt(settings[key], settings.socialSchedules?.[key], now);
+      const enabled = {
+        stories: at('socialStories'),
+        short: at('socialShortVideo'),
+        explore: at('socialExplore'),
+        home: at('socialHomeFeed'),
+      };
+      for (const anchor of Array.from(document.querySelectorAll('a[href]')).slice(0, 800)) {
+        try {
+          const url = new URL(anchor.getAttribute('href'), location.href);
+          if (url.hostname !== location.hostname) continue;
+          const category = categoryForLink(name, url.pathname);
+          if (category && enabled[category]) want(desired, navTarget(anchor), category);
+        } catch { /* Malformed page URL. */ }
+      }
+      for (const category of ['stories', 'short', 'explore']) {
+        if (enabled[category]) document.querySelectorAll(`[data-qb-social-surface="${category}"]`).forEach(element => want(desired, element, category));
+      }
+      let routedTarget = null;
+      if (enabled[route] && ['home', 'short', 'explore'].includes(route)) {
+        routedTarget = surface(route);
+        want(desired, routedTarget, route);
+      }
+      // Direct items and conversations stay usable; only an explicitly marked continuation feed is removed.
+      if (['direct', 'messages'].includes(route)) {
+        document.querySelectorAll('[data-qb-social-surface="recommendations"]').forEach(element => want(desired, element, 'recommendations'));
+      }
+      reconcile(desired);
+      showNotice(routedTarget, route);
+      if (!markedRoot) {
+        originalRoot = document.documentElement.getAttribute(ROOT);
+        originalRoute = document.documentElement.getAttribute(ROUTE);
+        markedRoot = true;
+      }
+      document.documentElement.setAttribute(ROOT, name);
+      document.documentElement.setAttribute(ROUTE, route);
+    }
+
+    function stop() {
+      reconcile(new Map());
+      notice?.remove(); notice = null;
+      if (markedRoot) {
+        if (originalRoot === null) document.documentElement.removeAttribute(ROOT); else document.documentElement.setAttribute(ROOT, originalRoot);
+        if (originalRoute === null) document.documentElement.removeAttribute(ROUTE); else document.documentElement.setAttribute(ROUTE, originalRoute);
+      }
+      markedRoot = false;
+    }
+    return { sync, stop, status: () => ({ platform: name, hidden: changed.size, route: routeFor(name, location.pathname) }) };
+  }
+
+  globalThis.QuietBrowseSocial = { create, platform, routeFor };
+})();

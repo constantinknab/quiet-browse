@@ -1,0 +1,41 @@
+// The starter list is always available locally. Remote updates are data only and opt in.
+export const ADULT_LIST_PERMISSION = 'https://raw.githubusercontent.com/*';
+
+// Each source has an independent Chrome rule range. Limits deliberately remain below
+// 2,000 so all enabled sources stay comfortably inside Chrome's dynamic-rule quota.
+export const ADULT_SOURCES = Object.freeze([
+  Object.freeze({
+    id: 'jarelllama-us-v1', region: 'United States', label: 'United States · popular-site supplement',
+    detail: 'Popular NSFW domains, including English-language and US-facing services. The label describes intended coverage, not server location.',
+    url: 'https://raw.githubusercontent.com/jarelllama/Scam-Blocklist/main/lists/adblock/nsfw.txt',
+    format: 'adblock', limit: 1995, minimum: 500, ruleStart: 210000,
+    homepage: 'https://github.com/jarelllama/Scam-Blocklist#nsfw-blocklist', license: 'GPL-3.0',
+  }),
+  Object.freeze({
+    id: 'v2fly-china-v1', region: 'China', label: 'China · community supplement',
+    detail: 'Chinese-community-maintained category coverage. The label describes intended coverage, not server location.',
+    url: 'https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-porn',
+    format: 'v2fly', limit: 1900, minimum: 1000, ruleStart: 220000,
+    homepage: 'https://github.com/v2fly/domain-list-community', license: 'MIT',
+  }),
+  Object.freeze({
+    id: 'v2fly-japan-v1', region: 'Japan', label: 'Japan · Japanese-content supplement',
+    detail: 'Japanese-content and .jp coverage selected from V2Fly’s maintained adult category. The label describes intended coverage, not server location.',
+    url: 'https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/category-porn',
+    format: 'v2fly', filter: 'japanese-content', limit: 1500, minimum: 300, ruleStart: 230000,
+    homepage: 'https://github.com/v2fly/domain-list-community', license: 'MIT',
+  }),
+]);
+export const ADULT_SOURCE_IDS = Object.freeze(ADULT_SOURCES.map(source => source.id));
+
+export const PACKAGED_ADULT_DOMAINS = Object.freeze([
+  '4tube.com', '8muses.com', 'adultfriendfinder.com', 'beeg.com', 'bellesa.co',
+  'brazzers.com', 'cam4.com', 'chaturbate.com', 'clips4sale.com', 'eporner.com',
+  'erome.com', 'fansly.com', 'fapello.com', 'hclips.com', 'hentai2read.com',
+  'hentaihaven.xxx', 'imagefap.com', 'ixxx.com', 'livejasmin.com', 'manyvids.com',
+  'motherless.com', 'myfreecams.com', 'nhentai.net', 'onlyfans.com', 'porn.com',
+  'pornhub.com', 'redgifs.com', 'redtube.com', 'rule34.xxx', 'sex.com',
+  'spankbang.com', 'stripchat.com', 'theporndude.com', 'thisvid.com', 'tnaflix.com',
+  'tube8.com', 'txxx.com', 'xhamster.com', 'xnxx.com', 'xvideos.com',
+  'youporn.com', 'youjizz.com', 'yuvutu.com', 'zbporn.com',
+]);

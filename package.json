@@ -1,0 +1,14 @@
+{
+  "name": "quiet-browse",
+  "version": "0.5.2",
+  "private": true,
+  "type": "module",
+  "description": "A local, reversible Chrome extension for calmer pages.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "package": "python3 scripts/package.py",
+    "demo": "python3 scripts/serve_demo.py"
+  },
+  "engines": { "node": ">=20" }
+}
