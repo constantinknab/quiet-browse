@@ -7,10 +7,11 @@
   const repairable = new URLSearchParams(location.search).has('repair');
   let pageUnavailable = new URLSearchParams(location.search).has('offline') || repairable;
   const schedules = () => Object.fromEntries(['socialStories', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, { scheduled: false, windows: [] }]));
-  const defaults = { pageMode: false, motion: true, consentChoices: true, backgroundVideo: false, youtubeQuiet: true, youtubeRecommendations: false, socialStories: true, socialShortVideo: true, socialExplore: true, socialHomeFeed: true, grayscale: { enabled: false, scheduled: false, level: 100, windows: [] }, socialSchedules: schedules() };
+  const defaults = { pageMode: false, motion: true, consentChoices: true, backgroundVideo: false, youtubeQuiet: true, youtubeRecommendations: false, youtubePictureCover: false, socialStories: true, socialShortVideo: true, socialExplore: true, socialHomeFeed: true, grayscale: { enabled: false, scheduled: false, level: 100, windows: [] }, socialSchedules: schedules() };
   const saved = { version: 4, recommendedVersion: 2, sites: isOptions ? {
     'https://www.instagram.com': { enabled: true, settings: structuredClone(defaults) },
     'https://www.amazon.com': { enabled: true, settings: { ...structuredClone(defaults), socialStories: false, socialShortVideo: false, socialExplore: false, socialHomeFeed: false, grayscale: { enabled: true, scheduled: false, level: 20, windows: [] } } },
+    'https://www.youtube.com': { enabled: true, settings: structuredClone(defaults) },
     'https://example.com': { enabled: true, settings: structuredClone(defaults) },
   } : {} };
   const sourceTemplates = [
@@ -39,7 +40,12 @@
         if (message.type === 'QB_ADULT_AUTO') { adult.remoteSources = [...message.sources]; adult.remoteUpdates = !!message.sources.length; adult.sources = adult.sources.map(source => ({ ...source, selected: message.sources.includes(source.id) })); adult.remoteCount = adult.sources.filter(source => source.selected).reduce((sum, source) => sum + source.count, 0); return { ok: true, data: structuredClone(adult) }; }
         if (message.type === 'QB_ADULT_REFRESH') { const now = Date.now(); adult.lastChecked = now; adult.lastUpdated = now; adult.lastError = ''; adult.sources = adult.sources.map(source => source.selected ? { ...source, count: source.activeCount, lastChecked: now, lastUpdated: now, lastError: '' } : source); adult.remoteCount = adult.sources.filter(source => source.selected).reduce((sum, source) => sum + source.count, 0); return { ok: true, data: structuredClone(adult) }; }
         if (message.type === 'QB_ADULT_DISABLE') { const selected = message.sources || adult.remoteSources; adult = { ...adult, enabled: false, passwordProtected: false, customDomains: [], remoteUpdates: false, remoteSources: [...selected], remoteCount: 0, lastChecked: 0, lastUpdated: 0, lastError: '', sources: sourceTemplates.map(source => ({ ...source, selected: selected.includes(source.id) })) }; return { ok: true, data: structuredClone(adult) }; }
-        if (message.type === 'QB_SAVE') { saved.sites[message.site] = { enabled: message.enabled, settings: structuredClone(message.settings) }; page.active = message.enabled && !page.paused; return { ok: true, data: structuredClone(saved.sites[message.site]) }; }
+        if (message.type === 'QB_SAVE') {
+          saved.sites[message.site] = { enabled: message.enabled, settings: structuredClone(message.settings) };
+          page.active = message.enabled && !page.paused;
+          if (site === 'https://www.youtube.com') page.covered = page.active && message.settings.youtubePictureCover === true;
+          return { ok: true, data: structuredClone(saved.sites[message.site]) };
+        }
         if (message.type === 'QB_FORGET') { delete saved.sites[message.site]; return { ok: true, data: {} }; }
         if (message.type === 'QB_RESET') { saved.sites = {}; adult = { ...adult, enabled: false, passwordProtected: false, customDomains: [], remoteUpdates: false, remoteSources: [], remoteCount: 0, lastChecked: 0, lastUpdated: 0, lastError: '', sources: sourceTemplates.map(source => ({ ...source, selected: false })) }; return { ok: true, data: {} }; }
         return { ok: false, error: 'Not implemented in UI preview.' };
@@ -58,7 +64,7 @@
       removeCSS: async () => {},
       insertCSS: async () => {},
       executeScript: async options => {
-        if (options.files) { pageUnavailable = false; page.engineVersion = 6; page.active = true; }
+        if (options.files) { pageUnavailable = false; page.engineVersion = 7; page.active = true; }
       },
     };
   }

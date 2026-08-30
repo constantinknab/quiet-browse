@@ -27,7 +27,7 @@ async function repairPage() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id, frameIds: [0] },
       func: () => {
-        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6']) {
+        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7']) {
           try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
           try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
         }
@@ -41,7 +41,7 @@ async function repairPage() {
       files: ['shared/comfort.js', 'content/comfort.js', 'content/social.js', 'content/engine.js'],
     });
     const status = await rawPageMessage({ type: 'QB_REFRESH' });
-    return status?.engineVersion === 6;
+    return status?.engineVersion === 7;
   } catch { return false; }
 }
 async function pageMessage(message, retry = true) {
@@ -57,6 +57,7 @@ function render() {
   $('features').disabled = busy || !config.enabled;
   $('navigation').disabled = busy || !config.enabled;
   $('social-controls').disabled = busy || !config.enabled;
+  $('youtube-controls').disabled = busy || !config.enabled;
   $('grayscale-controls').disabled = busy || !config.enabled;
   for (const feature of [...FEATURES, ...SOCIAL_FEATURES]) $(feature.key).checked = config.settings[feature.key];
   const gray = config.settings.grayscale;
@@ -81,7 +82,7 @@ function render() {
   $('cover').textContent = page?.covered ? 'Show YouTube video picture' : 'Hide YouTube video picture';
   $('cover-note').hidden = !youtubeSite;
   $('cover-note').textContent = page?.coverAvailable
-    ? 'Hides the video picture, not the audio or edits. Playback and YouTube controls—including mute—remain available. Ads and picture-in-picture are not covered.'
+    ? `${config.settings.youtubePictureCover ? 'Your saved cover returns after reloads and video changes. ' : ''}Hides the video picture, not the audio or edits. Playback and YouTube controls—including mute—remain available. Ads and picture-in-picture are not covered.`
     : 'Reload this YouTube page to make Hide video picture available. Your saved site settings are intact.';
   $('counts').hidden = !page;
   $('counts').textContent = page?.active
@@ -121,12 +122,15 @@ for (const feature of [...FEATURES, ...SOCIAL_FEATURES]) {
   const name = document.createElement('strong'); name.textContent = feature.label;
   const detail = document.createElement('small'); detail.textContent = feature.detail;
   text.append(name, detail); label.append(input, text);
-  $(feature.key === 'pageMode' ? 'navigation' : feature.key.startsWith('social') ? 'social-controls' : 'features').append(label);
+  $(feature.key === 'pageMode' ? 'navigation' : feature.key.startsWith('social') ? 'social-controls' : feature.key === 'youtubePictureCover' ? 'youtube-controls' : 'features').append(label);
   input.addEventListener('change', () => {
     const checked = input.checked;
     action(async () => {
       config.settings[feature.key] = checked;
-      await save(); say(!page ? 'Saved. Reload this page to apply it.' : page.paused ? 'Saved. Restore Quiet Browse to apply on this page.' : 'Saved for this site.');
+      await save();
+      if (feature.key === 'youtubePictureCover') {
+        say(checked ? 'Saved. YouTube video pictures will be covered after reloads and video changes.' : 'Saved. Persistent YouTube picture covering is off.');
+      } else say(!page ? 'Saved. Reload this page to apply it.' : page.paused ? 'Saved. Restore Quiet Browse to apply on this page.' : 'Saved for this site.');
     });
   });
 }
@@ -143,7 +147,14 @@ $('enable').addEventListener('click', () => {
   });
 });
 $('pause').addEventListener('click', () => action(async () => { page = await pageMessage({ type: 'QB_PAUSE', paused: !page.paused }); say('This setting resets on page reload.'); }));
-$('cover').addEventListener('click', () => action(async () => { page = await pageMessage({ type: 'QB_COVER', covered: !page.covered }); say(page.covered ? 'Picture covered. Visual information is hidden until you restore it.' : 'Original picture restored.'); }));
+$('cover').addEventListener('click', () => action(async () => {
+  page = await pageMessage({ type: 'QB_COVER', covered: !page.covered });
+  say(page.covered
+    ? `Picture covered for this page.${config.settings.youtubePictureCover ? ' The saved cover remains on.' : ''}`
+    : config.settings.youtubePictureCover
+    ? 'Picture shown temporarily. Your saved cover returns after reload or the next video.'
+    : 'Original picture restored.');
+}));
 $('options').addEventListener('click', () => chrome.runtime.openOptionsPage());
 $('gray-toggle').addEventListener('click', () => action(async () => {
   config.settings.grayscale.enabled = !config.settings.grayscale.enabled;
@@ -177,6 +188,8 @@ try {
     socialSite = socialPlatform(site);
     $('social-controls').hidden = !socialSite;
     $('social-note').hidden = !socialSite;
+    $('youtube-controls').hidden = !youtubeSite;
+    $('youtube-cover-note').hidden = !youtubeSite;
     $('social-legend').textContent = socialSite ? `${socialSite} controls` : 'Social feed controls';
     for (const feature of FEATURES.filter(item => item.key.startsWith('youtube'))) {
       $(feature.key).closest('label').hidden = !isYouTube(site);

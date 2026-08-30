@@ -8,6 +8,7 @@ const BOOLEAN_DEFAULTS = Object.freeze({
   backgroundVideo: false,
   youtubeQuiet: true,
   youtubeRecommendations: false,
+  youtubePictureCover: false,
   socialStories: true,
   socialShortVideo: true,
   socialExplore: true,
@@ -29,6 +30,7 @@ export const FEATURES = Object.freeze([
   { key: 'backgroundVideo', label: 'Pause background autoplay', detail: 'Only muted, autoplay videos without controls. Adds native play controls. Excludes YouTube.' },
   { key: 'youtubeQuiet', label: 'Quiet YouTube previews', detail: 'Hides supported hover-preview surfaces and ambient background effects.' },
   { key: 'youtubeRecommendations', label: 'Collapse YouTube recommendations', detail: 'Adds a Show recommendations button. Keeps the original links.' },
+  { key: 'youtubePictureCover', label: 'Keep YouTube video picture hidden', detail: 'Covers watch-video pictures after reloads and video changes. Audio, controls, captions, ads, and picture-in-picture remain available.' },
 ]);
 
 export const SOCIAL_FEATURES = Object.freeze([

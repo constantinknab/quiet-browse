@@ -3,7 +3,7 @@ import { ADULT_SOURCES, ADULT_SOURCE_IDS, ADULT_LIST_PERMISSION, PACKAGED_ADULT_
 const CONTENT_FILES = ['shared/comfort.js', 'content/comfort.js', 'content/social.js', 'content/engine.js'];
 const CLOCK_ALARM = 'qb-schedule-clock';
 const OLD_CLOCK_ALARM = 'qb-grayscale-clock';
-const CONTENT_ENGINE_VERSION = 6;
+const CONTENT_ENGINE_VERSION = 7;
 const ADULT_KEY = 'quietBrowseAdultGuard';
 const ADULT_RULE_START = 100000;
 const ADULT_RULE_RANGE = 10000;
@@ -401,7 +401,7 @@ async function applyToCurrentPage(tabId, site) {
       await chrome.scripting.executeScript({
         target: { tabId: tab.id, frameIds: [0] },
         func: () => {
-          for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6']) {
+          for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7']) {
             try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
             try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
           }
@@ -492,7 +492,15 @@ async function handle(message, sender) {
     if (!isValidSite(message.site)) throw new Error('Invalid site.');
     if (message.enabled && !await permitted(message.site)) throw new Error('Grant access to this site first.');
     const saved = await state();
-    saved.sites[message.site] = { enabled: message.enabled === true, settings: cleanSettings(message.settings) };
+    // A bare enable/disable action must not reset the site's feature choices. The
+    // current UI submits settings too, but preserving them here keeps lifecycle
+    // behavior safe across older UI pages, service-worker restarts, and callers
+    // that only intend to change the master switch.
+    const previous = saved.sites[message.site];
+    const submittedSettings = Object.prototype.hasOwnProperty.call(message, 'settings')
+      ? message.settings
+      : previous?.settings ?? defaultsForSite(message.site);
+    saved.sites[message.site] = { enabled: message.enabled === true, settings: cleanSettings(submittedSettings) };
     await persist(saved);
     const pageReady = message.enabled && Number.isInteger(message.tabId)
       ? await applyToCurrentPage(message.tabId, message.site) : null;

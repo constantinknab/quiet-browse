@@ -41,6 +41,16 @@ try {
     assert(new URLSearchParams(location.search).has('offline')
       ? document.getElementById('gray-status').textContent === 'Saved at 42%. Reload this page to apply it.'
       : document.getElementById('gray-status').textContent.startsWith('42% now'), 'Popup reports the applicable grayscale state');
+    if (testSite === 'https://www.youtube.com' && !parameters.has('offline') && !parameters.has('repair')) {
+      const persistentCover = document.getElementById('youtubePictureCover');
+      assert(!document.getElementById('youtube-controls').hidden && !persistentCover.checked, 'YouTube exposes a separate saved picture-cover preference');
+      persistentCover.click(); await waitFor(() => persistentCover.checked && document.getElementById('cover').textContent === 'Show YouTube video picture');
+      let youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[testSite];
+      assert(youtubeConfig.settings.youtubePictureCover === true, 'Persistent picture covering is saved for the YouTube host');
+      document.getElementById('cover').click(); await waitFor(() => document.getElementById('cover').textContent === 'Hide YouTube video picture');
+      youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[testSite];
+      assert(youtubeConfig.settings.youtubePictureCover === true && document.getElementById('message').textContent.includes('returns after reload'), 'Page-only Show picture leaves the saved preference intact');
+    }
     if (new URLSearchParams(location.search).has('social')) {
       assert(!document.getElementById('social-controls').hidden && document.querySelectorAll('#social-controls input').length === 4, 'A supported social site shows four independent controls');
       const stories = document.getElementById('socialStories'); stories.click();
@@ -85,6 +95,13 @@ try {
     assert(gray.windows.length === 1 && gray.windows[0].start === '20:30' && gray.windows[0].end === '06:45', 'Overnight start and end times are saved');
     assert(settings.socialSchedules.socialStories.scheduled && settings.socialSchedules.socialStories.windows.length === 1, 'Stories can be hidden on their own local-time schedule');
     assert(!settings.socialSchedules.socialShortVideo.scheduled && !settings.socialSchedules.socialHomeFeed.scheduled, 'Stories, short video, and scrollable-feed schedules remain independent');
+    const youtubeCard = document.querySelector('[data-site="https://www.youtube.com"]'); youtubeCard.open = true;
+    const youtubeForm = youtubeCard.querySelector('form');
+    const youtubeControl = youtubeForm.querySelector('.youtube-control'); youtubeControl.open = true;
+    youtubeControl.querySelector('input[type="checkbox"]').click(); youtubeForm.requestSubmit();
+    await waitFor(() => youtubeForm.querySelector('.message').textContent === 'Saved.');
+    const youtubeSettings = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites['https://www.youtube.com'].settings;
+    assert(youtubeSettings.youtubePictureCover === true, 'Sites & privacy can save persistent YouTube picture covering');
     document.getElementById('adult-domains').value = 'custom.example';
     const sourceChoices = [...document.querySelectorAll('#adult-source-options-off input')];
     sourceChoices.forEach(input => { input.checked = true; });

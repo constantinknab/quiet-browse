@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const INSTANCE = '__quietBrowseV6';
-  const ENGINE_VERSION = 6;
+  const INSTANCE = '__quietBrowseV7';
+  const ENGINE_VERSION = 7;
   if (globalThis[INSTANCE]) { globalThis[INSTANCE].refresh(); return; }
   const comfort = globalThis.QuietBrowsePageComfort.create();
   const social = globalThis.QuietBrowseSocial.create();
@@ -11,6 +11,8 @@
   let paused = false;
   let active = false;
   let covered = false;
+  let coverOverride = null;
+  let settingsInitialized = false;
   let refreshVersion = 0;
   let timer = null;
   let observer = null;
@@ -206,7 +208,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = 'Show picture';
-      button.addEventListener('click', () => { covered = false; updateCover(); });
+      button.addEventListener('click', () => { coverOverride = false; covered = false; updateCover(); });
       content.append(text, button); surface.append(content); shadow.adoptedStyleSheets = [style]; shadow.append(surface);
       player.append(cover);
     }
@@ -235,6 +237,13 @@
   function schedule() {
     if (active && timer === null) timer = setTimeout(scan, 120);
   }
+  function youtubeRouteChanged() {
+    if (youtube) {
+      coverOverride = null;
+      covered = settings.youtubePictureCover === true;
+    }
+    schedule();
+  }
 
   function restore() {
     comfort.stop();
@@ -248,9 +257,9 @@
     document.removeEventListener('play', onPlay, true);
     document.removeEventListener('pointerdown', allowVideo, true);
     document.removeEventListener('keydown', allowVideo, true);
-    document.removeEventListener('yt-navigate-finish', schedule);
-    window.removeEventListener('popstate', schedule);
-    window.removeEventListener('hashchange', schedule);
+    document.removeEventListener('yt-navigate-finish', youtubeRouteChanged);
+    window.removeEventListener('popstate', youtubeRouteChanged);
+    window.removeEventListener('hashchange', youtubeRouteChanged);
     for (const [animation, previous] of animations) restoreAnimation(animation, previous);
     animations.clear();
     for (const [element, original] of choices) restoreAttribute(element, 'data-qb-choice', original);
@@ -278,9 +287,9 @@
     document.addEventListener('play', onPlay, true);
     document.addEventListener('pointerdown', allowVideo, true);
     document.addEventListener('keydown', allowVideo, true);
-    document.addEventListener('yt-navigate-finish', schedule);
-    window.addEventListener('popstate', schedule);
-    window.addEventListener('hashchange', schedule);
+    document.addEventListener('yt-navigate-finish', youtubeRouteChanged);
+    window.addEventListener('popstate', youtubeRouteChanged);
+    window.addEventListener('hashchange', youtubeRouteChanged);
     observer = new MutationObserver(schedule);
     observer.observe(document.documentElement, { childList: true, subtree: true });
     scan();
@@ -292,14 +301,24 @@
       const response = await chrome.runtime.sendMessage({ type: 'QB_POLICY' });
       if (version !== refreshVersion) return;
       policyEnabled = response?.ok === true && response.data?.enabled === true;
-      settings = response?.data?.settings || {};
-      if (!policyEnabled) covered = false;
+      const nextSettings = response?.data?.settings || {};
+      const previousPreference = settings.youtubePictureCover === true;
+      const nextPreference = nextSettings.youtubePictureCover === true;
+      settings = nextSettings;
+      if (!policyEnabled) { covered = false; coverOverride = null; }
+      else if (!settingsInitialized || previousPreference !== nextPreference) {
+        coverOverride = null;
+        covered = nextPreference;
+      } else covered = coverOverride ?? nextPreference;
+      settingsInitialized = true;
       apply();
-    } catch { if (version === refreshVersion) { policyEnabled = false; covered = false; restore(); } }
+    } catch { if (version === refreshVersion) { policyEnabled = false; covered = false; coverOverride = null; restore(); } }
   }
 
   function status() {
-    return { ...comfort.status(), ...social.status(), engineVersion: ENGINE_VERSION, active, paused, covered, coverAvailable: youtube && !!document.querySelector('#movie_player video'),
+    return { ...comfort.status(), ...social.status(), engineVersion: ENGINE_VERSION, active, paused, covered,
+      coverPersistent: youtube && settings.youtubePictureCover === true, coverTemporary: youtube && coverOverride !== null,
+      coverAvailable: youtube && !!document.querySelector('#movie_player video'),
       loops: animations.size, choices: choices.size, videos: [...videos.keys()].filter(video => video.paused).length, recommendations: recommendations.size };
   }
 
@@ -308,16 +327,21 @@
     if (message.type === 'QB_CLOCK') { comfort.tick(); scan(); respond(status()); return; }
     if (message.type === 'QB_REFRESH') { refresh().then(() => respond(status())); return true; }
     if (message.type === 'QB_STATUS') { respond(status()); return; }
-    if (message.type === 'QB_PAUSE') { paused = message.paused === true; if (paused) covered = false; apply(); respond(status()); return; }
+    if (message.type === 'QB_PAUSE') {
+      paused = message.paused === true;
+      covered = paused ? false : (coverOverride ?? settings.youtubePictureCover === true);
+      apply(); respond(status()); return;
+    }
     if (message.type === 'QB_COVER') {
       if (!active || !youtube || !document.querySelector('#movie_player video')) { respond({ error: 'Open an enabled YouTube watch page first.' }); return; }
-      covered = message.covered === true; updateCover(); respond(status());
+      coverOverride = message.covered === true;
+      covered = coverOverride; updateCover(); respond(status());
     }
   }
   chrome.runtime.onMessage.addListener(onMessage);
   function dispose() {
     refreshVersion += 1;
-    policyEnabled = false; paused = false; covered = false;
+    policyEnabled = false; paused = false; covered = false; coverOverride = null;
     restore();
     try { chrome.runtime.onMessage.removeListener(onMessage); } catch { /* Invalidated extension context. */ }
   }

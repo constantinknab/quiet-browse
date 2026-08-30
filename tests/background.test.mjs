@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { STATE_KEY, RECOMMENDED_SITES, sitePattern } from '../extension/shared/settings.js';
+import { DEFAULTS, STATE_KEY, RECOMMENDED_SITES, SOCIAL_SCHEDULE_KEYS, cleanSettings, sitePattern } from '../extension/shared/settings.js';
 import { ADULT_LIST_PERMISSION, ADULT_SOURCES } from '../extension/shared/adult-domains.js';
 
 function event() {
@@ -15,7 +15,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 6;
+  let receiverVersion = 7;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -33,7 +33,7 @@ function fakeChrome() {
       injected.push(options);
       if (options.files) {
         if (failInjection) throw new Error('Fixture injection failure');
-        receiver = true; receiverVersion = 6;
+        receiver = true; receiverVersion = 7;
       }
     } },
     tabs: { query: async () => [{ id: 1 }], get: async id => ({ id, url: 'https://example.com/a?private=yes' }), sendMessage: async (id, message) => {
@@ -43,9 +43,24 @@ function fakeChrome() {
     } },
   };
   return { chrome, grants, registered, injected, messages, alarms, dynamicRules, data: () => data, resetData: () => { data = {}; }, setData: value => { data = structuredClone(value); },
-    setReceiver: (value, version = 6) => { receiver = value; receiverVersion = version; },
+    setReceiver: (value, version = 7) => { receiver = value; receiverVersion = version; },
     setFailInjection: value => { failInjection = value; },
     setFailDynamicUpdate: value => { failDynamicUpdate = value; } };
+}
+
+const BOOLEAN_FEATURE_KEYS = Object.freeze(Object.entries(DEFAULTS)
+  .filter(([, value]) => typeof value === 'boolean')
+  .map(([key]) => key));
+
+function completeFeatureSettings(value) {
+  const settings = Object.fromEntries(BOOLEAN_FEATURE_KEYS.map(key => [key, value]));
+  settings.grayscale = value
+    ? { enabled: true, level: 73, scheduled: true, windows: [{ days: [1, 3, 5], start: '21:15', end: '06:45', level: 84 }] }
+    : { enabled: false, level: 11, scheduled: false, windows: [] };
+  settings.socialSchedules = Object.fromEntries(SOCIAL_SCHEDULE_KEYS.map((key, index) => [key, value
+    ? { scheduled: true, windows: [{ days: [index, (index + 2) % 7], start: `0${index + 1}:00`, end: `0${index + 2}:30` }] }
+    : { scheduled: false, windows: [] }]));
+  return cleanSettings(settings);
 }
 
 test('background permission, scope, messaging, persistence and revocation lifecycle', async t => {
@@ -166,6 +181,77 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     assert.equal(f.registered.size, 0);
     assert.equal(f.alarms.size, 0);
     assert.equal(Object.keys(f.data()[STATE_KEY].sites).length, 0);
+  });
+  await t.test('every built-in site preserves every feature through off, on, page reload, and worker restart cycles', async t => {
+    const sites = [...RECOMMENDED_SITES.map(entry => entry.site), 'https://www.youtube.com'];
+    const allOn = completeFeatureSettings(true);
+    const allOff = completeFeatureSettings(false);
+    assert.deepEqual([...BOOLEAN_FEATURE_KEYS].sort(), [
+      'backgroundVideo', 'consentChoices', 'motion', 'pageMode',
+      'socialExplore', 'socialHomeFeed', 'socialShortVideo', 'socialStories',
+      'youtubePictureCover', 'youtubeQuiet', 'youtubeRecommendations',
+    ].sort(), 'the lifecycle matrix must include every boolean feature');
+
+    for (const site of sites) {
+      await t.test(new URL(site).hostname, async () => {
+        const page = { id: f.chrome.runtime.id, tab: { id: 1 }, frameId: 0, url: `${site}/fixture` };
+        f.grants.add(sitePattern(site));
+
+        // Activate with every feature selected and simulate a newly loaded page
+        // asking the restarted worker for its policy.
+        assert.equal((await send({ type: 'QB_SAVE', site, enabled: true, settings: allOn })).ok, true);
+        let current = await send({ type: 'QB_POLICY' }, page);
+        assert.equal(current.data.enabled, true);
+        assert.deepEqual(current.data.settings, allOn);
+        assert.ok([...f.registered.values()].some(script => script.matches[0] === sitePattern(site)));
+        f.chrome.runtime.onStartup.emit();
+        await send({ type: 'QB_LIST' }); // Serialized behind worker initialization.
+        current = await send({ type: 'QB_POLICY' }, page);
+        assert.equal(current.data.enabled, true);
+        assert.deepEqual(current.data.settings, allOn);
+
+        // The master switch restores the original page but retains choices. A
+        // bare switch message also models an older popup that submits no settings.
+        assert.equal((await send({ type: 'QB_SAVE', site, enabled: false })).ok, true);
+        assert.equal((await send({ type: 'QB_POLICY' }, page)).data.enabled, false);
+        let saved = (await send({ type: 'QB_LIST' })).data.sites[site];
+        assert.equal(saved.enabled, false);
+        assert.deepEqual(saved.settings, allOn);
+        assert.ok(![...f.registered.values()].some(script => script.matches[0] === sitePattern(site)));
+
+        // Change every feature while the extension is off, reload/restart, and
+        // verify those disabled choices do not leak into the page prematurely.
+        assert.equal((await send({ type: 'QB_SAVE', site, enabled: false, settings: allOff })).ok, true);
+        f.chrome.runtime.onStartup.emit();
+        saved = (await send({ type: 'QB_LIST' })).data.sites[site];
+        assert.equal(saved.enabled, false);
+        assert.deepEqual(saved.settings, allOff);
+        assert.equal((await send({ type: 'QB_POLICY' }, page)).data.enabled, false);
+
+        // Re-enable without resubmitting settings. A new page receives the exact
+        // off-state choices, including grayscale and all four social schedules.
+        assert.equal((await send({ type: 'QB_SAVE', site, enabled: true })).ok, true);
+        current = await send({ type: 'QB_POLICY' }, page);
+        assert.equal(current.data.enabled, true);
+        assert.deepEqual(current.data.settings, allOff);
+        f.chrome.runtime.onStartup.emit();
+        await send({ type: 'QB_LIST' });
+        current = await send({ type: 'QB_POLICY' }, page);
+        assert.equal(current.data.enabled, true);
+        assert.deepEqual(current.data.settings, allOff);
+
+        // Reverse every feature while active, then repeat an off/on cycle to
+        // prove the second direction is persistent as well.
+        assert.equal((await send({ type: 'QB_SAVE', site, enabled: true, settings: allOn })).ok, true);
+        assert.deepEqual((await send({ type: 'QB_POLICY' }, page)).data.settings, allOn);
+        await send({ type: 'QB_SAVE', site, enabled: false });
+        await send({ type: 'QB_SAVE', site, enabled: true });
+        assert.deepEqual((await send({ type: 'QB_POLICY' }, page)).data.settings, allOn);
+
+        await send({ type: 'QB_FORGET', site });
+        assert.equal((await send({ type: 'QB_LIST' })).data.sites[site], undefined);
+      });
+    }
   });
   await t.test('adult-site rules are local, password protected, editable and reset only with the password', async () => {
     const enabled = await send({ type: 'QB_ADULT_ENABLE', domains: ['custom.example', 'custom.example'], password: 'shared passphrase' });

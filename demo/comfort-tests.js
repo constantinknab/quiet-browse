@@ -16,7 +16,7 @@
   $('ordinary-button').addEventListener('click', () => { $('ordinary-count').textContent = `Button clicks: ${++clicks}`; });
   try {
     await wait(); origin();
-    policy.settings = { motion: false, consentChoices: false, backgroundVideo: false, youtubeQuiet: false, youtubeRecommendations: false, pageMode: true, grayscale: { enabled: true, level: 65 } };
+    policy.settings = { motion: false, consentChoices: false, backgroundVideo: false, youtubeQuiet: false, youtubeRecommendations: false, youtubePictureCover: false, pageMode: true, grayscale: { enabled: true, level: 65 } };
     await send({ type: 'QB_REFRESH' });
     assert(document.querySelectorAll('[data-qb-comfort]').length === 1, 'Exactly one navigation toolbar appears');
     assert(getComputedStyle(root).filter.includes('grayscale(0.65)'), '65% grayscale composes with the original root filter');

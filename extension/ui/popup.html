@@ -16,8 +16,10 @@
       <button id="pause" type="button" class="secondary" hidden>Show original page</button>
     </section>
     <p id="message" role="status" aria-live="polite"></p>
+    <fieldset id="youtube-controls" disabled hidden><legend>YouTube picture</legend></fieldset>
+    <p id="youtube-cover-note" class="muted" hidden>A saved cover returns after reloads and when YouTube opens another video. The page-only button below is a temporary override.</p>
     <section id="session" hidden aria-label="This page only">
-      <p class="eyebrow">THIS PAGE ONLY · RESETS ON RELOAD</p>
+      <p class="eyebrow">THIS PAGE ONLY · RESETS ON RELOAD OR NEXT VIDEO</p>
       <button id="cover" type="button" class="secondary" hidden>Hide YouTube video picture</button>
       <p id="cover-note" class="muted" hidden>Hides the video picture, not the audio or edits. Playback and YouTube controls—including mute—remain available.</p>
       <p id="counts" class="muted"></p>
@@ -39,7 +41,7 @@
     <details class="more-controls"><summary>Other calming controls</summary><fieldset id="features" disabled><legend>Presentation</legend></fieldset></details>
     <p class="footnote">Never clicks consent, changes purchases, downloads video, or bypasses access controls. Some pages and animations are unsupported.</p>
   </main>
-  <footer><button type="button" id="options" class="link-button">Sites &amp; privacy</button><span>Local by design · v0.5.3</span></footer>
+  <footer><button type="button" id="options" class="link-button">Sites &amp; privacy</button><span>Local by design · v0.5.4</span></footer>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

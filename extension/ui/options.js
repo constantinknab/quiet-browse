@@ -1,4 +1,4 @@
-import { SOCIAL_FEATURES, cleanSettings, grayscaleAt, settingAt, siteCategory } from '../shared/settings.js';
+import { SOCIAL_FEATURES, cleanSettings, grayscaleAt, settingAt, siteCategory, isYouTube } from '../shared/settings.js';
 import { ADULT_LIST_PERMISSION } from '../shared/adult-domains.js';
 
 const $ = id => document.getElementById(id);
@@ -142,6 +142,19 @@ function siteEditor(site, config) {
   const enabledInput = document.createElement('input'); enabledInput.type = 'checkbox'; enabledInput.checked = enabled;
   enabledInput.addEventListener('change', () => { enabled = enabledInput.checked; changed(); });
   form.append(inputLabel('Quiet Browse enabled for this site', enabledInput));
+
+  if (isYouTube(site)) {
+    const youtube = document.createElement('details'); youtube.className = 'control-block youtube-control';
+    const summary = document.createElement('summary'); summary.textContent = 'YouTube picture'; youtube.append(summary);
+    const body = document.createElement('div'); body.className = 'control-body';
+    const persistentCover = document.createElement('input'); persistentCover.type = 'checkbox';
+    persistentCover.checked = draft.youtubePictureCover;
+    persistentCover.addEventListener('change', () => { draft.youtubePictureCover = persistentCover.checked; changed(); });
+    body.append(inputLabel('Keep YouTube video picture hidden', persistentCover));
+    const description = document.createElement('p'); description.className = 'muted';
+    description.textContent = 'Automatically returns the picture cover after reloads and YouTube video changes. Audio, controls, captions, ads, and picture-in-picture stay available.';
+    body.append(description); youtube.append(body); form.append(youtube);
+  }
 
   const gray = document.createElement('details'); gray.className = 'control-block';
   const graySummary = document.createElement('summary'); graySummary.textContent = 'Grayscale and times'; gray.append(graySummary);

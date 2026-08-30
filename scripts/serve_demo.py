@@ -2,8 +2,23 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlsplit
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
+LIFECYCLE_PROFILES = {
+    'instagram': ('www.instagram.com', 'social', 'Instagram', '/reels/'),
+    'facebook': ('www.facebook.com', 'social', 'Facebook', '/watch/'),
+    'tiktok': ('www.tiktok.com', 'social', 'TikTok', '/following/'),
+    'amazon': ('www.amazon.com', 'ecommerce', 'Amazon', '/video/'),
+    'ebay': ('www.ebay.com', 'ecommerce', 'eBay', '/video/'),
+    'etsy': ('www.etsy.com', 'ecommerce', 'Etsy', '/video/'),
+    'walmart': ('www.walmart.com', 'ecommerce', 'Walmart', '/video/'),
+    'target': ('www.target.com', 'ecommerce', 'Target', '/video/'),
+    'temu': ('www.temu.com', 'ecommerce', 'Temu', '/video/'),
+    'shein': ('us.shein.com', 'ecommerce', 'Shein', '/video/'),
+    'aliexpress': ('www.aliexpress.com', 'ecommerce', 'AliExpress', '/video/'),
+    'youtube': ('www.youtube.com', 'youtube', 'YouTube', '/shorts/'),
+}
 
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -13,6 +28,24 @@ class Handler(SimpleHTTPRequestHandler):
         if 'If-Modified-Since' in self.headers:
             del self.headers['If-Modified-Since']
         route = urlsplit(self.path).path
+        lifecycle = re.fullmatch(r'/demo/lifecycle-([a-z]+)\.html', route)
+        if lifecycle and lifecycle.group(1) in LIFECYCLE_PROFILES:
+            profile = lifecycle.group(1)
+            host, group, label, short_path = LIFECYCLE_PROFILES[profile]
+            source = (ROOT / 'demo/lifecycle.html').read_text()
+            replacements = {'__PROFILE__': profile, '__GROUP__': group, '__LABEL__': label, '__SHORT_PATH__': short_path,
+                            '__SHORT_SURFACE__': '' if profile == 'tiktok' else 'data-qb-social-surface="short"'}
+            for token, value in replacements.items():
+                source = source.replace(token, value)
+            return self.html(source)
+        lifecycle_script = re.fullmatch(r'/demo/lifecycle-(social|engine)-([a-z]+)\.js', route)
+        if lifecycle_script and lifecycle_script.group(2) in LIFECYCLE_PROFILES:
+            kind, profile = lifecycle_script.groups()
+            host = LIFECYCLE_PROFILES[profile][0]
+            target = 'content/social.js' if kind == 'social' else 'content/engine.js'
+            fake_location = f"const location = {{ hostname: '{host}', pathname: '/', href: 'https://{host}/' }};"
+            source = f"(() => {{ {fake_location}\n" + (ROOT / 'extension' / target).read_text() + '\n})();'
+            return self.reply(source, 'text/javascript; charset=utf-8')
         if route == '/demo/tests.html':
             source = (ROOT / 'demo/index.html').read_text()
             source = source.replace('</body>', '<script src="harness.js"></script><script src="/extension/shared/comfort.js"></script><script src="/extension/content/comfort.js"></script><script src="/extension/content/social.js"></script><script src="/extension/content/engine.js"></script><script src="browser-tests.js"></script></body>')
@@ -66,7 +99,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     print('Quiet Browse local lab: http://127.0.0.1:8674/demo/index.html', flush=True)
-    print('Automated DOM fixtures: /demo/tests.html, /demo/youtube-tests.html, /demo/social-tests.html, /demo/tiktok-tests.html, /demo/comfort.html', flush=True)
+    print('Automated DOM fixtures: /demo/tests.html, /demo/youtube-tests.html, /demo/social-tests.html, /demo/tiktok-tests.html, /demo/comfort.html, and /demo/lifecycle-<profile>.html', flush=True)
     try:
         ThreadingHTTPServer(('127.0.0.1', 8674), Handler).serve_forever()
     except KeyboardInterrupt:

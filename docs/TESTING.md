@@ -1,14 +1,14 @@
 # Verification report and manual acceptance checklist
 
-Date: August 29, 2026. Tests are intentionally split by what they establish. No live Chrome extension installation, real permission prompt, Web Store review, or live YouTube verification has been completed in this build session.
+Date: August 30, 2026. Tests are intentionally split by what they establish. No live Chrome extension installation, real permission prompt, Web Store review, or live YouTube verification has been completed in this build session.
 
 ## Automated Node tests
 
 Run `node --test tests/*.test.mjs` (Node 20+; no dependency installation).
 
-The tests exercise URL normalization, protected-page exclusion, state migration, recommended-profile defaults, grayscale and social schedule boundaries, wheel grouping, capped sticky-header page distances, sender authorization, host grants, content-script migration, alarms, registration, current-tab injection, removal, permission revocation, adult-domain validation, three independent bounded dynamic-rule ranges, cleanup of a retired source range, optional source permission, update scheduling, fixed-source fetching, critical-domain protection, distinct download/format/Chrome-install failures, per-source last-known-good behavior, salted password verification, protected reset, and first-install seeding. The background uses a controlled Chrome API and fetch double, not Chrome or the live source.
+The tests exercise URL normalization, protected-page exclusion, state migration, recommended-profile defaults, grayscale and social schedule boundaries, wheel grouping, capped sticky-header page distances, sender authorization, host grants, content-script migration, alarms, registration, current-tab injection, removal, permission revocation, adult-domain validation, three independent bounded dynamic-rule ranges, cleanup of a retired source range, optional source permission, update scheduling, fixed-source fetching, critical-domain protection, distinct download/format/Chrome-install failures, per-source last-known-good behavior, salted password verification, protected reset, and first-install seeding. A table-driven lifecycle matrix also exercises Instagram, Facebook, TikTok, all eight built-in shopping profiles, and YouTube. For every host it turns all boolean features and schedules on, disables the master switch, changes every feature while off, simulates a page policy reload and service-worker startup, enables without resubmitting settings, reverses every feature, and repeats the off/on cycle. The background uses a controlled Chrome API and fetch double, not Chrome or the live source.
 
-Observed result during development: **38 reported tests passed, zero failed** (including the parent lifecycle test). Rerun after any changes.
+Observed result during development: **51 reported tests passed, zero failed** (including 12 per-site lifecycle cases and the parent lifecycle test). Rerun after any changes.
 
 ## Static checks
 
@@ -21,13 +21,15 @@ Checks include manifest format, the exact required HTTPS host count, absence of 
 Start `python3 scripts/serve_demo.py`. Open:
 
 - `/demo/tests.html`: 17 checks covering decorative vs. functional animations, consent presentation without automatic clicks, original handlers, sensitive-dialog exclusion, background video pause, newly inserted prompts, reversible styling, preservation of an unfinished note, and policy removal.
-- `/demo/youtube-tests.html`: 14 checks covering recommendations/reveal, previews, the picture cover, native mute hit-testing and audio state, fixture caption/control stacking, recognized ad states, and undo.
+- `/demo/youtube-tests.html`: 22 checks covering recommendations/reveal, previews, saved and page-only picture-cover modes, temporary override persistence, YouTube and browser-history navigation reapplication, pause/restore, native mute hit-testing and audio state, fixture caption/control stacking, recognized ad states, and undo.
 - `/demo/social-tests.html`: 16 checks covering Instagram route classification, independent Stories/Reels/Explore/home controls, local-time Stories scheduling, message/profile preservation, direct Reel preservation, continuation-feed removal, notices, and complete undo.
 - `/demo/tiktok-tests.html`: 10 checks covering TikTok root classification, short-video/home-feed overlap, entry-point removal, message preservation, direct-video preservation, continuation-feed removal, and complete undo.
 - `/demo/comfort.html`: 39 checks covering instant jumps, momentum grouping, sticky headers, nested panels, key and arrow controls, normal-scroll bypass, input/zoom exemptions, local schedule boundaries, grayscale composition, and full undo.
-- `/demo/popup-tests.html`, its direct-repair, reload-fallback, social and shopping scenarios, and `/demo/options-tests.html`: 40 checks covering site enablement, direct missing-receiver repair, safe fallback, persistent hide-video visibility, four independent social controls, the 20% shopping default, categorized site dropdowns, grayscale and social overnight-window editing, the three-source adult-blocker flow, and list-choice persistence after shutdown.
+- `/demo/popup-tests.html`, its direct-repair, reload-fallback, social and shopping scenarios, and `/demo/options-tests.html`: 44 checks covering site enablement, direct missing-receiver repair, safe fallback, saved and page-only YouTube picture-cover controls, four independent social controls, the 20% shopping default, categorized site dropdowns, grayscale and social overnight-window editing, the three-source adult-blocker flow, and list-choice persistence after shutdown.
 
-**Observed results: all 136 checks passed in the in-app Chromium browser.** Fixtures use real DOM/CSS/animation/media elements under a content security policy that forbids inline scripts and inline styles. Chrome messaging, permissions, fetch, and declarativeNetRequest are simulated; the YouTube and social fixtures use local markup and test-only host adapters. This does not prove compatibility with live platforms, the live lists, or a loaded Chrome extension.
+**Observed results: all 148 checks passed in the in-app Chromium browser.** Fixtures use real DOM/CSS/animation/media elements under a content security policy that forbids inline scripts and inline styles. Chrome messaging, permissions, fetch, and declarativeNetRequest are simulated; the YouTube and social fixtures use local markup and test-only host adapters. This does not prove compatibility with live platforms, the live lists, or a loaded Chrome extension.
+
+The additional lifecycle matrix at `/demo/lifecycle-<profile>.html` runs the production content controllers against local structural fixtures for Instagram, Facebook, TikTok, all eight built-in shopping hosts, and YouTube. Each profile tests every feature alone, unsupported-feature isolation, all features together, full restoration after the master switch is disabled, a reload while disabled, re-enabling with saved off choices, restoring the features, a reload while enabled, scheduled grayscale and social activation, and final restoration. It performs **280 assertions per profile across two real document reloads (3,360 total)**. The observed result on August 30, 2026 was all 12 profiles passing. These are deterministic adapter tests with simulated policy messaging, not live-site or installed-extension results.
 
 The popup and schedule editor were inspected in the browser. Enabling a site, paging, the grayscale slider, effective-strength feedback, overnight-window creation, saving, host switching, and session pause/restore states were exercised with simulated Chrome APIs. These UI checks do not test Chrome's permission dialog.
 
@@ -71,7 +73,7 @@ The popup and schedule editor were inspected in the browser. Enabling a site, pa
 
 - [ ] Desktop watch page, search, subscriptions, signed-out state, and a signed-in state authorized by the tester.
 - [ ] Preview hiding, recommendation reveal, normal links, comments, and search remain functional.
-- [ ] Hide YouTube video picture can be shown and removed; playback is neither skipped nor duplicated. While covered, verify YouTube’s native mute button changes audio state and the remaining controls are clickable.
+- [ ] Hide YouTube video picture can be shown and removed; playback is neither skipped nor duplicated. Verify the saved preference reapplies after a full reload, another YouTube video opens through in-page navigation, and browser back/forward. Confirm page-only Show picture remains temporary without changing the saved preference. While covered, verify YouTube’s native mute button changes audio state and the remaining controls are clickable.
 - [ ] Standard captions and controls remain visible and usable; test embedded/burned-in text separately (it is intentionally hidden by the cover).
 - [ ] Recognized ad playback is uncovered; test actual ad variants. If a variant stays covered, fix the adapter or exclude the cover from release.
 - [ ] Fullscreen, theater mode, live streams, seeking, keyboard shortcuts, navigation between videos, and restored playback after a page change.
