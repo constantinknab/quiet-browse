@@ -25,8 +25,13 @@ class Handler(SimpleHTTPRequestHandler):
             return self.reply(source, 'text/javascript; charset=utf-8')
         if route == '/demo/social-tests.html':
             return self.html((ROOT / 'demo/social.html').read_text())
+        if route == '/demo/tiktok-tests.html':
+            return self.html((ROOT / 'demo/tiktok.html').read_text())
         if route == '/demo/social-instagram.js':
             source = "(() => { const location = { hostname: 'www.instagram.com', get pathname() { return window.fixturePath || '/'; }, get href() { return 'https://www.instagram.com' + this.pathname; } };\n" + (ROOT / 'extension/content/social.js').read_text() + '\n})();'
+            return self.reply(source, 'text/javascript; charset=utf-8')
+        if route == '/demo/social-tiktok.js':
+            source = "(() => { const location = { hostname: 'www.tiktok.com', get pathname() { return window.fixturePath || '/'; }, get href() { return 'https://www.tiktok.com' + this.pathname; } };\n" + (ROOT / 'extension/content/social.js').read_text() + '\n})();'
             return self.reply(source, 'text/javascript; charset=utf-8')
         if route in ('/demo/popup.html', '/demo/options.html', '/demo/popup-tests.html', '/demo/options-tests.html'):
             page = 'popup.html' if '/popup' in route else 'options.html'
@@ -61,7 +66,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     print('Quiet Browse local lab: http://127.0.0.1:8674/demo/index.html', flush=True)
-    print('Automated DOM fixtures: /demo/tests.html, /demo/youtube-tests.html, /demo/social-tests.html, /demo/comfort.html', flush=True)
+    print('Automated DOM fixtures: /demo/tests.html, /demo/youtube-tests.html, /demo/social-tests.html, /demo/tiktok-tests.html, /demo/comfort.html', flush=True)
     try:
         ThreadingHTTPServer(('127.0.0.1', 8674), Handler).serve_forever()
     except KeyboardInterrupt:

@@ -15,7 +15,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 5;
+  let receiverVersion = 6;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -33,7 +33,7 @@ function fakeChrome() {
       injected.push(options);
       if (options.files) {
         if (failInjection) throw new Error('Fixture injection failure');
-        receiver = true; receiverVersion = 5;
+        receiver = true; receiverVersion = 6;
       }
     } },
     tabs: { query: async () => [{ id: 1 }], get: async id => ({ id, url: 'https://example.com/a?private=yes' }), sendMessage: async (id, message) => {
@@ -43,7 +43,7 @@ function fakeChrome() {
     } },
   };
   return { chrome, grants, registered, injected, messages, alarms, dynamicRules, data: () => data, resetData: () => { data = {}; }, setData: value => { data = structuredClone(value); },
-    setReceiver: (value, version = 5) => { receiver = value; receiverVersion = version; },
+    setReceiver: (value, version = 6) => { receiver = value; receiverVersion = version; },
     setFailInjection: value => { failInjection = value; },
     setFailDynamicUpdate: value => { failDynamicUpdate = value; } };
 }

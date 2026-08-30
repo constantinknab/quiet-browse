@@ -163,6 +163,9 @@ function siteEditor(site, config) {
 
   if (siteCategory(site) === 'social') {
     const heading = document.createElement('h3'); heading.textContent = 'Social surfaces and times'; form.append(heading);
+    const socialHelp = document.createElement('p'); socialHelp.className = 'muted';
+    socialHelp.textContent = "Checked means hidden. TikTok's landing stream counts as both short-video and home-feed content, so either checked control stops it.";
+    form.append(socialHelp);
     for (const feature of SOCIAL_FEATURES) {
       const control = document.createElement('details'); control.className = 'control-block social-control';
       const controlSummary = document.createElement('summary'); controlSummary.textContent = feature.label; control.append(controlSummary);

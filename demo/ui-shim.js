@@ -58,7 +58,7 @@
       removeCSS: async () => {},
       insertCSS: async () => {},
       executeScript: async options => {
-        if (options.files) { pageUnavailable = false; page.engineVersion = 5; page.active = true; }
+        if (options.files) { pageUnavailable = false; page.engineVersion = 6; page.active = true; }
       },
     };
   }

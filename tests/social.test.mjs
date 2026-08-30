@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 await import('../extension/content/social.js');
-const { platform, routeFor } = globalThis.QuietBrowseSocial;
+const { platform, routeFor, routeCategories, categoryForLink } = globalThis.QuietBrowseSocial;
 
 test('supported social hosts and routes preserve messages and direct items', () => {
   assert.equal(platform('www.instagram.com'), 'instagram');
@@ -22,7 +22,10 @@ test('supported social hosts and routes preserve messages and direct items', () 
   assert.equal(routeFor('facebook', '/watch/'), 'short');
   assert.equal(routeFor('facebook', '/discover/'), 'explore');
 
-  assert.equal(routeFor('tiktok', '/'), 'home');
+  assert.equal(routeFor('tiktok', '/'), 'short');
+  assert.deepEqual(routeCategories('tiktok', '/'), ['short', 'home']);
+  assert.deepEqual(routeCategories('tiktok', '////'), ['short', 'home']);
+  assert.equal(categoryForLink('tiktok', '/'), 'short');
   assert.equal(routeFor('tiktok', '/messages/'), 'messages');
   assert.equal(routeFor('tiktok', '/@user/video/123'), 'direct');
   assert.equal(routeFor('tiktok', '/following/'), 'short');

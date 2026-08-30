@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.2 is an unsubmitted alpha, not a Google-approved product, legal certification, or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.3 is an unsubmitted alpha, not a Google-approved product, legal certification, or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -34,7 +34,7 @@ No developer account, registration payment, API key, npm install, or Google revi
 | YouTube recommendations | Off | Collapses the supported watch-page list behind a reveal button. |
 | Hide YouTube video picture | Manual, resets on reload | Covers the picture while playback continues. It does not edit cuts or change audio. Native player controls, including mute, remain available; recognized ads and picture-in-picture are uncovered. |
 | Social Stories | On for built-in social profiles | Hides supported Stories navigation and trays on Instagram, Facebook, and TikTok, always or during up to 12 local-time windows. |
-| Social short video | On for built-in social profiles | Hides supported Reels, Watch, TikTok short-video hubs, and their entry points, always or on a separate schedule. A direct item URL remains viewable. |
+| Social short video | On for built-in social profiles | Hides supported Reels, Watch, and TikTok short-video hubs and entry points, always or on a separate schedule. TikTok's `/` landing stream counts as both short-video and home-feed content, so either hide control stops it. A direct item URL remains viewable. |
 | Social Explore | On for built-in social profiles | Hides supported Explore and Discover navigation and route feeds, always or on a separate schedule, while leaving search, profiles, and messages available. |
 | Social home feed | On for built-in social profiles | Hides supported home/infinite feeds, always or on a separate schedule. Direct items and conversations remain; marked continuation recommendations are removed. |
 | Quit Porn | Off | Adds local Chrome request-blocking rules for a packaged starter list plus up to 500 user-entered hostnames. With separate consent, it downloads any selected bounded US-coverage, China-coverage, and Japan-coverage lists now and about weekly. It only blocks top-level navigation and stores no visit log. |
@@ -70,7 +70,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, listing draft, release gates, tests
-  dist/quiet-browse-0.5.2.zip ← generated extension-only archive
+  dist/quiet-browse-0.5.3.zip ← generated extension-only archive
 ```
 
 ## Developer commands

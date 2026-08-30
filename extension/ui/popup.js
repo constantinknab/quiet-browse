@@ -27,7 +27,7 @@ async function repairPage() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id, frameIds: [0] },
       func: () => {
-        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5']) {
+        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6']) {
           try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
           try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
         }
@@ -41,7 +41,7 @@ async function repairPage() {
       files: ['shared/comfort.js', 'content/comfort.js', 'content/social.js', 'content/engine.js'],
     });
     const status = await rawPageMessage({ type: 'QB_REFRESH' });
-    return status?.engineVersion === 5;
+    return status?.engineVersion === 6;
   } catch { return false; }
 }
 async function pageMessage(message, retry = true) {

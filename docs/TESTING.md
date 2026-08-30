@@ -23,10 +23,11 @@ Start `python3 scripts/serve_demo.py`. Open:
 - `/demo/tests.html`: 17 checks covering decorative vs. functional animations, consent presentation without automatic clicks, original handlers, sensitive-dialog exclusion, background video pause, newly inserted prompts, reversible styling, preservation of an unfinished note, and policy removal.
 - `/demo/youtube-tests.html`: 14 checks covering recommendations/reveal, previews, the picture cover, native mute hit-testing and audio state, fixture caption/control stacking, recognized ad states, and undo.
 - `/demo/social-tests.html`: 16 checks covering Instagram route classification, independent Stories/Reels/Explore/home controls, local-time Stories scheduling, message/profile preservation, direct Reel preservation, continuation-feed removal, notices, and complete undo.
+- `/demo/tiktok-tests.html`: 10 checks covering TikTok root classification, short-video/home-feed overlap, entry-point removal, message preservation, direct-video preservation, continuation-feed removal, and complete undo.
 - `/demo/comfort.html`: 39 checks covering instant jumps, momentum grouping, sticky headers, nested panels, key and arrow controls, normal-scroll bypass, input/zoom exemptions, local schedule boundaries, grayscale composition, and full undo.
 - `/demo/popup-tests.html`, its direct-repair, reload-fallback, social and shopping scenarios, and `/demo/options-tests.html`: 40 checks covering site enablement, direct missing-receiver repair, safe fallback, persistent hide-video visibility, four independent social controls, the 20% shopping default, categorized site dropdowns, grayscale and social overnight-window editing, the three-source adult-blocker flow, and list-choice persistence after shutdown.
 
-**Observed results: all 126 checks passed in the in-app Chromium browser.** Fixtures use real DOM/CSS/animation/media elements under a content security policy that forbids inline scripts and inline styles. Chrome messaging, permissions, fetch, and declarativeNetRequest are simulated; the YouTube and social fixtures use local markup and test-only host adapters. This does not prove compatibility with live platforms, the live lists, or a loaded Chrome extension.
+**Observed results: all 136 checks passed in the in-app Chromium browser.** Fixtures use real DOM/CSS/animation/media elements under a content security policy that forbids inline scripts and inline styles. Chrome messaging, permissions, fetch, and declarativeNetRequest are simulated; the YouTube and social fixtures use local markup and test-only host adapters. This does not prove compatibility with live platforms, the live lists, or a loaded Chrome extension.
 
 The popup and schedule editor were inspected in the browser. Enabling a site, paging, the grayscale slider, effective-strength feedback, overnight-window creation, saving, host switching, and session pause/restore states were exercised with simulated Chrome APIs. These UI checks do not test Chrome's permission dialog.
 
@@ -54,7 +55,7 @@ The popup and schedule editor were inspected in the browser. Enabling a site, pa
 
 ## Required live social and adult-blocker checks — not yet completed
 
-- [ ] Instagram, Facebook, and TikTok signed-out and authorized signed-in layouts. Toggle Stories, short-video, Explore/Discover, and home-feed controls one at a time.
+- [ ] Instagram, Facebook, and TikTok signed-out and authorized signed-in layouts. Toggle Stories, short-video, Explore/Discover, and home-feed controls one at a time. On TikTok, verify that `/` is stopped by either the short-video or home-feed hide control and returns only when both applicable controls allow it.
 - [ ] Give Stories, short video, Explore, and the home feed separate schedules. Verify each surface changes at its own local-time boundary without changing messages or direct items.
 - [ ] Verify messages, search, profiles, notifications needed for ordinary use, and direct post/video links. Check SPA route transitions and browser back/forward navigation.
 - [ ] Confirm a directly opened item remains visible while supported continuation feeds are absent. Test long comments and conversations; document any necessary scrolling.

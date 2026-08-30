@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'"><title>Quiet Browse · TikTok landing-feed fixture</title><link rel="stylesheet" href="/extension/ui/styles.css"><link rel="stylesheet" href="fixture.css"><link rel="stylesheet" href="/extension/content/presentation.css"></head><body class="document">
+<h1>TikTok landing-feed fixture</h1><p>This is a local structural fixture, not TikTok. It verifies that the root route cannot bypass short-video or home-feed controls.</p>
+<nav><a id="home-nav" href="/">For You</a> <a id="following-nav" href="/following/">Following</a> <a id="messages-nav" href="/messages/">Messages</a></nav>
+<main id="landing"><article>Vertically scrollable short-video item</article></main>
+<section id="recommendations" data-qb-social-surface="recommendations">Continuation recommendations</section>
+<p id="test-status" role="status">Running…</p><ol id="results"></ol>
+<script src="harness.js"></script><script src="/extension/shared/comfort.js"></script><script src="/extension/content/comfort.js"></script><script src="social-tiktok.js"></script><script src="/extension/content/engine.js"></script><script src="tiktok-tests.js"></script></body></html>

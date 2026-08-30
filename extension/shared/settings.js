@@ -33,7 +33,7 @@ export const FEATURES = Object.freeze([
 
 export const SOCIAL_FEATURES = Object.freeze([
   { key: 'socialStories', label: 'Hide Stories', detail: 'Removes supported Stories trays and navigation. Direct links and messages remain available.' },
-  { key: 'socialShortVideo', label: 'Hide short-video feeds and tabs', detail: 'Removes supported Reels, Watch, and TikTok discovery surfaces. A direct video link still opens.' },
+  { key: 'socialShortVideo', label: 'Hide short-video feeds and tabs', detail: "Removes supported Reels, Watch, and TikTok's landing, For You, Following, and Live streams. A direct video link still opens." },
   { key: 'socialExplore', label: 'Hide Explore and Discover', detail: 'Removes supported discovery tabs and feeds without disabling search, profiles, or messages.' },
   { key: 'socialHomeFeed', label: 'Hide the home feed', detail: 'Keeps navigation and messages while removing the supported infinite home feed.' },
 ]);

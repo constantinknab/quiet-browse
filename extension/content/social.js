@@ -12,8 +12,12 @@
     return null;
   }
 
+  function normalizedPath(pathname) {
+    return pathname.replace(/\/+$/, '') || '/';
+  }
+
   function routeFor(name, pathname) {
-    const path = pathname.replace(/\/+$/, '') || '/';
+    const path = normalizedPath(pathname);
     if (name === 'instagram') {
       if (/^\/direct(?:\/|$)/.test(path)) return 'messages';
       if (/^\/(?:p|reel|tv|stories)\//.test(path)) return 'direct';
@@ -33,17 +37,27 @@
       if (/^\/@[^/]+\/video\/[^/]+/.test(path)) return 'direct';
       if (/^\/(?:foryou|following|live)(?:\/|$)/.test(path)) return 'short';
       if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
-      return path === '/' ? 'home' : 'other';
+      // TikTok serves its vertically scrollable For You stream at `/`.
+      return path === '/' ? 'short' : 'other';
     }
     return 'other';
   }
 
+  function routeCategories(name, pathname) {
+    const route = routeFor(name, pathname);
+    // The landing stream is both TikTok's home feed and a short-video feed.
+    // Either independent control must be able to stop it.
+    if (name === 'tiktok' && normalizedPath(pathname) === '/') return ['short', 'home'];
+    return [route];
+  }
+
   function categoryForLink(name, pathname) {
-    if (/^\/stories(?:\/|$)/.test(pathname)) return 'stories';
-    if (name === 'instagram' && /^\/reels(?:\/|$)/.test(pathname)) return 'short';
-    if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(pathname)) return 'short';
-    if (name === 'tiktok' && /^\/(?:foryou|following|live)(?:\/|$)/.test(pathname)) return 'short';
-    if (/^\/(?:explore|discover)(?:\/|$)/.test(pathname)) return 'explore';
+    const path = normalizedPath(pathname);
+    if (/^\/stories(?:\/|$)/.test(path)) return 'stories';
+    if (name === 'instagram' && /^\/reels(?:\/|$)/.test(path)) return 'short';
+    if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
+    if (name === 'tiktok' && (path === '/' || /^\/(?:foryou|following|live)(?:\/|$)/.test(path))) return 'short';
+    if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
     return null;
   }
 
@@ -99,6 +113,7 @@
     function sync(settings = {}, now = new Date()) {
       if (!name) return;
       const route = routeFor(name, location.pathname);
+      const currentCategories = routeCategories(name, location.pathname);
       const desired = new Map();
       const at = key => globalThis.QuietBrowseComfort.settingAt(settings[key], settings.socialSchedules?.[key], now);
       const enabled = {
@@ -111,24 +126,28 @@
         try {
           const url = new URL(anchor.getAttribute('href'), location.href);
           if (url.hostname !== location.hostname) continue;
-          const category = categoryForLink(name, url.pathname);
-          if (category && enabled[category]) want(desired, navTarget(anchor), category);
+          const categories = name === 'tiktok' && normalizedPath(url.pathname) === '/'
+            ? routeCategories(name, url.pathname)
+            : [categoryForLink(name, url.pathname)];
+          const category = categories.find(item => item && enabled[item]);
+          if (category) want(desired, navTarget(anchor), category);
         } catch { /* Malformed page URL. */ }
       }
       for (const category of ['stories', 'short', 'explore']) {
         if (enabled[category]) document.querySelectorAll(`[data-qb-social-surface="${category}"]`).forEach(element => want(desired, element, category));
       }
       let routedTarget = null;
-      if (enabled[route] && ['home', 'short', 'explore'].includes(route)) {
-        routedTarget = surface(route);
-        want(desired, routedTarget, route);
+      const blockedRoute = currentCategories.find(category => enabled[category] && ['home', 'short', 'explore'].includes(category));
+      if (blockedRoute) {
+        routedTarget = surface(blockedRoute);
+        want(desired, routedTarget, blockedRoute);
       }
       // Direct items and conversations stay usable; only an explicitly marked continuation feed is removed.
       if (['direct', 'messages'].includes(route)) {
         document.querySelectorAll('[data-qb-social-surface="recommendations"]').forEach(element => want(desired, element, 'recommendations'));
       }
       reconcile(desired);
-      showNotice(routedTarget, route);
+      showNotice(routedTarget, blockedRoute);
       if (!markedRoot) {
         originalRoot = document.documentElement.getAttribute(ROOT);
         originalRoute = document.documentElement.getAttribute(ROUTE);
@@ -150,5 +169,5 @@
     return { sync, stop, status: () => ({ platform: name, hidden: changed.size, route: routeFor(name, location.pathname) }) };
   }
 
-  globalThis.QuietBrowseSocial = { create, platform, routeFor };
+  globalThis.QuietBrowseSocial = { create, platform, routeFor, routeCategories, categoryForLink };
 })();
