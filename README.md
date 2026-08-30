@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.4 is an unsubmitted alpha, not a Google-approved product, legal certification, or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.4 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
