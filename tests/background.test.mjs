@@ -15,7 +15,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 8;
+  let receiverVersion = 9;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -33,7 +33,7 @@ function fakeChrome() {
       injected.push(options);
       if (options.files) {
         if (failInjection) throw new Error('Fixture injection failure');
-        receiver = true; receiverVersion = 8;
+        receiver = true; receiverVersion = 9;
       }
     } },
     tabs: { query: async () => [{ id: 1 }], get: async id => ({ id, url: 'https://example.com/a?private=yes' }), sendMessage: async (id, message) => {
@@ -43,7 +43,7 @@ function fakeChrome() {
     } },
   };
   return { chrome, grants, registered, injected, messages, alarms, dynamicRules, data: () => data, resetData: () => { data = {}; }, setData: value => { data = structuredClone(value); },
-    setReceiver: (value, version = 8) => { receiver = value; receiverVersion = version; },
+    setReceiver: (value, version = 9) => { receiver = value; receiverVersion = version; },
     setFailInjection: value => { failInjection = value; },
     setFailDynamicUpdate: value => { failDynamicUpdate = value; } };
 }
@@ -106,7 +106,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
   });
   await t.test('an outdated live page is replaced before newly saved settings are applied', async () => {
     const before = f.injected.filter(entry => entry.files).length;
-    f.setReceiver(true, 7);
+    f.setReceiver(true, 8);
     const response = await send({ type: 'QB_SAVE', site: 'https://example.com', enabled: true, tabId: 1, settings: { pageMode: true } });
     assert.equal(response.ok, true);
     assert.equal(response.data.pageReady, true);

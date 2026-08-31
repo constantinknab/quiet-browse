@@ -100,6 +100,29 @@
     function safeSurface(element) {
       return element && element.isConnected && !element.matches('html,body,main,[role="main"]') ? element : null;
     }
+    function instagramStoryCarouselSurfaces() {
+      const found = new Set();
+      if (name !== 'instagram') return found;
+      const main = document.querySelector('main,[role="main"]');
+      if (!main) return found;
+      const controls = Array.from(main.querySelectorAll('button,[role="button"],svg[aria-label]')).slice(0, 600);
+      for (const control of controls) {
+        if (control.closest('article,[role="article"]')) continue;
+        const label = (control.getAttribute('aria-label') || control.getAttribute('title') || control.textContent || '').trim();
+        if (!/^(?:next|previous)$/i.test(label)) continue;
+        let candidate = control.parentElement;
+        for (let depth = 0; candidate && candidate !== main && depth < 8; depth += 1, candidate = candidate.parentElement) {
+          if (!safeSurface(candidate)) break;
+          const images = Array.from(candidate.querySelectorAll('img')).filter(image => !image.closest('article,[role="article"]'));
+          const items = candidate.querySelectorAll('button,[role="button"],a,[role="link"],[role="listitem"]');
+          if (images.length >= 3 && items.length >= 3) {
+            found.add(candidate);
+            break;
+          }
+        }
+      }
+      return found;
+    }
     function storySurfaces() {
       const found = new Set();
       document.querySelectorAll('[aria-label*="Stories" i],[data-e2e*="story" i]').forEach(element => {
@@ -116,6 +139,7 @@
           if (list) found.add(list);
         } catch { /* Malformed page URL. */ }
       });
+      instagramStoryCarouselSurfaces().forEach(element => found.add(element));
       return found;
     }
     function hasFollowAction(element) {

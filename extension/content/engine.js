@@ -1,7 +1,7 @@
 (() => {
   'use strict';
-  const INSTANCE = '__quietBrowseV8';
-  const ENGINE_VERSION = 8;
+  const INSTANCE = '__quietBrowseV9';
+  const ENGINE_VERSION = 9;
   if (globalThis[INSTANCE]) { globalThis[INSTANCE].refresh(); return; }
   const comfort = globalThis.QuietBrowsePageComfort.create();
   const social = globalThis.QuietBrowseSocial.create();

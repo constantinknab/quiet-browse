@@ -3,7 +3,7 @@ import { ADULT_SOURCES, ADULT_SOURCE_IDS, ADULT_LIST_PERMISSION, PACKAGED_ADULT_
 const CONTENT_FILES = ['shared/comfort.js', 'content/comfort.js', 'content/social.js', 'content/engine.js'];
 const CLOCK_ALARM = 'qb-schedule-clock';
 const OLD_CLOCK_ALARM = 'qb-grayscale-clock';
-const CONTENT_ENGINE_VERSION = 8;
+const CONTENT_ENGINE_VERSION = 9;
 const ADULT_KEY = 'quietBrowseAdultGuard';
 const ADULT_RULE_START = 100000;
 const ADULT_RULE_RANGE = 10000;
@@ -401,7 +401,7 @@ async function applyToCurrentPage(tabId, site) {
       await chrome.scripting.executeScript({
         target: { tabId: tab.id, frameIds: [0] },
         func: () => {
-          for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7', '__quietBrowseV8']) {
+          for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7', '__quietBrowseV8', '__quietBrowseV9']) {
             try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
             try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
           }

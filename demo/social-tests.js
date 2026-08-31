@@ -21,6 +21,7 @@
     assert(!hidden('home') && !document.querySelector('[data-qb-social-notice]'), 'Restoring followed posts removes the home-feed notice');
     assert(hidden('stories') && hidden('stories-nav'), 'Restoring followed posts does not restore Stories');
     assert(hidden('suggestions'), 'Restoring followed posts does not restore follow recommendations');
+    assert(!hidden('post-carousel'), 'A post image carousel remains visible when Stories are hidden');
     policy.settings.socialHomeFeed = true;
 
     const today = new Date().getDay();
@@ -57,6 +58,6 @@
 
     policy.enabled = false; await send({ type: 'QB_REFRESH' });
     assert(!document.querySelector('[data-qb-social-hidden],[data-qb-social-notice]'), 'Turning Quiet Browse off restores every social surface');
-    $('test-status').textContent = 'PASS — 22 social route checks. This fixture is not a live-platform compatibility claim.';
+    $('test-status').textContent = 'PASS — 23 social route checks. This fixture is not a live-platform compatibility claim.';
   } catch (error) { $('test-status').textContent = `FAIL — ${error.message}`; console.error(error); }
 })();

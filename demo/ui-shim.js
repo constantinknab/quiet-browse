@@ -22,7 +22,7 @@
   ];
   let adult = { enabled: false, passwordProtected: false, customDomains: [], packagedCount: 44, remoteUpdates: false, remoteSources: [], remoteCount: 0, lastChecked: 0, lastUpdated: 0, lastError: '', sources: sourceTemplates.map(source => ({ ...source, selected: false })) };
   let granted = isOptions;
-  const page = { engineVersion: stale ? 7 : 8, active: false, paused: false, covered: false, coverAvailable: !socialPreview && !shoppingPreview, loops: 0, choices: 0, videos: 0, recommendations: 0, platform: socialPreview ? 'instagram' : null, hidden: socialPreview ? 5 : 0 };
+  const page = { engineVersion: stale ? 8 : 9, active: false, paused: false, covered: false, coverAvailable: !socialPreview && !shoppingPreview, loops: 0, choices: 0, videos: 0, recommendations: 0, platform: socialPreview ? 'instagram' : null, hidden: socialPreview ? 5 : 0 };
   window.chrome = {
     runtime: {
       getURL: path => `${location.origin}/${path.replace('ui/', 'demo/')}`,
@@ -65,7 +65,7 @@
       removeCSS: async () => {},
       insertCSS: async () => {},
       executeScript: async options => {
-        if (options.files) { pageUnavailable = false; page.engineVersion = 8; page.active = true; }
+        if (options.files) { pageUnavailable = false; page.engineVersion = 9; page.active = true; }
       },
     };
   }

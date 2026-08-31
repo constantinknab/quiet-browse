@@ -8,7 +8,7 @@ let page = null;
 let busy = false;
 let youtubeSite = false;
 let socialSite = null;
-const EXPECTED_ENGINE_VERSION = 8;
+const EXPECTED_ENGINE_VERSION = 9;
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
@@ -28,7 +28,7 @@ async function repairPage() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id, frameIds: [0] },
       func: () => {
-        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7', '__quietBrowseV8']) {
+        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7', '__quietBrowseV8', '__quietBrowseV9']) {
           try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
           try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
         }
