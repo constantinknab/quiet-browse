@@ -70,7 +70,7 @@
     let notice = null;
 
     function navTarget(anchor) {
-      return anchor.closest('li') || anchor.closest('[role="tab"],[role="menuitem"]') || anchor;
+      return anchor.closest('li,[role="listitem"]') || anchor.closest('[role="tab"],[role="menuitem"]') || anchor;
     }
     function want(map, element, category) {
       if (element && element.isConnected && element !== document.body && element !== document.documentElement) map.set(element, category);
@@ -97,6 +97,46 @@
       if (name === 'instagram') return document.querySelector('main');
       return null;
     }
+    function safeSurface(element) {
+      return element && element.isConnected && !element.matches('html,body,main,[role="main"]') ? element : null;
+    }
+    function storySurfaces() {
+      const found = new Set();
+      document.querySelectorAll('[aria-label*="Stories" i],[data-e2e*="story" i]').forEach(element => {
+        const target = safeSurface(element.closest('[role="region"],[role="list"],section') || element);
+        if (target) found.add(target);
+      });
+      Array.from(document.querySelectorAll('a[href]')).slice(0, 800).forEach(anchor => {
+        try {
+          const url = new URL(anchor.getAttribute('href'), location.href);
+          if (url.hostname !== location.hostname || categoryForLink(name, url.pathname) !== 'stories') return;
+          const item = safeSurface(navTarget(anchor));
+          if (item) found.add(item);
+          const list = safeSurface(anchor.closest('[role="list"],[aria-label*="Stories" i]'));
+          if (list) found.add(list);
+        } catch { /* Malformed page URL. */ }
+      });
+      return found;
+    }
+    function hasFollowAction(element) {
+      return [...element.querySelectorAll('button,[role="button"]')].some(control => /^follow(?: back)?$/i.test(control.textContent.trim()));
+    }
+    function suggestionSurfaces() {
+      const found = new Set();
+      document.querySelectorAll('[aria-label*="suggest" i],[data-testid*="suggest" i]').forEach(element => {
+        const target = safeSurface(element.closest('[role="region"],section,aside') || element);
+        if (target) found.add(target);
+      });
+      for (const heading of Array.from(document.querySelectorAll('h1,h2,h3,h4,span,div')).slice(0, 1200)) {
+        if (heading.childElementCount > 1 || !/^(?:suggested|suggestions) for you$/i.test(heading.textContent.trim())) continue;
+        let candidate = heading.parentElement;
+        for (let depth = 0; candidate && depth < 6; depth += 1, candidate = candidate.parentElement) {
+          if (!safeSurface(candidate)) break;
+          if (hasFollowAction(candidate)) { found.add(candidate); break; }
+        }
+      }
+      return found;
+    }
     function showNotice(target, route) {
       if (!target?.parentElement || !['home', 'short', 'explore'].includes(route)) { notice?.remove(); notice = null; return; }
       if (!notice) {
@@ -118,6 +158,7 @@
       const at = key => globalThis.QuietBrowseComfort.settingAt(settings[key], settings.socialSchedules?.[key], now);
       const enabled = {
         stories: at('socialStories'),
+        suggestions: at('socialSuggestions'),
         short: at('socialShortVideo'),
         explore: at('socialExplore'),
         home: at('socialHomeFeed'),
@@ -130,12 +171,15 @@
             ? routeCategories(name, url.pathname)
             : [categoryForLink(name, url.pathname)];
           const category = categories.find(item => item && enabled[item]);
+          if (route === 'direct' && normalizedPath(url.pathname) === normalizedPath(location.pathname)) continue;
           if (category) want(desired, navTarget(anchor), category);
         } catch { /* Malformed page URL. */ }
       }
-      for (const category of ['stories', 'short', 'explore']) {
+      for (const category of ['stories', 'suggestions', 'short', 'explore']) {
         if (enabled[category]) document.querySelectorAll(`[data-qb-social-surface="${category}"]`).forEach(element => want(desired, element, category));
       }
+      if (enabled.stories && !['direct', 'messages'].includes(route)) storySurfaces().forEach(element => want(desired, element, 'stories'));
+      if (enabled.suggestions && currentCategories.includes('home')) suggestionSurfaces().forEach(element => want(desired, element, 'suggestions'));
       let routedTarget = null;
       const blockedRoute = currentCategories.find(category => enabled[category] && ['home', 'short', 'explore'].includes(category));
       if (blockedRoute) {

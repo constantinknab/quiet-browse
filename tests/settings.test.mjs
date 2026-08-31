@@ -21,7 +21,9 @@ test('social and recommended profiles are exact and use calmer defaults', () => 
   assert.equal(isRecommendedSite('https://amazon.com.evil.test'), false);
   assert.equal(RECOMMENDED_SITES.length, 11);
   assert.equal(defaultsForSite('https://www.instagram.com').socialHomeFeed, true);
+  assert.equal(defaultsForSite('https://www.instagram.com').socialSuggestions, true);
   assert.equal(defaultsForSite('https://www.amazon.com').socialHomeFeed, false);
+  assert.equal(defaultsForSite('https://www.amazon.com').socialSuggestions, false);
   assert.equal(defaultsForSite('https://www.amazon.com').backgroundVideo, true);
   assert.equal(defaultsForSite('https://www.amazon.com').grayscale.enabled, true);
   assert.equal(defaultsForSite('https://www.amazon.com').grayscale.level, 20);
@@ -36,6 +38,8 @@ test('settings accept only known boolean flags', () => {
   assert.deepEqual(cleanSettings({ motion: false, backgroundVideo: 'yes', remoteScript: 'https://evil.test' }), { ...DEFAULTS, motion: false });
   assert.equal(cleanSettings({ youtubePictureCover: true }).youtubePictureCover, true);
   assert.equal(cleanSettings({ youtubePictureCover: 'yes' }).youtubePictureCover, false);
+  assert.equal(cleanSettings({ socialSuggestions: false }).socialSuggestions, false);
+  assert.equal(cleanSettings({ socialSuggestions: 'yes' }).socialSuggestions, true);
 });
 test('malformed stored scopes and account-like data are discarded', () => {
   const state = cleanState({ sites: { 'https://example.com/private': { enabled: true }, 'https://example.com': { enabled: 1, settings: { motion: false }, token: 'secret' } }, history: ['private'] });

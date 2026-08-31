@@ -1,10 +1,10 @@
-# Quiet Browse 0.5.4 — complete Chrome Web Store submission guide
+# Quiet Browse 0.5.5 — complete Chrome Web Store submission guide
 
 Prepared August 29, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
 
 ## What is ready
 
-- Store package: `dist/quiet-browse-0.5.4.zip`
+- Store package: `dist/quiet-browse-0.5.5.zip`
 - SHA-256: `3d74cd40778d4a300355c825a8732c0b3a40b74e060070dd00f17167e412b02c`
 - Manifest V3, 21 packaged files, and no remote executable code
 - 38 Node tests, 136 browser fixture checks, static checks, and ZIP integrity checks passed
@@ -61,7 +61,7 @@ Creative Commons recommends software-specific licenses for software. Do not chan
    git init
    git branch -M main
    git add .
-   git commit -m "Publish Quiet Browse 0.5.4"
+   git commit -m "Publish Quiet Browse 0.5.5"
    git remote add origin https://github.com/YOUR-GITHUB-USERNAME/quiet-browse.git
    git push -u origin main
    ```
@@ -127,7 +127,7 @@ Suggested caption: **Keep separate, understandable controls for each website.**
 ### Screenshot 3 — scheduled social controls
 
 1. Expand the Instagram profile in settings without showing an Instagram account or feed.
-2. Show Stories, short-video, Explore/Discover, and home-feed controls.
+2. Show Stories, follow-recommendation, short-video, Explore/Discover, and home-feed controls.
 3. Expand one schedule with a harmless example such as 8:00 PM–7:00 AM.
 
 Suggested caption: **Hide high-stimulation social surfaces always or on your own schedule.**
@@ -155,7 +155,7 @@ Suggested caption: **Optional local top-level blocking with selectable lists and
 - No personal accounts, messages, carts, orders, addresses, or payment details.
 - No fixture pages presented as the real extension.
 - No excessive platform logos or implication of affiliation.
-- No feature shown unless it exists in version 0.5.4.
+- No feature shown unless it exists in version 0.5.5.
 
 ## Phase 6 — prepare the promotional video
 
@@ -168,7 +168,7 @@ Google's current listing documentation asks for a YouTube promo-video URL. Make 
 5. 40–52 seconds: show the blocker settings using `example.com`, never an adult page.
 6. 52–60 seconds: disable the blocker and show that ordinary access returns.
 
-Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.4 — Chrome extension demonstration`. In the description, state that it shows version 0.5.4 and contains no paid endorsement.
+Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.5 — Chrome extension demonstration`. In the description, state that it shows version 0.5.5 and contains no paid endorsement.
 
 ## Phase 7 — register the Chrome Web Store developer account
 
@@ -182,11 +182,11 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.4 — Chrome ex
 8. Enable publication/review notification emails.
 9. Add a physical address only if the current dashboard requires one for the selected business or monetization status; do not invent one.
 
-## Phase 8 — create the item and upload version 0.5.4
+## Phase 8 — create the item and upload version 0.5.5
 
 1. In the dashboard, choose **Add new item**.
-2. Upload `dist/quiet-browse-0.5.4.zip`.
-3. Confirm the dashboard identifies Manifest V3 and version 0.5.4.
+2. Upload `dist/quiet-browse-0.5.5.zip`.
+3. Confirm the dashboard identifies Manifest V3 and version 0.5.5.
 4. Do not upload the source repository ZIP. The Web Store package must have `manifest.json` at its root.
 
 ## Phase 9 — Store Listing tab
@@ -256,7 +256,7 @@ Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTT
 ## Phase 12 — submit safely
 
 1. Review every dashboard tab for warnings.
-2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 0.5.4.
+2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 0.5.5.
 3. Choose **Submit for Review**.
 4. Disable automatic publication so approval produces a staged release.
 5. Monitor the verified publisher email.

@@ -5,12 +5,13 @@
   const site = socialPreview ? 'https://www.instagram.com' : shoppingPreview ? 'https://www.amazon.com' : 'https://www.youtube.com';
   const isOptions = location.pathname.includes('/options');
   const repairable = new URLSearchParams(location.search).has('repair');
+  const stale = new URLSearchParams(location.search).has('stale');
   let pageUnavailable = new URLSearchParams(location.search).has('offline') || repairable;
-  const schedules = () => Object.fromEntries(['socialStories', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, { scheduled: false, windows: [] }]));
-  const defaults = { pageMode: false, motion: true, consentChoices: true, backgroundVideo: false, youtubeQuiet: true, youtubeRecommendations: false, youtubePictureCover: false, socialStories: true, socialShortVideo: true, socialExplore: true, socialHomeFeed: true, grayscale: { enabled: false, scheduled: false, level: 100, windows: [] }, socialSchedules: schedules() };
+  const schedules = () => Object.fromEntries(['socialStories', 'socialSuggestions', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, { scheduled: false, windows: [] }]));
+  const defaults = { pageMode: false, motion: true, consentChoices: true, backgroundVideo: false, youtubeQuiet: true, youtubeRecommendations: false, youtubePictureCover: false, socialStories: true, socialSuggestions: true, socialShortVideo: true, socialExplore: true, socialHomeFeed: true, grayscale: { enabled: false, scheduled: false, level: 100, windows: [] }, socialSchedules: schedules() };
   const saved = { version: 4, recommendedVersion: 2, sites: isOptions ? {
     'https://www.instagram.com': { enabled: true, settings: structuredClone(defaults) },
-    'https://www.amazon.com': { enabled: true, settings: { ...structuredClone(defaults), socialStories: false, socialShortVideo: false, socialExplore: false, socialHomeFeed: false, grayscale: { enabled: true, scheduled: false, level: 20, windows: [] } } },
+    'https://www.amazon.com': { enabled: true, settings: { ...structuredClone(defaults), socialStories: false, socialSuggestions: false, socialShortVideo: false, socialExplore: false, socialHomeFeed: false, grayscale: { enabled: true, scheduled: false, level: 20, windows: [] } } },
     'https://www.youtube.com': { enabled: true, settings: structuredClone(defaults) },
     'https://example.com': { enabled: true, settings: structuredClone(defaults) },
   } : {} };
@@ -21,7 +22,7 @@
   ];
   let adult = { enabled: false, passwordProtected: false, customDomains: [], packagedCount: 44, remoteUpdates: false, remoteSources: [], remoteCount: 0, lastChecked: 0, lastUpdated: 0, lastError: '', sources: sourceTemplates.map(source => ({ ...source, selected: false })) };
   let granted = isOptions;
-  const page = { active: false, paused: false, covered: false, coverAvailable: !socialPreview && !shoppingPreview, loops: 0, choices: 0, videos: 0, recommendations: 0, platform: socialPreview ? 'instagram' : null, hidden: socialPreview ? 4 : 0 };
+  const page = { engineVersion: stale ? 7 : 8, active: false, paused: false, covered: false, coverAvailable: !socialPreview && !shoppingPreview, loops: 0, choices: 0, videos: 0, recommendations: 0, platform: socialPreview ? 'instagram' : null, hidden: socialPreview ? 5 : 0 };
   window.chrome = {
     runtime: {
       getURL: path => `${location.origin}/${path.replace('ui/', 'demo/')}`,
@@ -64,7 +65,7 @@
       removeCSS: async () => {},
       insertCSS: async () => {},
       executeScript: async options => {
-        if (options.files) { pageUnavailable = false; page.engineVersion = 7; page.active = true; }
+        if (options.files) { pageUnavailable = false; page.engineVersion = 8; page.active = true; }
       },
     };
   }

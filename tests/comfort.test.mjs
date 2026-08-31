@@ -14,6 +14,7 @@ test('old preferences migrate with paging and grayscale off and no shared mutabl
   assert.equal(state.sites['https://example.com'].settings.motion, false);
   assert.equal(state.sites['https://example.com'].settings.pageMode, false);
   assert.equal(state.sites['https://example.com'].settings.youtubePictureCover, false);
+  assert.equal(state.sites['https://example.com'].settings.socialSuggestions, true);
   assert.equal(state.sites['https://example.com'].settings.grayscale.enabled, false);
   const a = cleanSettings(), b = cleanSettings(); a.grayscale.windows.push({});
   a.socialSchedules.socialStories.windows.push({});

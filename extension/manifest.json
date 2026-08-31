@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quiet Browse",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "minimum_chrome_version": "123",
   "description": "Calmer browsing with scheduled social controls, regional adult-site lists, reliable instant paging, motion limits, and grayscale.",
   "permissions": ["activeTab", "scripting", "storage", "alarms", "declarativeNetRequest"],

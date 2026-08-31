@@ -10,13 +10,14 @@ const BOOLEAN_DEFAULTS = Object.freeze({
   youtubeRecommendations: false,
   youtubePictureCover: false,
   socialStories: true,
+  socialSuggestions: true,
   socialShortVideo: true,
   socialExplore: true,
   socialHomeFeed: true,
 });
 const EMPTY_SCHEDULE = Object.freeze({ scheduled: false, windows: Object.freeze([]) });
 const SOCIAL_SCHEDULE_DEFAULTS = Object.freeze(Object.fromEntries(
-  ['socialStories', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, EMPTY_SCHEDULE])));
+  ['socialStories', 'socialSuggestions', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, EMPTY_SCHEDULE])));
 export const DEFAULTS = Object.freeze({
   ...BOOLEAN_DEFAULTS,
   grayscale: Object.freeze({ enabled: false, level: 100, scheduled: false, windows: Object.freeze([]) }),
@@ -35,6 +36,7 @@ export const FEATURES = Object.freeze([
 
 export const SOCIAL_FEATURES = Object.freeze([
   { key: 'socialStories', label: 'Hide Stories', detail: 'Removes supported Stories trays and navigation. Direct links and messages remain available.' },
+  { key: 'socialSuggestions', label: 'Hide follow recommendations', detail: 'Removes supported suggested-account modules from home pages without hiding followed posts, profiles, or messages.' },
   { key: 'socialShortVideo', label: 'Hide short-video feeds and tabs', detail: "Removes supported Reels, Watch, and TikTok's landing, For You, Following, and Live streams. A direct video link still opens." },
   { key: 'socialExplore', label: 'Hide Explore and Discover', detail: 'Removes supported discovery tabs and feeds without disabling search, profiles, or messages.' },
   { key: 'socialHomeFeed', label: 'Hide the home feed', detail: 'Keeps navigation and messages while removing the supported infinite home feed.' },

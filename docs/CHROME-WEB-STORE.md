@@ -29,7 +29,7 @@ Disclose **local processing of page structure/text, required built-in hosts, opt
 
 ## 5. Build and inspect the ZIP
 
-Run the tests and static check, then `python3 scripts/package.py`. The generated archive is `dist/quiet-browse-0.5.4.zip`, with `manifest.json` at its root. Only extension assets are included; fixtures and developer tools are excluded. The packager validates file paths and writes a SHA-256 checksum.
+Run the tests and static check, then `python3 scripts/package.py`. The generated archive is `dist/quiet-browse-0.5.5.zip`, with `manifest.json` at its root. Only extension assets are included; fixtures and developer tools are excluded. The packager validates file paths and writes a SHA-256 checksum.
 
 This command produces a local package even when release gates are incomplete. `python3 scripts/release_check.py` separately explains whether publication prerequisites have been recorded. Do not tick those gates without doing the work.
 

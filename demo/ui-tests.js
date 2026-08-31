@@ -52,11 +52,12 @@ try {
       assert(youtubeConfig.settings.youtubePictureCover === true && document.getElementById('message').textContent.includes('returns after reload'), 'Page-only Show picture leaves the saved preference intact');
     }
     if (new URLSearchParams(location.search).has('social')) {
-      assert(!document.getElementById('social-controls').hidden && document.querySelectorAll('#social-controls input').length === 4, 'A supported social site shows four independent controls');
+      assert(!document.getElementById('social-controls').hidden && document.querySelectorAll('#social-controls input').length === 5, 'A supported social site shows five independent controls');
       const stories = document.getElementById('socialStories'); stories.click();
       await waitFor(() => !stories.checked);
       const socialConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites['https://www.instagram.com'];
       assert(socialConfig.settings.socialStories === false && socialConfig.settings.socialHomeFeed === true, 'One social surface can be restored without changing the others');
+      assert(socialConfig.settings.socialSuggestions === true, 'Restoring Stories does not restore follow recommendations');
     }
     if (new URLSearchParams(location.search).has('offline')) {
       assert(document.getElementById('message').textContent === 'Saved. Reload this page to apply it.', 'A missing page receiver becomes a reload instruction, not a connection error');
@@ -67,6 +68,9 @@ try {
       assert(document.getElementById('message').textContent !== 'Could not establish connection. Receiving end does not exist.', 'Direct page repair prevents a connection error');
       assert(!document.getElementById('cover').disabled, 'Direct page repair restores the hide-video control without a tab reload');
       assert(document.getElementById('cover-note').textContent.includes('including mute'), 'The repaired page exposes the mute-safe cover explanation');
+    }
+    if (new URLSearchParams(location.search).has('stale')) {
+      assert(document.getElementById('message').textContent !== 'Could not establish connection. Receiving end does not exist.' && !document.getElementById('cover').disabled, 'Opening the popup replaces an older live content engine without requiring a page reload');
     }
   } else {
     await waitFor(() => document.querySelectorAll('.site-category').length === 3);
@@ -94,7 +98,7 @@ try {
     assert(gray.enabled && gray.scheduled, 'Schedule mode and master grayscale switch are saved');
     assert(gray.windows.length === 1 && gray.windows[0].start === '20:30' && gray.windows[0].end === '06:45', 'Overnight start and end times are saved');
     assert(settings.socialSchedules.socialStories.scheduled && settings.socialSchedules.socialStories.windows.length === 1, 'Stories can be hidden on their own local-time schedule');
-    assert(!settings.socialSchedules.socialShortVideo.scheduled && !settings.socialSchedules.socialHomeFeed.scheduled, 'Stories, short video, and scrollable-feed schedules remain independent');
+    assert(!settings.socialSchedules.socialSuggestions.scheduled && !settings.socialSchedules.socialShortVideo.scheduled && !settings.socialSchedules.socialHomeFeed.scheduled, 'Stories, follow recommendations, short video, and scrollable-feed schedules remain independent');
     const youtubeCard = document.querySelector('[data-site="https://www.youtube.com"]'); youtubeCard.open = true;
     const youtubeForm = youtubeCard.querySelector('form');
     const youtubeControl = youtubeForm.querySelector('.youtube-control'); youtubeControl.open = true;

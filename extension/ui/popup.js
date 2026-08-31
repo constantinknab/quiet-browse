@@ -8,6 +8,7 @@ let page = null;
 let busy = false;
 let youtubeSite = false;
 let socialSite = null;
+const EXPECTED_ENGINE_VERSION = 8;
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
@@ -27,7 +28,7 @@ async function repairPage() {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id, frameIds: [0] },
       func: () => {
-        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7']) {
+        for (const key of ['__quietBrowseV1', '__quietBrowseV2', '__quietBrowseV3', '__quietBrowseV4', '__quietBrowseV5', '__quietBrowseV6', '__quietBrowseV7', '__quietBrowseV8']) {
           try { globalThis[key]?.dispose?.(); } catch { /* Stale extension context. */ }
           try { delete globalThis[key]; } catch { /* Non-configurable collision. */ }
         }
@@ -41,11 +42,15 @@ async function repairPage() {
       files: ['shared/comfort.js', 'content/comfort.js', 'content/social.js', 'content/engine.js'],
     });
     const status = await rawPageMessage({ type: 'QB_REFRESH' });
-    return status?.engineVersion === 7;
+    return status?.engineVersion === EXPECTED_ENGINE_VERSION;
   } catch { return false; }
 }
 async function pageMessage(message, retry = true) {
-  try { return await rawPageMessage(message); }
+  try {
+    const response = await rawPageMessage(message);
+    if (retry && response?.engineVersion && response.engineVersion !== EXPECTED_ENGINE_VERSION && await repairPage()) return pageMessage(message, false);
+    return response;
+  }
   catch (error) {
     if (retry && receiverMissing(error) && await repairPage()) return pageMessage(message, false);
     throw error;

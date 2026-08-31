@@ -15,7 +15,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 7;
+  let receiverVersion = 8;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -33,7 +33,7 @@ function fakeChrome() {
       injected.push(options);
       if (options.files) {
         if (failInjection) throw new Error('Fixture injection failure');
-        receiver = true; receiverVersion = 7;
+        receiver = true; receiverVersion = 8;
       }
     } },
     tabs: { query: async () => [{ id: 1 }], get: async id => ({ id, url: 'https://example.com/a?private=yes' }), sendMessage: async (id, message) => {
@@ -43,7 +43,7 @@ function fakeChrome() {
     } },
   };
   return { chrome, grants, registered, injected, messages, alarms, dynamicRules, data: () => data, resetData: () => { data = {}; }, setData: value => { data = structuredClone(value); },
-    setReceiver: (value, version = 7) => { receiver = value; receiverVersion = version; },
+    setReceiver: (value, version = 8) => { receiver = value; receiverVersion = version; },
     setFailInjection: value => { failInjection = value; },
     setFailDynamicUpdate: value => { failDynamicUpdate = value; } };
 }
@@ -104,13 +104,13 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     assert.equal((await send({ type: 'QB_POLICY' }, page)).data.settings.pageMode, true);
     assert.equal(f.alarms.size, 0);
   });
-  await t.test('an outdated live page saves safely and asks for a reload instead of adding duplicate listeners', async () => {
+  await t.test('an outdated live page is replaced before newly saved settings are applied', async () => {
     const before = f.injected.filter(entry => entry.files).length;
-    f.setReceiver(true, 2);
+    f.setReceiver(true, 7);
     const response = await send({ type: 'QB_SAVE', site: 'https://example.com', enabled: true, tabId: 1, settings: { pageMode: true } });
     assert.equal(response.ok, true);
-    assert.equal(response.data.pageReady, false);
-    assert.equal(f.injected.filter(entry => entry.files).length, before);
+    assert.equal(response.data.pageReady, true);
+    assert.equal(f.injected.filter(entry => entry.files).length, before + 1);
     assert.equal((await send({ type: 'QB_POLICY' }, page)).data.settings.pageMode, true);
   });
   await t.test('a missing receiver is cleaned up and reinjected', async () => {
@@ -188,7 +188,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     const allOff = completeFeatureSettings(false);
     assert.deepEqual([...BOOLEAN_FEATURE_KEYS].sort(), [
       'backgroundVideo', 'consentChoices', 'motion', 'pageMode',
-      'socialExplore', 'socialHomeFeed', 'socialShortVideo', 'socialStories',
+      'socialExplore', 'socialHomeFeed', 'socialShortVideo', 'socialStories', 'socialSuggestions',
       'youtubePictureCover', 'youtubeQuiet', 'youtubeRecommendations',
     ].sort(), 'the lifecycle matrix must include every boolean feature');
 
@@ -229,7 +229,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
         assert.equal((await send({ type: 'QB_POLICY' }, page)).data.enabled, false);
 
         // Re-enable without resubmitting settings. A new page receives the exact
-        // off-state choices, including grayscale and all four social schedules.
+        // off-state choices, including grayscale and all five social schedules.
         assert.equal((await send({ type: 'QB_SAVE', site, enabled: true })).ok, true);
         current = await send({ type: 'QB_POLICY' }, page);
         assert.equal(current.data.enabled, true);

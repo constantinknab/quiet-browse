@@ -1,8 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'"><title>Quiet Browse · social adapter fixture</title><link rel="stylesheet" href="/extension/ui/styles.css"><link rel="stylesheet" href="fixture.css"><link rel="stylesheet" href="/extension/content/presentation.css"></head><body class="document">
 <h1>Instagram route adapter fixture</h1><p>This is a local structural fixture, not Instagram. It tests reversible route behavior against representative markup.</p>
 <nav><ul><li id="messages-nav"><a href="/direct/inbox/">Messages</a></li><li id="stories-nav"><a href="/stories/">Stories</a></li><li id="reels-nav"><a href="/reels/">Reels</a></li><li id="explore-nav"><a href="/explore/">Explore</a></li><li id="profile-nav"><a href="/quiet-user/">Profile</a></li></ul></nav>
-<section id="stories" data-qb-social-surface="stories">Stories tray</section>
+<section id="stories" aria-label="Stories"><div role="list"><a href="/stories/quiet-user/123/" role="listitem">Stories tray</a></div></section>
 <main id="home" data-qb-social-surface="home"><article>Home feed post</article></main>
+<aside><div id="suggestions"><span>Suggested for you</span><div><a href="/suggested-user/">Suggested profile</a><button type="button">Follow</button></div></div></aside>
 <article id="direct-item">Directly opened post or video</article>
 <section id="recommendations" data-qb-social-surface="recommendations">Infinite continuation recommendations</section>
 <p id="test-status" role="status">Running…</p><ol id="results"></ol>

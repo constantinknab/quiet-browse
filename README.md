@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.4 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.5 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -15,7 +15,7 @@ The extension code and build/test scripts are MIT licensed. Documentation, the p
 5. Open Chrome's puzzle-piece Extensions menu and pin **Quiet Browse**.
 6. Review Chrome's install warnings. Built-in profiles start enabled for the exact HTTPS social and shopping hosts listed below. Open any other ordinary website, click the extension icon, and choose **Enable on this site** to request that host separately.
 7. Turn on **Instant page-by-page navigation** if you want wheel gestures and the page arrows to jump one screen at a time.
-8. Use **Grayscale** for a manual 0–100% amount. Choose **Edit times and days** for per-site grayscale, Stories, short-video, Explore, and home-feed windows.
+8. Use **Grayscale** for a manual 0–100% amount. Choose **Edit times and days** for per-site grayscale, Stories, follow-recommendation, short-video, Explore, and home-feed windows.
 9. Use **Normal scroll** for a temporary bypass, **Show original page** if something looks wrong, or **Turn off for this site** for a lasting change.
 10. Open **Sites & privacy** for categorized Social, Ecommerce, and Other site dropdowns, plus **Quit Porn**, additional blocked hostnames, optional password protection, and the selectable US-coverage, China-coverage, and Japan-coverage lists. Chrome asks separately before the selected sources can be contacted.
 
@@ -34,6 +34,7 @@ No developer account, registration payment, API key, npm install, or Google revi
 | YouTube recommendations | Off | Collapses the supported watch-page list behind a reveal button. |
 | Hide YouTube video picture | Manual by default; optional saved mode | Covers the picture while playback continues. A saved preference reapplies after reloads and YouTube video changes; Show picture remains a page-only override. It does not edit cuts or change audio. Native controls, including mute, and captions remain available; recognized ads and picture-in-picture are uncovered. |
 | Social Stories | On for built-in social profiles | Hides supported Stories navigation and trays on Instagram, Facebook, and TikTok, always or during up to 12 local-time windows. |
+| Social follow recommendations | On for built-in social profiles | Hides supported suggested-account modules on home pages, independently from Stories and the followed-post feed. |
 | Social short video | On for built-in social profiles | Hides supported Reels, Watch, and TikTok short-video hubs and entry points, always or on a separate schedule. TikTok's `/` landing stream counts as both short-video and home-feed content, so either hide control stops it. A direct item URL remains viewable. |
 | Social Explore | On for built-in social profiles | Hides supported Explore and Discover navigation and route feeds, always or on a separate schedule, while leaving search, profiles, and messages available. |
 | Social home feed | On for built-in social profiles | Hides supported home/infinite feeds, always or on a separate schedule. Direct items and conversations remain; marked continuation recommendations are removed. |
@@ -70,7 +71,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, listing draft, release gates, tests
-  dist/quiet-browse-0.5.4.zip ← generated extension-only archive
+  dist/quiet-browse-0.5.5.zip ← generated extension-only archive
 ```
 
 ## Developer commands

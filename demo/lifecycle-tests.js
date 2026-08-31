@@ -4,8 +4,8 @@
   const group = document.body.dataset.group;
   const phaseKey = `qb-lifecycle-phase:${location.pathname}`;
   const countKey = `qb-lifecycle-count:${location.pathname}`;
-  const keys = ['pageMode', 'motion', 'consentChoices', 'backgroundVideo', 'youtubeQuiet', 'youtubeRecommendations', 'youtubePictureCover', 'socialStories', 'socialShortVideo', 'socialExplore', 'socialHomeFeed', 'grayscale'];
-  const socialCategory = { socialStories: 'stories', socialShortVideo: 'short', socialExplore: 'explore', socialHomeFeed: 'home' };
+  const keys = ['pageMode', 'motion', 'consentChoices', 'backgroundVideo', 'youtubeQuiet', 'youtubeRecommendations', 'youtubePictureCover', 'socialStories', 'socialSuggestions', 'socialShortVideo', 'socialExplore', 'socialHomeFeed', 'grayscale'];
+  const socialCategory = { socialStories: 'stories', socialSuggestions: 'suggestions', socialShortVideo: 'short', socialExplore: 'explore', socialHomeFeed: 'home' };
   const applicable = key => ['pageMode', 'motion', 'consentChoices', 'grayscale'].includes(key) ||
     (key === 'backgroundVideo' && group !== 'youtube') ||
     (key.startsWith('youtube') && group === 'youtube') ||
@@ -14,11 +14,11 @@
   function settings(selected = []) {
     const on = new Set(selected);
     const today = new Date().getDay();
-    const socialSchedules = Object.fromEntries(['socialStories', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key =>
+    const socialSchedules = Object.fromEntries(['socialStories', 'socialSuggestions', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key =>
       [key, on.has(key) ? { scheduled: true, windows: [{ days: [today], start: '00:00', end: '00:00' }] } : schedule()]));
     return {
       pageMode: on.has('pageMode'), motion: on.has('motion'), consentChoices: on.has('consentChoices'), backgroundVideo: on.has('backgroundVideo'),
-      youtubeQuiet: on.has('youtubeQuiet'), youtubeRecommendations: on.has('youtubeRecommendations'), youtubePictureCover: on.has('youtubePictureCover'), socialStories: on.has('socialStories'),
+      youtubeQuiet: on.has('youtubeQuiet'), youtubeRecommendations: on.has('youtubeRecommendations'), youtubePictureCover: on.has('youtubePictureCover'), socialStories: on.has('socialStories'), socialSuggestions: on.has('socialSuggestions'),
       socialShortVideo: on.has('socialShortVideo'), socialExplore: on.has('socialExplore'), socialHomeFeed: on.has('socialHomeFeed'), socialSchedules,
       grayscale: on.has('grayscale')
         ? { enabled: true, level: 65, scheduled: true, windows: [{ days: [today], start: '00:00', end: '00:00', level: 65 }] }
