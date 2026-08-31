@@ -8,6 +8,8 @@
     "test": "node --test tests/*.test.mjs",
     "check": "node scripts/check.mjs",
     "package": "python3 scripts/package.py",
+    "audit-package": "python3 scripts/audit_package.py",
+    "verify": "npm test && npm run check && npm run package && npm run audit-package",
     "demo": "python3 scripts/serve_demo.py"
   },
   "engines": { "node": ">=20" }

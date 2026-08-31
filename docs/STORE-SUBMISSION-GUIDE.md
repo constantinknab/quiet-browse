@@ -5,9 +5,9 @@ Prepared August 29, 2026. Check the live dashboard when its wording differs. Fol
 ## What is ready
 
 - Store package: `dist/quiet-browse-0.5.6.zip`
-- SHA-256: `3d74cd40778d4a300355c825a8732c0b3a40b74e060070dd00f17167e412b02c`
+- SHA-256: `ad8ff672447dd69c66187fa4bc5f4f471430aabd709c11388fb3a28b4437ebf4`
 - Manifest V3, 21 packaged files, and no remote executable code
-- 38 Node tests, 136 browser fixture checks, static checks, and ZIP integrity checks passed
+- 63 Node tests, 164 browser fixture checks, 3,780 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
 - Draft listing copy: `docs/STORE-LISTING.md`
 - Public website source: `website/`
 - Store icon and promotional tiles: `store-assets/`

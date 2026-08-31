@@ -75,6 +75,18 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     assert.equal((await send({ type: 'QB_SAVE', site: 'https://example.com', enabled: true }, page)).ok, false);
     assert.equal((await send({ type: 'QB_LIST' }, page)).ok, false);
   });
+  await t.test('sender identity and extension-page URLs cannot be forged', async () => {
+    // A website content script has the extension ID, so the worker must also
+    // require the exact packaged popup/options URL for every privileged action.
+    assert.equal((await send({ type: 'QB_ADULT_STATUS' }, page)).ok, false);
+    assert.equal((await send({ type: 'QB_RESET' }, page)).ok, false);
+    assert.equal((await send({ type: 'QB_LIST' }, { id: 'different-extension', url: ui.url })).ok, false);
+    assert.equal((await send({ type: 'QB_LIST' }, { id: f.chrome.runtime.id, url: `${ui.url}.lookalike` })).ok, false);
+
+    // Policy is the sole content-script-readable message, and subframes fail
+    // closed so an embedded third-party frame cannot inherit the top page scope.
+    assert.equal((await send({ type: 'QB_POLICY' }, { ...page, frameId: 3 })).data.enabled, false);
+  });
   await t.test('enable requires an already granted exact host permission', async () => {
     assert.equal((await send({ type: 'QB_SAVE', site: 'https://example.com', enabled: true })).ok, false);
     assert.equal(f.registered.size, 0);
@@ -260,6 +272,10 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     assert.equal(enabled.data.customDomains.length, 1);
     assert.equal(f.dynamicRules.size, enabled.data.packagedCount + 1);
     assert.ok([...f.dynamicRules.values()].some(rule => rule.condition.urlFilter === '||custom.example^'));
+    for (const rule of f.dynamicRules.values()) {
+      assert.deepEqual(rule.action, { type: 'block' });
+      assert.deepEqual(rule.condition.resourceTypes, ['main_frame']);
+    }
     assert.equal(JSON.stringify(f.data()).includes('shared passphrase'), false);
     assert.equal((await send({ type: 'QB_ADULT_UPDATE', domains: ['changed.example'], password: 'wrong password' })).ok, false);
     assert.equal((await send({ type: 'QB_RESET' })).ok, false);
@@ -274,6 +290,10 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     };
     globalThis.fetch = async (url, options) => {
       assert.equal(options.credentials, 'omit');
+      assert.equal(options.cache, 'no-store');
+      assert.equal(options.redirect, 'error');
+      assert.equal(options.referrerPolicy, 'no-referrer');
+      assert.ok(options.signal instanceof AbortSignal);
       const source = ADULT_SOURCES.find(item => item.url === String(url));
       assert.ok(source);
       const bytes = new TextEncoder().encode(lists[source.format]);

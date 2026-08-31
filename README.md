@@ -67,7 +67,7 @@ quiet-browse/
     content/presentation.css extension-injected CSS
     ui/                      popup, site manager, help, privacy policy
     icons/                   original PNG artwork
-  tests/                     dependency-free Node tests
+  tests/                     dependency-free Node tests and a plain-English test guide
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, listing draft, release gates, tests
@@ -84,6 +84,7 @@ npm test
 npm run check
 npm run demo
 npm run package
+npm run verify
 ```
 
 There are no third-party runtime or test dependencies. `npm` only runs the scripts; it does not need to install anything. You can also run `node --test tests/*.test.mjs` and `node scripts/check.mjs` directly. Packaging and the local demo use Python:
@@ -91,6 +92,7 @@ There are no third-party runtime or test dependencies. `npm` only runs the scrip
 ```sh
 python3 scripts/serve_demo.py
 python3 scripts/package.py
+python3 scripts/audit_package.py
 python3 scripts/release_check.py
 ```
 

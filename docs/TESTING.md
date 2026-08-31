@@ -6,15 +6,21 @@ Date: August 31, 2026. Tests are intentionally split by what they establish. The
 
 Run `node --test tests/*.test.mjs` (Node 20+; no dependency installation).
 
-The tests exercise URL normalization, protected-page exclusion, state migration, recommended-profile defaults, grayscale and social schedule boundaries, wheel grouping, capped sticky-header page distances, sender authorization, host grants, content-script migration, alarms, registration, current-tab injection, removal, permission revocation, adult-domain validation, three independent bounded dynamic-rule ranges, cleanup of a retired source range, optional source permission, update scheduling, fixed-source fetching, critical-domain protection, distinct download/format/Chrome-install failures, per-source last-known-good behavior, salted password verification, protected reset, and first-install seeding. A table-driven lifecycle matrix also exercises Instagram, Facebook, TikTok, all eight built-in shopping profiles, and YouTube. For every host it turns all boolean features and schedules on, disables the master switch, changes every feature while off, simulates a page policy reload and service-worker startup, enables without resubmitting settings, reverses every feature, and repeats the off/on cycle. The background uses a controlled Chrome API and fetch double, not Chrome or the live source.
+The tests exercise URL normalization, protected-page exclusion, state migration, recommended-profile defaults, grayscale and social schedule boundaries, wheel grouping, capped sticky-header page distances, sender authorization and forgery resistance, host grants, content-script migration, alarms, registration, current-tab injection, removal, permission revocation, adult-domain validation, three independent bounded dynamic-rule ranges, cleanup of a retired source range, optional source permission, update scheduling, fixed-source fetching, critical-domain protection, distinct download/format/Chrome-install failures, per-source last-known-good behavior, salted password verification, protected reset, and first-install seeding. A table-driven lifecycle matrix also exercises Instagram, Facebook, TikTok, all eight built-in shopping profiles, and YouTube. For every host it turns all boolean features and schedules on, disables the master switch, changes every feature while off, simulates a page policy reload and service-worker startup, enables without resubmitting settings, reverses every feature, and repeats the off/on cycle. The background uses a controlled Chrome API and fetch double, not Chrome or the live source.
 
-Observed result during development: **51 reported tests passed, zero failed** (including 12 per-site lifecycle cases and the parent lifecycle test). Rerun after any changes.
+`tests/store-safety.test.mjs` adds a readable policy-oriented review of exact permission and host allowlists, absence of hidden extension entry points, self-contained executable code, the one fixed and bounded data download, absence of page-facing telemetry, code readability, sensitive Chrome API exclusions, protected storage, password hashing, top-level-only request blocking, public-disclosure alignment, secret scanning, package formats, and license files. `tests/README.md` explains the intent and limits of every test file in plain language.
+
+Observed result during development: **63 reported tests passed, zero failed** (including 12 per-site lifecycle cases and the parent lifecycle test). Rerun after any changes.
 
 ## Static checks
 
 Run `node scripts/check.mjs`.
 
 Checks include manifest format, the exact required HTTPS host count, absence of blanket required host access, declared permissions, the narrowly scoped connection policy, icon dimensions, referenced files, JavaScript syntax, no inline executable HTML, no eval/Function construction, exactly one worker fetch call for the fixed data source, no other extension network-request primitives, and no innerHTML assignment. These are limited checks, not a complete security audit.
+
+## Exact release-package audit
+
+Run `npm run verify` immediately before upload. It runs the Node and static checks, rebuilds the versioned ZIP, and calls `scripts/audit_package.py`. The audit rejects duplicate, corrupt, absolute, or parent-traversal ZIP entries; requires the exact expected file set; compares every archived file byte-for-byte with `extension/`; compares the packaged and source manifests; and verifies the SHA-256 sidecar. This establishes which reviewed bytes are in the ZIP, but does not establish live-site compatibility, legal compliance, or Store approval.
 
 ## Real-browser DOM fixtures
 
