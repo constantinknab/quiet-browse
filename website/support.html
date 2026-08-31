@@ -1,28 +1,100 @@
 <!doctype html>
+<!-- Static support page linking to the public issue tracker and privacy policy. -->
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Support and troubleshooting for the Quiet Browse Chrome extension.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
-  <title>Support — Quiet Browse</title>
-  <link rel="icon" href="icon128.png">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header><nav class="shell" aria-label="Main navigation"><a class="brand" href="index.html"><img src="icon128.png" alt=""><span>Quiet Browse</span></a><div class="nav-links"><a href="privacy.html">Privacy</a><a aria-current="page" href="support.html">Support</a></div></nav></header>
-  <main class="document">
-    <p class="eyebrow">Quiet Browse support</p><h1>Help without tracking.</h1><p class="meta"><a href="https://github.com/constantinknab/quiet-browse/issues/new/choose">Open a support request on GitHub</a></p>
-    <div class="contact"><h2>Before opening an issue</h2><p>Include the Quiet Browse version, Chrome version, operating system, affected hostname, the enabled Quiet Browse setting, what happened, and what you expected. Remove names, account details, messages, payment information, and other private page content from screenshots.</p></div>
-    <h2>Common fixes</h2>
-    <h3>A control says the page must be reloaded</h3><p>Reload the affected website tab once. Chrome cannot attach a newly installed or updated content script to some already-open pages until they reload.</p>
-    <h3>A site changed after an update</h3><p>Use <strong>Show original page</strong> for the current tab, or turn Quiet Browse off for that host. Platform interfaces change, and a previously supported selector can stop matching correctly.</p>
-    <h3>List choices changed after disabling the adult-site blocker</h3><p>Version 0.5.2 or later remembers list checkboxes while removing active block rules. Reload the extension from <code>chrome://extensions</code> if an older build is still installed, then choose the desired lists once.</p>
-    <h3>A regional list will not update</h3><p>Confirm that Chrome granted access to <code>raw.githubusercontent.com</code>. The packaged starter set works without that permission. An unavailable or malformed source keeps only its own last working rules.</p>
-    <h3>The protection password was lost</h3><p>Quiet Browse has no password recovery. Chrome still permits disabling or uninstalling the extension and clearing its data. The password provides friction, not administrator-grade enforcement.</p>
-    <h2>Delete local extension data</h2><ol><li>Open Quiet Browse.</li><li>Select <strong>Sites &amp; privacy</strong>.</li><li>Choose <strong>Delete all Quiet Browse settings</strong>.</li><li>If password protection is active, enter that password.</li></ol><p>Uninstalling the extension through Chrome also removes its extension storage and rules.</p>
-    <h2>Report a security concern</h2><p>Use <a href="https://github.com/constantinknab/quiet-browse/security/advisories/new">GitHub's private vulnerability reporting</a>. Do not disclose an unpatched vulnerability in a public issue, and do not include passwords, authentication cookies, private messages, or payment information.</p>
-  </main>
-  <footer><div class="shell"><p>© 2026 Constantin Knab.</p><p><a href="index.html">Home</a> · <a href="privacy.html">Privacy</a></p></div></footer>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Support and troubleshooting for the Quiet Browse Chrome extension."
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+    />
+    <title>Support — Quiet Browse</title>
+    <link rel="icon" href="icon128.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="shell" aria-label="Main navigation">
+        <a class="brand" href="index.html"
+          ><img src="icon128.png" alt="" /><span>Quiet Browse</span></a
+        >
+        <div class="nav-links">
+          <a href="privacy.html">Privacy</a><a aria-current="page" href="support.html">Support</a>
+        </div>
+      </nav>
+    </header>
+    <main class="document">
+      <p class="eyebrow">Quiet Browse support</p>
+      <h1>Help without tracking.</h1>
+      <p class="meta">
+        <a href="https://github.com/constantinknab/quiet-browse/issues/new/choose"
+          >Open a support request on GitHub</a
+        >
+      </p>
+      <div class="contact">
+        <h2>Before opening an issue</h2>
+        <p>
+          Include the Quiet Browse version, Chrome version, operating system, affected hostname, the
+          enabled Quiet Browse setting, what happened, and what you expected. Remove names, account
+          details, messages, payment information, and other private page content from screenshots.
+        </p>
+      </div>
+      <h2>Common fixes</h2>
+      <h3>A control says the page must be reloaded</h3>
+      <p>
+        Reload the affected website tab once. Chrome cannot attach a newly installed or updated
+        content script to some already-open pages until they reload.
+      </p>
+      <h3>A site changed after an update</h3>
+      <p>
+        Use <strong>Show original page</strong> for the current tab, or turn Quiet Browse off for
+        that host. Platform interfaces change, and a previously supported selector can stop matching
+        correctly.
+      </p>
+      <h3>List choices changed after disabling the adult-site blocker</h3>
+      <p>
+        Version 0.5.2 or later remembers list checkboxes while removing active block rules. Reload
+        the extension from <code>chrome://extensions</code> if an older build is still installed,
+        then choose the desired lists once.
+      </p>
+      <h3>A regional list will not update</h3>
+      <p>
+        Confirm that Chrome granted access to <code>raw.githubusercontent.com</code>. The packaged
+        starter set works without that permission. An unavailable or malformed source keeps only its
+        own last working rules.
+      </p>
+      <h3>The protection password was lost</h3>
+      <p>
+        Quiet Browse has no password recovery. Chrome still permits disabling or uninstalling the
+        extension and clearing its data. The password provides friction, not administrator-grade
+        enforcement.
+      </p>
+      <h2>Delete local extension data</h2>
+      <ol>
+        <li>Open Quiet Browse.</li>
+        <li>Select <strong>Sites &amp; privacy</strong>.</li>
+        <li>Choose <strong>Delete all Quiet Browse settings</strong>.</li>
+        <li>If password protection is active, enter that password.</li>
+      </ol>
+      <p>Uninstalling the extension through Chrome also removes its extension storage and rules.</p>
+      <h2>Report a security concern</h2>
+      <p>
+        Use
+        <a href="https://github.com/constantinknab/quiet-browse/security/advisories/new"
+          >GitHub's private vulnerability reporting</a
+        >. Do not disclose an unpatched vulnerability in a public issue, and do not include
+        passwords, authentication cookies, private messages, or payment information.
+      </p>
+    </main>
+    <footer>
+      <div class="shell">
+        <p>© 2026 Constantin Knab.</p>
+        <p><a href="index.html">Home</a> · <a href="privacy.html">Privacy</a></p>
+      </div>
+    </footer>
+  </body>
 </html>

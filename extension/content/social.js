@@ -1,3 +1,7 @@
+// Social-site surface controller.
+// Route checks keep messages and direct links usable, while DOM classification hides
+// only the independently selected Stories, recommendations, short-video, discovery,
+// and home-feed surfaces. Every hidden element is restored when its setting turns off.
 (() => {
   'use strict';
   const ROOT = 'data-qb-social';
@@ -27,7 +31,12 @@
     }
     if (name === 'facebook') {
       if (/^\/(?:messages|messenger)(?:\/|$)/.test(path)) return 'messages';
-      if (/^\/reel\/[^/]+/.test(path) || /^\/(?:share|permalink)\//.test(path) || /\/posts\//.test(path)) return 'direct';
+      if (
+        /^\/reel\/[^/]+/.test(path) ||
+        /^\/(?:share|permalink)\//.test(path) ||
+        /\/posts\//.test(path)
+      )
+        return 'direct';
       if (/^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
       if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
       return path === '/' || path === '/home.php' ? 'home' : 'other';
@@ -56,7 +65,8 @@
     if (/^\/stories(?:\/|$)/.test(path)) return 'stories';
     if (name === 'instagram' && /^\/reels(?:\/|$)/.test(path)) return 'short';
     if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
-    if (name === 'tiktok' && (path === '/' || /^\/(?:foryou|following|live)(?:\/|$)/.test(path))) return 'short';
+    if (name === 'tiktok' && (path === '/' || /^\/(?:foryou|following|live)(?:\/|$)/.test(path)))
+      return 'short';
     if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
     return null;
   }
@@ -70,15 +80,26 @@
     let notice = null;
 
     function navTarget(anchor) {
-      return anchor.closest('li,[role="listitem"]') || anchor.closest('[role="tab"],[role="menuitem"]') || anchor;
+      return (
+        anchor.closest('li,[role="listitem"]') ||
+        anchor.closest('[role="tab"],[role="menuitem"]') ||
+        anchor
+      );
     }
     function want(map, element, category) {
-      if (element && element.isConnected && element !== document.body && element !== document.documentElement) map.set(element, category);
+      if (
+        element &&
+        element.isConnected &&
+        element !== document.body &&
+        element !== document.documentElement
+      )
+        map.set(element, category);
     }
     function reconcile(desired) {
       for (const [element, original] of changed) {
         if (desired.has(element) && element.isConnected) continue;
-        if (original === null) element.removeAttribute(HIDDEN); else element.setAttribute(HIDDEN, original);
+        if (original === null) element.removeAttribute(HIDDEN);
+        else element.setAttribute(HIDDEN, original);
         changed.delete(element);
       }
       for (const [element, category] of desired) {
@@ -93,28 +114,48 @@
         return document.querySelector('[aria-label*="Stories" i],[data-e2e*="story" i]');
       }
       if (name === 'facebook') return document.querySelector('[role="feed"]');
-      if (name === 'tiktok') return document.querySelector('[data-e2e="recommend-list"],[data-e2e="explore-item-list"],main');
+      if (name === 'tiktok')
+        return document.querySelector(
+          '[data-e2e="recommend-list"],[data-e2e="explore-item-list"],main',
+        );
       if (name === 'instagram') return document.querySelector('main');
       return null;
     }
     function safeSurface(element) {
-      return element && element.isConnected && !element.matches('html,body,main,[role="main"]') ? element : null;
+      return element && element.isConnected && !element.matches('html,body,main,[role="main"]')
+        ? element
+        : null;
     }
     function instagramStoryCarouselSurfaces() {
       const found = new Set();
       if (name !== 'instagram') return found;
       const main = document.querySelector('main,[role="main"]');
       if (!main) return found;
-      const controls = Array.from(main.querySelectorAll('button,[role="button"],svg[aria-label]')).slice(0, 600);
+      const controls = Array.from(
+        main.querySelectorAll('button,[role="button"],svg[aria-label]'),
+      ).slice(0, 600);
       for (const control of controls) {
         if (control.closest('article,[role="article"]')) continue;
-        const label = (control.getAttribute('aria-label') || control.getAttribute('title') || control.textContent || '').trim();
+        const label = (
+          control.getAttribute('aria-label') ||
+          control.getAttribute('title') ||
+          control.textContent ||
+          ''
+        ).trim();
         if (!/^(?:next|previous)$/i.test(label)) continue;
         let candidate = control.parentElement;
-        for (let depth = 0; candidate && candidate !== main && depth < 8; depth += 1, candidate = candidate.parentElement) {
+        for (
+          let depth = 0;
+          candidate && candidate !== main && depth < 8;
+          depth += 1, candidate = candidate.parentElement
+        ) {
           if (!safeSurface(candidate)) break;
-          const images = Array.from(candidate.querySelectorAll('img')).filter(image => !image.closest('article,[role="article"]'));
-          const items = candidate.querySelectorAll('button,[role="button"],a,[role="link"],[role="listitem"]');
+          const images = Array.from(candidate.querySelectorAll('img')).filter(
+            (image) => !image.closest('article,[role="article"]'),
+          );
+          const items = candidate.querySelectorAll(
+            'button,[role="button"],a,[role="link"],[role="listitem"]',
+          );
           if (images.length >= 3 && items.length >= 3) {
             found.add(candidate);
             break;
@@ -125,44 +166,78 @@
     }
     function storySurfaces() {
       const found = new Set();
-      document.querySelectorAll('[aria-label*="Stories" i],[data-e2e*="story" i]').forEach(element => {
-        const target = safeSurface(element.closest('[role="region"],[role="list"],section') || element);
-        if (target) found.add(target);
-      });
-      Array.from(document.querySelectorAll('a[href]')).slice(0, 800).forEach(anchor => {
-        try {
-          const url = new URL(anchor.getAttribute('href'), location.href);
-          if (url.hostname !== location.hostname || categoryForLink(name, url.pathname) !== 'stories') return;
-          const item = safeSurface(navTarget(anchor));
-          if (item) found.add(item);
-          const list = safeSurface(anchor.closest('[role="list"],[aria-label*="Stories" i]'));
-          if (list) found.add(list);
-        } catch { /* Malformed page URL. */ }
-      });
-      instagramStoryCarouselSurfaces().forEach(element => found.add(element));
+      document
+        .querySelectorAll('[aria-label*="Stories" i],[data-e2e*="story" i]')
+        .forEach((element) => {
+          const target = safeSurface(
+            element.closest('[role="region"],[role="list"],section') || element,
+          );
+          if (target) found.add(target);
+        });
+      Array.from(document.querySelectorAll('a[href]'))
+        .slice(0, 800)
+        .forEach((anchor) => {
+          try {
+            const url = new URL(anchor.getAttribute('href'), location.href);
+            if (
+              url.hostname !== location.hostname ||
+              categoryForLink(name, url.pathname) !== 'stories'
+            )
+              return;
+            const item = safeSurface(navTarget(anchor));
+            if (item) found.add(item);
+            const list = safeSurface(anchor.closest('[role="list"],[aria-label*="Stories" i]'));
+            if (list) found.add(list);
+          } catch {
+            /* Malformed page URL. */
+          }
+        });
+      instagramStoryCarouselSurfaces().forEach((element) => found.add(element));
       return found;
     }
     function hasFollowAction(element) {
-      return [...element.querySelectorAll('button,[role="button"]')].some(control => /^follow(?: back)?$/i.test(control.textContent.trim()));
+      return [...element.querySelectorAll('button,[role="button"]')].some((control) =>
+        /^follow(?: back)?$/i.test(control.textContent.trim()),
+      );
     }
     function suggestionSurfaces() {
       const found = new Set();
-      document.querySelectorAll('[aria-label*="suggest" i],[data-testid*="suggest" i]').forEach(element => {
-        const target = safeSurface(element.closest('[role="region"],section,aside') || element);
-        if (target) found.add(target);
-      });
-      for (const heading of Array.from(document.querySelectorAll('h1,h2,h3,h4,span,div')).slice(0, 1200)) {
-        if (heading.childElementCount > 1 || !/^(?:suggested|suggestions) for you$/i.test(heading.textContent.trim())) continue;
+      document
+        .querySelectorAll('[aria-label*="suggest" i],[data-testid*="suggest" i]')
+        .forEach((element) => {
+          const target = safeSurface(element.closest('[role="region"],section,aside') || element);
+          if (target) found.add(target);
+        });
+      for (const heading of Array.from(document.querySelectorAll('h1,h2,h3,h4,span,div')).slice(
+        0,
+        1200,
+      )) {
+        if (
+          heading.childElementCount > 1 ||
+          !/^(?:suggested|suggestions) for you$/i.test(heading.textContent.trim())
+        )
+          continue;
         let candidate = heading.parentElement;
-        for (let depth = 0; candidate && depth < 6; depth += 1, candidate = candidate.parentElement) {
+        for (
+          let depth = 0;
+          candidate && depth < 6;
+          depth += 1, candidate = candidate.parentElement
+        ) {
           if (!safeSurface(candidate)) break;
-          if (hasFollowAction(candidate)) { found.add(candidate); break; }
+          if (hasFollowAction(candidate)) {
+            found.add(candidate);
+            break;
+          }
         }
       }
       return found;
     }
     function showNotice(target, route) {
-      if (!target?.parentElement || !['home', 'short', 'explore'].includes(route)) { notice?.remove(); notice = null; return; }
+      if (!target?.parentElement || !['home', 'short', 'explore'].includes(route)) {
+        notice?.remove();
+        notice = null;
+        return;
+      }
       if (!notice) {
         notice = document.createElement('aside');
         notice.setAttribute('data-qb-social-notice', '');
@@ -171,7 +246,8 @@
       const labels = { home: 'Home feed', short: 'Short-video feed', explore: 'Explore feed' };
       const message = `${labels[route]} hidden by Quiet Browse. Messages, profiles, and direct links still work.`;
       if (notice.textContent !== message) notice.textContent = message;
-      if (notice.parentElement !== target.parentElement || notice.nextSibling !== target) target.before(notice);
+      if (notice.parentElement !== target.parentElement || notice.nextSibling !== target)
+        target.before(notice);
     }
 
     function sync(settings = {}, now = new Date()) {
@@ -179,7 +255,12 @@
       const route = routeFor(name, location.pathname);
       const currentCategories = routeCategories(name, location.pathname);
       const desired = new Map();
-      const at = key => globalThis.QuietBrowseComfort.settingAt(settings[key], settings.socialSchedules?.[key], now);
+      const at = (key) =>
+        globalThis.QuietBrowseComfort.settingAt(
+          settings[key],
+          settings.socialSchedules?.[key],
+          now,
+        );
       const enabled = {
         stories: at('socialStories'),
         suggestions: at('socialSuggestions'),
@@ -191,28 +272,44 @@
         try {
           const url = new URL(anchor.getAttribute('href'), location.href);
           if (url.hostname !== location.hostname) continue;
-          const categories = name === 'tiktok' && normalizedPath(url.pathname) === '/'
-            ? routeCategories(name, url.pathname)
-            : [categoryForLink(name, url.pathname)];
-          const category = categories.find(item => item && enabled[item]);
-          if (route === 'direct' && normalizedPath(url.pathname) === normalizedPath(location.pathname)) continue;
+          const categories =
+            name === 'tiktok' && normalizedPath(url.pathname) === '/'
+              ? routeCategories(name, url.pathname)
+              : [categoryForLink(name, url.pathname)];
+          const category = categories.find((item) => item && enabled[item]);
+          if (
+            route === 'direct' &&
+            normalizedPath(url.pathname) === normalizedPath(location.pathname)
+          )
+            continue;
           if (category) want(desired, navTarget(anchor), category);
-        } catch { /* Malformed page URL. */ }
+        } catch {
+          /* Malformed page URL. */
+        }
       }
       for (const category of ['stories', 'suggestions', 'short', 'explore']) {
-        if (enabled[category]) document.querySelectorAll(`[data-qb-social-surface="${category}"]`).forEach(element => want(desired, element, category));
+        if (enabled[category])
+          document
+            .querySelectorAll(`[data-qb-social-surface="${category}"]`)
+            .forEach((element) => want(desired, element, category));
       }
-      if (enabled.stories && !['direct', 'messages'].includes(route)) storySurfaces().forEach(element => want(desired, element, 'stories'));
-      if (enabled.suggestions && currentCategories.includes('home')) suggestionSurfaces().forEach(element => want(desired, element, 'suggestions'));
+      if (enabled.stories && !['direct', 'messages'].includes(route))
+        storySurfaces().forEach((element) => want(desired, element, 'stories'));
+      if (enabled.suggestions && currentCategories.includes('home'))
+        suggestionSurfaces().forEach((element) => want(desired, element, 'suggestions'));
       let routedTarget = null;
-      const blockedRoute = currentCategories.find(category => enabled[category] && ['home', 'short', 'explore'].includes(category));
+      const blockedRoute = currentCategories.find(
+        (category) => enabled[category] && ['home', 'short', 'explore'].includes(category),
+      );
       if (blockedRoute) {
         routedTarget = surface(blockedRoute);
         want(desired, routedTarget, blockedRoute);
       }
       // Direct items and conversations stay usable; only an explicitly marked continuation feed is removed.
       if (['direct', 'messages'].includes(route)) {
-        document.querySelectorAll('[data-qb-social-surface="recommendations"]').forEach(element => want(desired, element, 'recommendations'));
+        document
+          .querySelectorAll('[data-qb-social-surface="recommendations"]')
+          .forEach((element) => want(desired, element, 'recommendations'));
       }
       reconcile(desired);
       showNotice(routedTarget, blockedRoute);
@@ -227,14 +324,25 @@
 
     function stop() {
       reconcile(new Map());
-      notice?.remove(); notice = null;
+      notice?.remove();
+      notice = null;
       if (markedRoot) {
-        if (originalRoot === null) document.documentElement.removeAttribute(ROOT); else document.documentElement.setAttribute(ROOT, originalRoot);
-        if (originalRoute === null) document.documentElement.removeAttribute(ROUTE); else document.documentElement.setAttribute(ROUTE, originalRoute);
+        if (originalRoot === null) document.documentElement.removeAttribute(ROOT);
+        else document.documentElement.setAttribute(ROOT, originalRoot);
+        if (originalRoute === null) document.documentElement.removeAttribute(ROUTE);
+        else document.documentElement.setAttribute(ROUTE, originalRoute);
       }
       markedRoot = false;
     }
-    return { sync, stop, status: () => ({ platform: name, hidden: changed.size, route: routeFor(name, location.pathname) }) };
+    return {
+      sync,
+      stop,
+      status: () => ({
+        platform: name,
+        hidden: changed.size,
+        route: routeFor(name, location.pathname),
+      }),
+    };
   }
 
   globalThis.QuietBrowseSocial = { create, platform, routeFor, routeCategories, categoryForLink };

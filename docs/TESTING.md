@@ -10,7 +10,7 @@ The tests exercise URL normalization, protected-page exclusion, state migration,
 
 `tests/store-safety.test.mjs` adds a readable policy-oriented review of exact permission and host allowlists, absence of hidden extension entry points, self-contained executable code, the one fixed and bounded data download, absence of page-facing telemetry, code readability, sensitive Chrome API exclusions, protected storage, password hashing, top-level-only request blocking, public-disclosure alignment, secret scanning, package formats, and license files. `tests/README.md` explains the intent and limits of every test file in plain language.
 
-Observed result during development: **63 reported tests passed, zero failed** (including 12 per-site lifecycle cases and the parent lifecycle test). Rerun after any changes.
+Observed result during development: **64 reported tests passed, zero failed** (including 12 per-site lifecycle cases and the parent lifecycle test). Rerun after any changes.
 
 ## Static checks
 
@@ -20,7 +20,7 @@ Checks include manifest format, the exact required HTTPS host count, absence of 
 
 ## Exact release-package audit
 
-Run `npm run verify` immediately before upload. It runs the Node and static checks, rebuilds the versioned ZIP, and calls `scripts/audit_package.py`. The audit rejects duplicate, corrupt, absolute, or parent-traversal ZIP entries; requires the exact expected file set; compares every archived file byte-for-byte with `extension/`; compares the packaged and source manifests; and verifies the SHA-256 sidecar. This establishes which reviewed bytes are in the ZIP, but does not establish live-site compatibility, legal compliance, or Store approval.
+Run `npm install` once to install the pinned development formatter, then run `npm run verify` immediately before upload. It checks formatting, runs the Node and static checks, rebuilds the versioned ZIP, and calls `scripts/audit_package.py`. The audit rejects duplicate, corrupt, absolute, or parent-traversal ZIP entries; requires the exact expected file set; compares every archived file byte-for-byte with `extension/`; compares the packaged and source manifests; and verifies the SHA-256 sidecar. This establishes which reviewed bytes are in the ZIP, but does not establish live-site compatibility, legal compliance, or Store approval.
 
 ## Real-browser DOM fixtures
 

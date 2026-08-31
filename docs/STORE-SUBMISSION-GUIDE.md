@@ -1,13 +1,13 @@
-# Quiet Browse 0.5.6 — complete Chrome Web Store submission guide
+# Quiet Browse 0.5.7 — complete Chrome Web Store submission guide
 
 Prepared August 29, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
 
 ## What is ready
 
-- Store package: `dist/quiet-browse-0.5.6.zip`
+- Store package: `dist/quiet-browse-0.5.7.zip`
 - SHA-256: `ad8ff672447dd69c66187fa4bc5f4f471430aabd709c11388fb3a28b4437ebf4`
 - Manifest V3, 21 packaged files, and no remote executable code
-- 63 Node tests, 164 browser fixture checks, 3,780 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
+- 64 Node tests, 164 browser fixture checks, 3,780 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
 - Draft listing copy: `docs/STORE-LISTING.md`
 - Public website source: `website/`
 - Store icon and promotional tiles: `store-assets/`
@@ -61,7 +61,7 @@ Creative Commons recommends software-specific licenses for software. Do not chan
    git init
    git branch -M main
    git add .
-   git commit -m "Publish Quiet Browse 0.5.6"
+   git commit -m "Publish Quiet Browse 0.5.7"
    git remote add origin https://github.com/YOUR-GITHUB-USERNAME/quiet-browse.git
    git push -u origin main
    ```
@@ -155,7 +155,7 @@ Suggested caption: **Optional local top-level blocking with selectable lists and
 - No personal accounts, messages, carts, orders, addresses, or payment details.
 - No fixture pages presented as the real extension.
 - No excessive platform logos or implication of affiliation.
-- No feature shown unless it exists in version 0.5.6.
+- No feature shown unless it exists in version 0.5.7.
 
 ## Phase 6 — prepare the promotional video
 
@@ -168,7 +168,7 @@ Google's current listing documentation asks for a YouTube promo-video URL. Make 
 5. 40–52 seconds: show the blocker settings using `example.com`, never an adult page.
 6. 52–60 seconds: disable the blocker and show that ordinary access returns.
 
-Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.6 — Chrome extension demonstration`. In the description, state that it shows version 0.5.6 and contains no paid endorsement.
+Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.7 — Chrome extension demonstration`. In the description, state that it shows version 0.5.7 and contains no paid endorsement.
 
 ## Phase 7 — register the Chrome Web Store developer account
 
@@ -182,11 +182,11 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.6 — Chrome ex
 8. Enable publication/review notification emails.
 9. Add a physical address only if the current dashboard requires one for the selected business or monetization status; do not invent one.
 
-## Phase 8 — create the item and upload version 0.5.6
+## Phase 8 — create the item and upload version 0.5.7
 
 1. In the dashboard, choose **Add new item**.
-2. Upload `dist/quiet-browse-0.5.6.zip`.
-3. Confirm the dashboard identifies Manifest V3 and version 0.5.6.
+2. Upload `dist/quiet-browse-0.5.7.zip`.
+3. Confirm the dashboard identifies Manifest V3 and version 0.5.7.
 4. Do not upload the source repository ZIP. The Web Store package must have `manifest.json` at its root.
 
 ## Phase 9 — Store Listing tab
@@ -256,7 +256,7 @@ Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTT
 ## Phase 12 — submit safely
 
 1. Review every dashboard tab for warnings.
-2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 0.5.6.
+2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 0.5.7.
 3. Choose **Submit for Review**.
 4. Disable automatic publication so approval produces a staged release.
 5. Monitor the verified publisher email.

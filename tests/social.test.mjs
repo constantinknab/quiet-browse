@@ -4,6 +4,9 @@ import assert from 'node:assert/strict';
 await import('../extension/content/social.js');
 const { platform, routeFor, routeCategories, categoryForLink } = globalThis.QuietBrowseSocial;
 
+// Route classification is tested separately from live DOM selectors so messages
+// and direct links cannot accidentally become part of a scrollable-feed rule.
+
 test('supported social hosts and routes preserve messages and direct items', () => {
   assert.equal(platform('www.instagram.com'), 'instagram');
   assert.equal(platform('www.facebook.com'), 'facebook');

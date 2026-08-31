@@ -51,7 +51,13 @@ def marquee():
     draw.rounded_rectangle((34, 34, 1366, 526), radius=46, outline="#C9D5C8", width=3)
     draw.ellipse((1010, -160, 1500, 330), fill=COLORS["cream"])
     draw.text((90, 78), "QUIET BROWSE", font=font(22, True), fill=COLORS["brand"])
-    draw.multiline_text((86, 145), "Calmer pages.\nYour choices intact.", font=font(62, True), fill=COLORS["text"], spacing=10)
+    draw.multiline_text(
+        (86, 145),
+        "Calmer pages.\nYour choices intact.",
+        font=font(62, True),
+        fill=COLORS["text"],
+        spacing=10,
+    )
     draw.text((90, 350), "Local-first controls for lower-stimulation browsing.", font=font(23), fill=COLORS["muted"])
     icon_card(image, (1045, 105, 1295, 355), 190)
     for text, x in [("Instant paging", 90), ("Adjustable grayscale", 318), ("Social controls", 610)]:

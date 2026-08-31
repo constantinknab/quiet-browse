@@ -1,13 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULTS, RECOMMENDED_SITES, cleanState, cleanSettings, defaultsForSite, isRecommendedSite, siteCategory, siteFromUrl, sitePattern, isYouTube, socialPlatform, registrationId } from '../extension/shared/settings.js';
+import {
+  DEFAULTS,
+  RECOMMENDED_SITES,
+  cleanState,
+  cleanSettings,
+  defaultsForSite,
+  isRecommendedSite,
+  siteCategory,
+  siteFromUrl,
+  sitePattern,
+  isYouTube,
+  socialPlatform,
+  registrationId,
+} from '../extension/shared/settings.js';
+
+// These cases document which URLs can become site scopes and which fields survive
+// settings cleanup before the extension stores or applies them.
 
 test('site scope discards paths, credentials, query strings, fragments, and ports', () => {
-  assert.equal(siteFromUrl('https://user:pass@example.com:8443/private?q=secret#private'), 'https://example.com');
+  assert.equal(
+    siteFromUrl('https://user:pass@example.com:8443/private?q=secret#private'),
+    'https://example.com',
+  );
   assert.equal(sitePattern('https://example.com'), 'https://example.com/*');
 });
 test('restricted and malformed URLs cannot become registrations', () => {
-  for (const url of ['chrome://settings', 'file:///tmp/x', 'data:text/html,hello', 'javascript:alert(1)', 'https://chromewebstore.google.com/detail/x', 'https://chrome.google.com/webstore', 'not a url']) assert.equal(siteFromUrl(url), null);
+  for (const url of [
+    'chrome://settings',
+    'file:///tmp/x',
+    'data:text/html,hello',
+    'javascript:alert(1)',
+    'https://chromewebstore.google.com/detail/x',
+    'https://chrome.google.com/webstore',
+    'not a url',
+  ])
+    assert.equal(siteFromUrl(url), null);
   assert.throws(() => sitePattern('https://example.com/private'));
 });
 test('YouTube host matching excludes lookalikes', () => {
@@ -35,22 +63,31 @@ test('social and recommended profiles are exact and use calmer defaults', () => 
   assert.equal(siteCategory('https://example.com'), 'other');
 });
 test('settings accept only known boolean flags', () => {
-  assert.deepEqual(cleanSettings({ motion: false, backgroundVideo: 'yes', remoteScript: 'https://evil.test' }), { ...DEFAULTS, motion: false });
+  assert.deepEqual(
+    cleanSettings({ motion: false, backgroundVideo: 'yes', remoteScript: 'https://evil.test' }),
+    { ...DEFAULTS, motion: false },
+  );
   assert.equal(cleanSettings({ youtubePictureCover: true }).youtubePictureCover, true);
   assert.equal(cleanSettings({ youtubePictureCover: 'yes' }).youtubePictureCover, false);
   assert.equal(cleanSettings({ socialSuggestions: false }).socialSuggestions, false);
   assert.equal(cleanSettings({ socialSuggestions: 'yes' }).socialSuggestions, true);
 });
 test('malformed stored scopes and account-like data are discarded', () => {
-  const state = cleanState({ sites: { 'https://example.com/private': { enabled: true }, 'https://example.com': { enabled: 1, settings: { motion: false }, token: 'secret' } }, history: ['private'] });
+  const state = cleanState({
+    sites: {
+      'https://example.com/private': { enabled: true },
+      'https://example.com': { enabled: 1, settings: { motion: false }, token: 'secret' },
+    },
+    history: ['private'],
+  });
   assert.deepEqual(Object.keys(state.sites), ['https://example.com']);
   assert.equal(state.sites['https://example.com'].enabled, false);
   assert.equal('token' in state.sites['https://example.com'], false);
   assert.equal('history' in state, false);
 });
 test('registration IDs are stable, distinct, and do not disclose hostnames', async () => {
-  const a = await registrationId('https://example.com');
-  assert.equal(a, await registrationId('https://example.com'));
-  assert.notEqual(a, await registrationId('http://example.com'));
-  assert.match(a, /^qb-[0-9a-f]{64}$/);
+  const registration = await registrationId('https://example.com');
+  assert.equal(registration, await registrationId('https://example.com'));
+  assert.notEqual(registration, await registrationId('http://example.com'));
+  assert.match(registration, /^qb-[0-9a-f]{64}$/);
 });

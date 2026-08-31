@@ -1,15 +1,81 @@
-html { color-scheme: light dark; font: 16px/1.5 system-ui, sans-serif; }
-body { margin: 0; }
-header { position: sticky; top: 0; z-index: 4; display: flex; gap: 20px; padding: 12px 20px; background: Canvas; border-bottom: 1px solid GrayText; }
-.content { max-width: 850px; margin: auto; padding: 20px; }
-nav ul { display: flex; flex-wrap: wrap; gap: 12px; padding: 0; list-style: none; }
-section, .promo-loop, .loading-loop { margin: 12px 0; padding: 14px; border: 1px solid GrayText; border-radius: 8px; }
-.promo-loop { animation: promo-pulse 1s infinite alternate; }
-.loading-loop { animation: loading-spin 1s infinite linear; }
-@keyframes promo-pulse { from { opacity: .55; } to { opacity: 1; } }
-@keyframes loading-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-#movie_player { position: relative; min-height: 80px; }
-.ytp-caption-window-container, .ytp-chrome-bottom { position: relative; z-index: 20; }
-.long-content { min-height: 180vh; padding-top: 30px; }
-.pass { color: #277568; }
-.fail { color: #b83d31; }
+/* Shared presentation for the cross-reload lifecycle fixtures. */
+html {
+  color-scheme: light dark;
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+}
+body {
+  margin: 0;
+}
+header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  gap: 20px;
+  padding: 12px 20px;
+  background: Canvas;
+  border-bottom: 1px solid GrayText;
+}
+.content {
+  max-width: 850px;
+  margin: auto;
+  padding: 20px;
+}
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+section,
+.promo-loop,
+.loading-loop {
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid GrayText;
+  border-radius: 8px;
+}
+.promo-loop {
+  animation: promo-pulse 1s infinite alternate;
+}
+.loading-loop {
+  animation: loading-spin 1s infinite linear;
+}
+@keyframes promo-pulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes loading-spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+#movie_player {
+  position: relative;
+  min-height: 80px;
+}
+.ytp-caption-window-container,
+.ytp-chrome-bottom {
+  position: relative;
+  z-index: 20;
+}
+.long-content {
+  min-height: 180vh;
+  padding-top: 30px;
+}
+.pass {
+  color: #277568;
+}
+.fail {
+  color: #b83d31;
+}

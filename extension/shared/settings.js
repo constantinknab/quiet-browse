@@ -1,5 +1,8 @@
+// Canonical settings schema shared by the service worker and extension pages.
+// Every stored or received value passes through these functions before use.
 import './comfort.js';
-export const { cleanGrayscale, cleanSchedule, grayscaleAt, settingAt } = globalThis.QuietBrowseComfort;
+export const { cleanGrayscale, cleanSchedule, grayscaleAt, settingAt } =
+  globalThis.QuietBrowseComfort;
 export const STATE_KEY = 'quietBrowseState';
 const BOOLEAN_DEFAULTS = Object.freeze({
   pageMode: false,
@@ -16,32 +19,100 @@ const BOOLEAN_DEFAULTS = Object.freeze({
   socialHomeFeed: true,
 });
 const EMPTY_SCHEDULE = Object.freeze({ scheduled: false, windows: Object.freeze([]) });
-const SOCIAL_SCHEDULE_DEFAULTS = Object.freeze(Object.fromEntries(
-  ['socialStories', 'socialSuggestions', 'socialShortVideo', 'socialExplore', 'socialHomeFeed'].map(key => [key, EMPTY_SCHEDULE])));
+const SOCIAL_SCHEDULE_DEFAULTS = Object.freeze(
+  Object.fromEntries(
+    [
+      'socialStories',
+      'socialSuggestions',
+      'socialShortVideo',
+      'socialExplore',
+      'socialHomeFeed',
+    ].map((key) => [key, EMPTY_SCHEDULE]),
+  ),
+);
 export const DEFAULTS = Object.freeze({
   ...BOOLEAN_DEFAULTS,
-  grayscale: Object.freeze({ enabled: false, level: 100, scheduled: false, windows: Object.freeze([]) }),
+  grayscale: Object.freeze({
+    enabled: false,
+    level: 100,
+    scheduled: false,
+    windows: Object.freeze([]),
+  }),
   socialSchedules: SOCIAL_SCHEDULE_DEFAULTS,
 });
 
 export const FEATURES = Object.freeze([
-  { key: 'pageMode', label: 'Instant page-by-page navigation', detail: 'Arrows or one scroll gesture move one screen, without a scrolling transition.' },
-  { key: 'motion', label: 'Pause decorative loops', detail: 'Keeps loading, status, and interaction animations running.' },
-  { key: 'consentChoices', label: 'Clarify cookie choices', detail: 'Emphasizes existing accept and reject controls equally. Never clicks them.' },
-  { key: 'backgroundVideo', label: 'Pause background autoplay', detail: 'Only muted, autoplay videos without controls. Adds native play controls. Excludes YouTube.' },
-  { key: 'youtubeQuiet', label: 'Quiet YouTube previews', detail: 'Hides supported hover-preview surfaces and ambient background effects.' },
-  { key: 'youtubeRecommendations', label: 'Collapse YouTube recommendations', detail: 'Adds a Show recommendations button. Keeps the original links.' },
-  { key: 'youtubePictureCover', label: 'Keep YouTube video picture hidden', detail: 'Covers watch-video pictures after reloads and video changes. Audio, controls, captions, ads, and picture-in-picture remain available.' },
+  {
+    key: 'pageMode',
+    label: 'Instant page-by-page navigation',
+    detail: 'Arrows or one scroll gesture move one screen, without a scrolling transition.',
+  },
+  {
+    key: 'motion',
+    label: 'Pause decorative loops',
+    detail: 'Keeps loading, status, and interaction animations running.',
+  },
+  {
+    key: 'consentChoices',
+    label: 'Clarify cookie choices',
+    detail: 'Emphasizes existing accept and reject controls equally. Never clicks them.',
+  },
+  {
+    key: 'backgroundVideo',
+    label: 'Pause background autoplay',
+    detail:
+      'Only muted, autoplay videos without controls. Adds native play controls. Excludes YouTube.',
+  },
+  {
+    key: 'youtubeQuiet',
+    label: 'Quiet YouTube previews',
+    detail: 'Hides supported hover-preview surfaces and ambient background effects.',
+  },
+  {
+    key: 'youtubeRecommendations',
+    label: 'Collapse YouTube recommendations',
+    detail: 'Adds a Show recommendations button. Keeps the original links.',
+  },
+  {
+    key: 'youtubePictureCover',
+    label: 'Keep YouTube video picture hidden',
+    detail:
+      'Covers watch-video pictures after reloads and video changes. Audio, controls, captions, ads, and picture-in-picture remain available.',
+  },
 ]);
 
 export const SOCIAL_FEATURES = Object.freeze([
-  { key: 'socialStories', label: 'Hide Stories', detail: 'Removes supported Stories trays and navigation. Direct links and messages remain available.' },
-  { key: 'socialSuggestions', label: 'Hide follow recommendations', detail: 'Removes supported suggested-account modules from home pages without hiding followed posts, profiles, or messages.' },
-  { key: 'socialShortVideo', label: 'Hide short-video feeds and tabs', detail: "Removes supported Reels, Watch, and TikTok's landing, For You, Following, and Live streams. A direct video link still opens." },
-  { key: 'socialExplore', label: 'Hide Explore and Discover', detail: 'Removes supported discovery tabs and feeds without disabling search, profiles, or messages.' },
-  { key: 'socialHomeFeed', label: 'Hide the home feed', detail: 'Keeps navigation and messages while removing the supported infinite home feed.' },
+  {
+    key: 'socialStories',
+    label: 'Hide Stories',
+    detail:
+      'Removes supported Stories trays and navigation. Direct links and messages remain available.',
+  },
+  {
+    key: 'socialSuggestions',
+    label: 'Hide follow recommendations',
+    detail:
+      'Removes supported suggested-account modules from home pages without hiding followed posts, profiles, or messages.',
+  },
+  {
+    key: 'socialShortVideo',
+    label: 'Hide short-video feeds and tabs',
+    detail:
+      "Removes supported Reels, Watch, and TikTok's landing, For You, Following, and Live streams. A direct video link still opens.",
+  },
+  {
+    key: 'socialExplore',
+    label: 'Hide Explore and Discover',
+    detail:
+      'Removes supported discovery tabs and feeds without disabling search, profiles, or messages.',
+  },
+  {
+    key: 'socialHomeFeed',
+    label: 'Hide the home feed',
+    detail: 'Keeps navigation and messages while removing the supported infinite home feed.',
+  },
 ]);
-export const SOCIAL_SCHEDULE_KEYS = Object.freeze(SOCIAL_FEATURES.map(feature => feature.key));
+export const SOCIAL_SCHEDULE_KEYS = Object.freeze(SOCIAL_FEATURES.map((feature) => feature.key));
 
 export const RECOMMENDED_VERSION = 2;
 export const RECOMMENDED_SITES = Object.freeze([
@@ -65,7 +136,9 @@ export function siteFromUrl(input) {
     if (!['http:', 'https:'].includes(url.protocol)) return null;
     if (['chromewebstore.google.com', 'chrome.google.com'].includes(url.hostname)) return null;
     return `${url.protocol}//${url.hostname}`;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function isValidSite(site) {
@@ -79,10 +152,16 @@ export function sitePattern(site) {
 
 export function cleanSettings(value = {}) {
   return {
-    ...Object.fromEntries(Object.entries(BOOLEAN_DEFAULTS).map(([key, fallback]) =>
-      [key, typeof value?.[key] === 'boolean' ? value[key] : fallback])),
+    ...Object.fromEntries(
+      Object.entries(BOOLEAN_DEFAULTS).map(([key, fallback]) => [
+        key,
+        typeof value?.[key] === 'boolean' ? value[key] : fallback,
+      ]),
+    ),
     grayscale: cleanGrayscale(value?.grayscale),
-    socialSchedules: Object.fromEntries(SOCIAL_SCHEDULE_KEYS.map(key => [key, cleanSchedule(value?.socialSchedules?.[key])])),
+    socialSchedules: Object.fromEntries(
+      SOCIAL_SCHEDULE_KEYS.map((key) => [key, cleanSchedule(value?.socialSchedules?.[key])]),
+    ),
   };
 }
 
@@ -93,13 +172,21 @@ export function cleanState(value) {
       sites[site] = { enabled: config.enabled === true, settings: cleanSettings(config.settings) };
     }
   }
-  return { version: 4, recommendedVersion: Number.isInteger(value?.recommendedVersion) ? Math.max(0, value.recommendedVersion) : 0, sites };
+  return {
+    version: 4,
+    recommendedVersion: Number.isInteger(value?.recommendedVersion)
+      ? Math.max(0, value.recommendedVersion)
+      : 0,
+    sites,
+  };
 }
 
 export function isYouTube(site) {
   try {
     return ['www.youtube.com', 'youtube.com', 'm.youtube.com'].includes(new URL(site).hostname);
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 export function socialPlatform(site) {
@@ -108,16 +195,18 @@ export function socialPlatform(site) {
     if (host === 'instagram.com') return 'Instagram';
     if (host === 'facebook.com') return 'Facebook';
     if (host === 'tiktok.com') return 'TikTok';
-  } catch { /* Unsupported input. */ }
+  } catch {
+    /* Unsupported input. */
+  }
   return null;
 }
 
 export function isRecommendedSite(site) {
-  return RECOMMENDED_SITES.some(entry => entry.site === site);
+  return RECOMMENDED_SITES.some((entry) => entry.site === site);
 }
 
 export function siteCategory(site) {
-  const kind = RECOMMENDED_SITES.find(entry => entry.site === site)?.kind;
+  const kind = RECOMMENDED_SITES.find((entry) => entry.site === site)?.kind;
   if (kind === 'social' || socialPlatform(site)) return 'social';
   if (kind === 'shopping') return 'ecommerce';
   return 'other';
@@ -125,16 +214,24 @@ export function siteCategory(site) {
 
 export function defaultsForSite(site) {
   const settings = cleanSettings();
-  const profile = RECOMMENDED_SITES.find(entry => entry.site === site);
+  const profile = RECOMMENDED_SITES.find((entry) => entry.site === site);
   if (!socialPlatform(site)) {
     for (const feature of SOCIAL_FEATURES) settings[feature.key] = false;
   }
   settings.backgroundVideo = !!profile;
-  if (profile?.kind === 'shopping') settings.grayscale = cleanGrayscale({ enabled: true, level: 20, scheduled: false, windows: [] });
+  if (profile?.kind === 'shopping')
+    settings.grayscale = cleanGrayscale({
+      enabled: true,
+      level: 20,
+      scheduled: false,
+      windows: [],
+    });
   return settings;
 }
 
 export async function registrationId(site) {
   const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(site));
-  return `qb-${Array.from(new Uint8Array(hash)).map(x => x.toString(16).padStart(2, '0')).join('')}`;
+  return `qb-${Array.from(new Uint8Array(hash))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')}`;
 }

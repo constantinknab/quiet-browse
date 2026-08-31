@@ -1,7 +1,67 @@
-<!doctype html><html lang="en"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quiet Browse · Local compatibility lab</title><link rel="stylesheet" href="/extension/ui/styles.css"><link rel="stylesheet" href="fixture.css"><link rel="stylesheet" href="/extension/content/presentation.css"></head>
-<body class="document"><header><p class="eyebrow">LOCAL COMPATIBILITY LAB</p><h1>Calmer, still functional.</h1><p>This page contains deliberately simplified fixtures, not live accounts or real consent requests. To try the installed extension, enable it on this host using its Chrome toolbar button.</p></header>
-<main><h2>Decorative motion vs. useful status</h2><div class="samples"><button class="promo-pulse" id="promo" type="button">Promotional pulse</button><span id="spinner" role="status" aria-label="Loading example">◌ Loading…</span><span id="finite">Finite entrance animation</span></div>
-<h2>Cookie choices</h2><section id="cookie-banner" role="dialog" aria-label="Sample cookie choices"><p>This sample uses cookies. Choose either action: no cookie will actually be set.</p><button id="accept" class="fake-accept" type="button">Accept all</button><button id="reject" class="fake-reject" type="button">Reject all</button></section><p id="clicks">Consent actions clicked: 0</p>
-<h2>Keep your work intact</h2><label for="draft">An unfinished note</label><textarea id="draft" rows="3">Keep this unfinished note.</textarea><section role="dialog" id="security"><p>Security notice. This is not a cookie prompt.</p><button type="button">Accept all</button><button type="button">Reject all</button></section>
-<h2>Optional background autoplay</h2><video id="background" autoplay muted playsinline aria-label="Locally generated sample video"></video><button id="start-video" type="button">Start local sample video</button><p>This is a generated canvas stream. It uses no camera, microphone, remote video, or account.</p>
-<h2 id="results-title">Test results</h2><p id="test-status" role="status">Manual fixture. Automated tests run only on the separate test URL.</p><ol id="results"></ol></main><script src="fixture.js"></script></body></html>
+<!doctype html>
+<!-- Index of local browser fixtures used during manual extension verification. -->
+<html lang="en">
+  <head>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:"
+    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quiet Browse · Local compatibility lab</title>
+    <link rel="stylesheet" href="/extension/ui/styles.css" />
+    <link rel="stylesheet" href="fixture.css" />
+    <link rel="stylesheet" href="/extension/content/presentation.css" />
+  </head>
+  <body class="document">
+    <header>
+      <p class="eyebrow">LOCAL COMPATIBILITY LAB</p>
+      <h1>Calmer, still functional.</h1>
+      <p>
+        This page contains deliberately simplified fixtures, not live accounts or real consent
+        requests. To try the installed extension, enable it on this host using its Chrome toolbar
+        button.
+      </p>
+    </header>
+    <main>
+      <h2>Decorative motion vs. useful status</h2>
+      <div class="samples">
+        <button class="promo-pulse" id="promo" type="button">Promotional pulse</button
+        ><span id="spinner" role="status" aria-label="Loading example">◌ Loading…</span
+        ><span id="finite">Finite entrance animation</span>
+      </div>
+      <h2>Cookie choices</h2>
+      <section id="cookie-banner" role="dialog" aria-label="Sample cookie choices">
+        <p>This sample uses cookies. Choose either action: no cookie will actually be set.</p>
+        <button id="accept" class="fake-accept" type="button">Accept all</button
+        ><button id="reject" class="fake-reject" type="button">Reject all</button>
+      </section>
+      <p id="clicks">Consent actions clicked: 0</p>
+      <h2>Keep your work intact</h2>
+      <label for="draft">An unfinished note</label
+      ><textarea id="draft" rows="3">Keep this unfinished note.</textarea>
+      <section role="dialog" id="security">
+        <p>Security notice. This is not a cookie prompt.</p>
+        <button type="button">Accept all</button><button type="button">Reject all</button>
+      </section>
+      <h2>Optional background autoplay</h2>
+      <video
+        id="background"
+        autoplay
+        muted
+        playsinline
+        aria-label="Locally generated sample video"
+      ></video
+      ><button id="start-video" type="button">Start local sample video</button>
+      <p>
+        This is a generated canvas stream. It uses no camera, microphone, remote video, or account.
+      </p>
+      <h2 id="results-title">Test results</h2>
+      <p id="test-status" role="status">
+        Manual fixture. Automated tests run only on the separate test URL.
+      </p>
+      <ol id="results"></ol>
+    </main>
+    <script src="fixture.js"></script>
+  </body>
+</html>

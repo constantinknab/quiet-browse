@@ -1,31 +1,118 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quiet Browse — Sites & privacy</title><link rel="stylesheet" href="styles.css"></head>
-<body class="document"><main>
-<p class="eyebrow">QUIET BROWSE SETTINGS</p><h1>Sites, schedules, and privacy</h1>
-<p class="muted">Built-in profiles are grouped below. Ecommerce profiles begin at 20% grayscale. Open a category, then open one site to change its grayscale and social-surface schedules together.</p>
+<!doctype html>
+<!-- Options-page structure. options.js owns behavior; this document contains no inline code. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quiet Browse — Sites & privacy</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="document">
+    <main>
+      <p class="eyebrow">QUIET BROWSE SETTINGS</p>
+      <h1>Sites, schedules, and privacy</h1>
+      <p class="muted">
+        Built-in profiles are grouped below. Ecommerce profiles begin at 20% grayscale. Open a
+        category, then open one site to change its grayscale and social-surface schedules together.
+      </p>
 
-<section aria-labelledby="sites-title"><h2 id="sites-title">Website categories</h2><div id="site-categories"></div><p id="site-message" class="message" role="status"></p></section>
+      <section aria-labelledby="sites-title">
+        <h2 id="sites-title">Website categories</h2>
+        <div id="site-categories"></div>
+        <p id="site-message" class="message" role="status"></p>
+      </section>
 
-<section id="adult-guard" aria-labelledby="adult-title"><p class="eyebrow">OPTIONAL LOCAL BLOCKER</p><h2 id="adult-title">Quit Porn</h2>
-<p class="muted">Blocks top-level navigation to a small packaged starter set, your additions, and any regional community lists you select. Lists update about weekly and remain below 2,000 installed domains each. Coverage labels describe the audience a preset is meant to help; they do not claim where a domain or server is located.</p>
-<div id="adult-off">
-  <div id="adult-source-options-off" class="source-options" aria-label="Community adult lists"></div>
-  <label class="field">Additional domains (optional)<textarea id="adult-domains" rows="4" placeholder="example.com&#10;another.example"></textarea></label>
-  <label class="field">Protection password (optional, 8–128 characters)<input id="adult-password" type="password" minlength="8" maxlength="128" autocomplete="new-password"></label>
-  <p class="muted">Give the password to a trusted person if you want changes to require their help. Quiet Browse stores a salted PBKDF2 hash, never the plaintext password. This is friction, not tamper-proof parental control.</p>
-  <button id="adult-enable" class="primary" type="button">Turn on Quit Porn</button>
-</div>
-<div id="adult-on" hidden>
-  <p id="adult-status" class="notice"></p>
-  <div id="adult-source-options-on" class="source-options" aria-label="Active community adult lists"></div>
-  <label id="adult-current-label" class="field">Current protection password<input id="adult-current-password" type="password" maxlength="128" autocomplete="current-password"></label>
-  <div class="button-row"><button id="adult-apply-sources" type="button">Apply selected lists</button><button id="adult-refresh" type="button">Update lists now</button></div>
-  <label class="field">Additional domains<textarea id="adult-active-domains" rows="4"></textarea></label>
-  <div class="button-row"><button id="adult-save" type="button">Save additional domains</button><button id="adult-disable" class="danger" type="button">Turn off Quit Porn</button></div>
-</div>
-<p id="adult-message" class="message" role="status"></p>
-</section>
+      <section id="adult-guard" aria-labelledby="adult-title">
+        <p class="eyebrow">OPTIONAL LOCAL BLOCKER</p>
+        <h2 id="adult-title">Quit Porn</h2>
+        <p class="muted">
+          Blocks top-level navigation to a small packaged starter set, your additions, and any
+          regional community lists you select. Lists update about weekly and remain below 2,000
+          installed domains each. Coverage labels describe the audience a preset is meant to help;
+          they do not claim where a domain or server is located.
+        </p>
+        <div id="adult-off">
+          <div
+            id="adult-source-options-off"
+            class="source-options"
+            aria-label="Community adult lists"
+          ></div>
+          <label class="field"
+            >Additional domains (optional)<textarea
+              id="adult-domains"
+              rows="4"
+              placeholder="example.com&#10;another.example"
+            ></textarea>
+          </label>
+          <label class="field"
+            >Protection password (optional, 8–128 characters)<input
+              id="adult-password"
+              type="password"
+              minlength="8"
+              maxlength="128"
+              autocomplete="new-password"
+          /></label>
+          <p class="muted">
+            Give the password to a trusted person if you want changes to require their help. Quiet
+            Browse stores a salted PBKDF2 hash, never the plaintext password. This is friction, not
+            tamper-proof parental control.
+          </p>
+          <button id="adult-enable" class="primary" type="button">Turn on Quit Porn</button>
+        </div>
+        <div id="adult-on" hidden>
+          <p id="adult-status" class="notice"></p>
+          <div
+            id="adult-source-options-on"
+            class="source-options"
+            aria-label="Active community adult lists"
+          ></div>
+          <label id="adult-current-label" class="field"
+            >Current protection password<input
+              id="adult-current-password"
+              type="password"
+              maxlength="128"
+              autocomplete="current-password"
+          /></label>
+          <div class="button-row">
+            <button id="adult-apply-sources" type="button">Apply selected lists</button
+            ><button id="adult-refresh" type="button">Update lists now</button>
+          </div>
+          <label class="field"
+            >Additional domains<textarea id="adult-active-domains" rows="4"></textarea>
+          </label>
+          <div class="button-row">
+            <button id="adult-save" type="button">Save additional domains</button
+            ><button id="adult-disable" class="danger" type="button">Turn off Quit Porn</button>
+          </div>
+        </div>
+        <p id="adult-message" class="message" role="status"></p>
+      </section>
 
-<section><h2>Reset</h2><p class="muted">Deletes all saved site preferences, schedules, blocker data, dynamic rules, and optional host access. Built-in host declarations remain part of the installed extension and are restored with their defaults after reinstall.</p><button id="reset" class="danger" type="button">Delete all Quiet Browse settings</button><p id="reset-message" class="message" role="status"></p></section>
+      <section>
+        <h2>Reset</h2>
+        <p class="muted">
+          Deletes all saved site preferences, schedules, blocker data, dynamic rules, and optional
+          host access. Built-in host declarations remain part of the installed extension and are
+          restored with their defaults after reinstall.
+        </p>
+        <button id="reset" class="danger" type="button">Delete all Quiet Browse settings</button>
+        <p id="reset-message" class="message" role="status"></p>
+      </section>
 
-<section><h2>Privacy without an account</h2><p>Quiet Browse inspects page structure locally. It stores chosen hostnames, feature preferences, grayscale and social-surface schedules, and adult-list update status in Chrome’s local extension storage. There is no analytics, browsing-history log, cloud AI, cookie access, or video capture.</p><p>The only extension-initiated external requests are the regional list downloads you explicitly select. <a href="privacy.html">Read the full privacy disclosure</a>.</p></section>
-</main><script type="module" src="options.js"></script></body></html>
+      <section>
+        <h2>Privacy without an account</h2>
+        <p>
+          Quiet Browse inspects page structure locally. It stores chosen hostnames, feature
+          preferences, grayscale and social-surface schedules, and adult-list update status in
+          Chrome’s local extension storage. There is no analytics, browsing-history log, cloud AI,
+          cookie access, or video capture.
+        </p>
+        <p>
+          The only extension-initiated external requests are the regional list downloads you
+          explicitly select. <a href="privacy.html">Read the full privacy disclosure</a>.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

@@ -1,11 +1,60 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:"><title>Quiet Browse · Paging and grayscale fixture</title><link rel="stylesheet" href="comfort.css"><link rel="stylesheet" href="/extension/content/presentation.css"></head>
-<body><header id="fixed-header"><strong>Quiet Browse — paging and grayscale lab</strong><span id="test-status" role="status">Running checks…</span></header>
-<main><h1>Instant screens. Less color.</h1><p id="intro">Local test fixture with simulated Chrome APIs. This checks real DOM behavior, not a live Chrome extension installation.</p>
-<div class="swatches" aria-label="Color samples"><span class="red">Red</span><span class="green">Green</span><span class="blue">Blue</span></div>
-<div id="panel" class="panel" tabindex="0" aria-label="Scrollable panel"><div class="sticky">Sticky panel heading</div><div id="panel-content"><p>A nested scrollable panel. Click inside, then use the arrows.</p><p>Its scroll boundary does not move the outside page.</p><p class="panel-end">End of panel</p></div></div>
-<label for="memo">Unfinished note — should stay intact</label><textarea id="memo">Keep this note.</textarea>
-<button id="ordinary-button" type="button">Ordinary button</button><p id="ordinary-count">Button clicks: 0</p>
-<section class="long-content"><h2>Long document</h2><p>Page arrows move instantly with a small overlap. Native text and media controls keep their own behavior.</p><p class="middle">Middle of document</p><p class="end">End of document</p></section>
-<h2>Test results</h2><ol id="results"></ol></main>
-<script src="harness.js"></script><script src="/extension/shared/comfort.js"></script><script src="/extension/content/comfort.js"></script><script src="/extension/content/social.js"></script><script src="/extension/content/engine.js"></script><script src="comfort-tests.js"></script></body></html>
+<!-- Local browser fixture for instant paging and grayscale. Never shipped in the extension ZIP. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:"
+    />
+    <title>Quiet Browse · Paging and grayscale fixture</title>
+    <link rel="stylesheet" href="comfort.css" />
+    <link rel="stylesheet" href="/extension/content/presentation.css" />
+  </head>
+  <body>
+    <header id="fixed-header">
+      <strong>Quiet Browse — paging and grayscale lab</strong
+      ><span id="test-status" role="status">Running checks…</span>
+    </header>
+    <main>
+      <h1>Instant screens. Less color.</h1>
+      <p id="intro">
+        Local test fixture with simulated Chrome APIs. This checks real DOM behavior, not a live
+        Chrome extension installation.
+      </p>
+      <div class="swatches" aria-label="Color samples">
+        <span class="red">Red</span><span class="green">Green</span><span class="blue">Blue</span>
+      </div>
+      <div id="panel" class="panel" tabindex="0" aria-label="Scrollable panel">
+        <div class="sticky">Sticky panel heading</div>
+        <div id="panel-content">
+          <p>A nested scrollable panel. Click inside, then use the arrows.</p>
+          <p>Its scroll boundary does not move the outside page.</p>
+          <p class="panel-end">End of panel</p>
+        </div>
+      </div>
+      <label for="memo">Unfinished note — should stay intact</label
+      ><textarea id="memo">Keep this note.</textarea>
+      <button id="ordinary-button" type="button">Ordinary button</button>
+      <p id="ordinary-count">Button clicks: 0</p>
+      <section class="long-content">
+        <h2>Long document</h2>
+        <p>
+          Page arrows move instantly with a small overlap. Native text and media controls keep their
+          own behavior.
+        </p>
+        <p class="middle">Middle of document</p>
+        <p class="end">End of document</p>
+      </section>
+      <h2>Test results</h2>
+      <ol id="results"></ol>
+    </main>
+    <script src="harness.js"></script>
+    <script src="/extension/shared/comfort.js"></script>
+    <script src="/extension/content/comfort.js"></script>
+    <script src="/extension/content/social.js"></script>
+    <script src="/extension/content/engine.js"></script>
+    <script src="comfort-tests.js"></script>
+  </body>
+</html>

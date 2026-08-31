@@ -1,29 +1,147 @@
 <!doctype html>
+<!-- Public privacy policy for the release identified in the page content. -->
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Privacy policy for the Quiet Browse Chrome extension.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
-  <title>Privacy policy — Quiet Browse</title>
-  <link rel="icon" href="icon128.png">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <header><nav class="shell" aria-label="Main navigation"><a class="brand" href="index.html"><img src="icon128.png" alt=""><span>Quiet Browse</span></a><div class="nav-links"><a aria-current="page" href="privacy.html">Privacy</a><a href="support.html">Support</a></div></nav></header>
-  <main class="document">
-    <p class="eyebrow">Quiet Browse · Version 0.5.6</p><h1>Privacy policy</h1><p class="meta">Effective August 31, 2026 · Publisher: Constantin Knab · Contact: <a href="https://github.com/constantinknab/quiet-browse/issues">Quiet Browse support</a></p>
-    <h2>Purpose</h2><p>Quiet Browse reduces high-stimulation browsing through reversible presentation controls, social-feed controls, instant paging, optional grayscale by local time, and an optional local adult-site blocker. Built-in profiles operate on the disclosed social and shopping hosts; other presentation profiles operate only after the user authorizes them.</p>
-    <h2>Information processed on the device</h2><p>The extension uses the current page's host, document structure, limited static labels and text in candidate cookie dialogs, CSS animation properties, and media playback state to provide its visible features. It does not intentionally read form values, website passwords, payment details, or editable content. It does not inspect browser cookies, network-response bodies, or the Chrome history database.</p><p>Website access could technically expose sensitive page content. The extension code limits its use to the features described here. Page content is not transmitted to or saved by the publisher.</p>
-    <h2>Information stored</h2><p>Chrome's local extension storage holds enabled HTTP or HTTPS hostnames, feature preferences, grayscale and social-control schedules, and adult-list update status. If the adult-site blocker is enabled, local storage also holds its state, additional domain names, selected regional sources, update timestamps, and short failure statuses. If an optional protection password is chosen, the extension stores a random salt, an iteration count, and a PBKDF2-SHA-256 hash. It does not store the plaintext password.</p><p>Chrome locally persists active navigation-blocking rules so they survive a browser restart. Full page URLs, query strings, search terms, page text, video frames, recordings, website credentials, plaintext passwords, blocked-visit events, and chronological browsing history are not stored. Settings do not use Chrome Sync.</p>
-    <h2>Request blocking</h2><p>When the adult-site blocker is on, Chrome compares top-level navigation requests with a packaged starter list, any hostnames added by the user, and the last successfully downloaded snapshots of selected regional lists. Chrome blocks a match before navigation. The extension does not receive, record, redirect, or transmit the matched address. These rules do not filter advertisements or subresources and cannot cover every adult domain.</p>
-    <h2>Remote services and sharing</h2><p>The extension has no analytics, advertising SDK, publisher server, cloud model, or remote executable code. When the user selects a regional list and separately grants access, the background worker sends an HTTPS request now and about weekly to a fixed address on <code>raw.githubusercontent.com</code>. The request sends no browsing history, matches, page content, settings, added domains, or password. GitHub and its infrastructure can receive ordinary connection information such as IP address, request time, user agent, and technical logs under their own policies. Deselected sources are not requested.</p><p>Responses are treated only as untrusted domain-list data. Quiet Browse uses fixed parsers, rejects malformed or oversized responses, filters selected critical domains, and caps each source below 2,000 installed domains. The independent sources are <a href="https://github.com/jarelllama/Scam-Blocklist#nsfw-blocklist">Jarelllama's Tranco-derived NSFW list</a> (GPL-3.0) and <a href="https://github.com/v2fly/domain-list-community">V2Fly domain-list-community</a> (MIT). Coverage labels describe intended audiences, not server locations. The sources are not complete or cryptographically signed by this extension's publisher.</p>
-    <h2>Website hosting</h2><p>This informational website uses no analytics, advertising, account system, or contact form. It is hosted by GitHub Pages. GitHub may receive connection and technical-log information when a visitor loads the site under <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub's privacy statement</a>. Support requests use GitHub Issues and are subject to GitHub's privacy practices; users should not include private page content or account information.</p>
-    <h2>User controls and deletion</h2><p>Users can remove one profile or use the reset control to delete all extension settings and revoke optional host access. Required access to disclosed built-in hosts remains part of the installed manifest, but an inactive or removed profile does not register the page engine. Chrome also lets users disable or uninstall the extension or clear its storage.</p>
-    <h2>Limited Use</h2><p>The use of information received from Google APIs will adhere to the Chrome Web Store User Data Policy, including the Limited Use requirements. Quiet Browse uses locally handled data only to provide or improve its disclosed user-facing features. The publisher does not sell it, use it for advertising or credit decisions, transfer it to data brokers, or permit humans to read it.</p>
-    <h2>Children, adult content, and limits</h2><p>The adult-site blocker is an optional browsing-friction tool. It does not display or direct users to explicit material. It is not age verification, guaranteed content detection, or a tamper-proof parental-control boundary. The extension and website contain no explicit imagery.</p>
-    <h2>Changes and contact</h2><p>A future change that adds data collection or another external service requires updated disclosures and appropriate consent before that behavior begins. Questions can be submitted through <a href="https://github.com/constantinknab/quiet-browse/issues">Quiet Browse support</a>.</p>
-  </main>
-  <footer><div class="shell"><p>© 2026 Constantin Knab.</p><p><a href="index.html">Home</a> · <a href="support.html">Support</a></p></div></footer>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Privacy policy for the Quiet Browse Chrome extension." />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+    />
+    <title>Privacy policy — Quiet Browse</title>
+    <link rel="icon" href="icon128.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav class="shell" aria-label="Main navigation">
+        <a class="brand" href="index.html"
+          ><img src="icon128.png" alt="" /><span>Quiet Browse</span></a
+        >
+        <div class="nav-links">
+          <a aria-current="page" href="privacy.html">Privacy</a><a href="support.html">Support</a>
+        </div>
+      </nav>
+    </header>
+    <main class="document">
+      <p class="eyebrow">Quiet Browse · Version 0.5.7</p>
+      <h1>Privacy policy</h1>
+      <p class="meta">
+        Effective August 31, 2026 · Publisher: Constantin Knab · Contact:
+        <a href="https://github.com/constantinknab/quiet-browse/issues">Quiet Browse support</a>
+      </p>
+      <h2>Purpose</h2>
+      <p>
+        Quiet Browse reduces high-stimulation browsing through reversible presentation controls,
+        social-feed controls, instant paging, optional grayscale by local time, and an optional
+        local adult-site blocker. Built-in profiles operate on the disclosed social and shopping
+        hosts; other presentation profiles operate only after the user authorizes them.
+      </p>
+      <h2>Information processed on the device</h2>
+      <p>
+        The extension uses the current page's host, document structure, limited static labels and
+        text in candidate cookie dialogs, CSS animation properties, and media playback state to
+        provide its visible features. It does not intentionally read form values, website passwords,
+        payment details, or editable content. It does not inspect browser cookies, network-response
+        bodies, or the Chrome history database.
+      </p>
+      <p>
+        Website access could technically expose sensitive page content. The extension code limits
+        its use to the features described here. Page content is not transmitted to or saved by the
+        publisher.
+      </p>
+      <h2>Information stored</h2>
+      <p>
+        Chrome's local extension storage holds enabled HTTP or HTTPS hostnames, feature preferences,
+        grayscale and social-control schedules, and adult-list update status. If the adult-site
+        blocker is enabled, local storage also holds its state, additional domain names, selected
+        regional sources, update timestamps, and short failure statuses. If an optional protection
+        password is chosen, the extension stores a random salt, an iteration count, and a
+        PBKDF2-SHA-256 hash. It does not store the plaintext password.
+      </p>
+      <p>
+        Chrome locally persists active navigation-blocking rules so they survive a browser restart.
+        Full page URLs, query strings, search terms, page text, video frames, recordings, website
+        credentials, plaintext passwords, blocked-visit events, and chronological browsing history
+        are not stored. Settings do not use Chrome Sync.
+      </p>
+      <h2>Request blocking</h2>
+      <p>
+        When the adult-site blocker is on, Chrome compares top-level navigation requests with a
+        packaged starter list, any hostnames added by the user, and the last successfully downloaded
+        snapshots of selected regional lists. Chrome blocks a match before navigation. The extension
+        does not receive, record, redirect, or transmit the matched address. These rules do not
+        filter advertisements or subresources and cannot cover every adult domain.
+      </p>
+      <h2>Remote services and sharing</h2>
+      <p>
+        The extension has no analytics, advertising SDK, publisher server, cloud model, or remote
+        executable code. When the user selects a regional list and separately grants access, the
+        background worker sends an HTTPS request now and about weekly to a fixed address on
+        <code>raw.githubusercontent.com</code>. The request sends no browsing history, matches, page
+        content, settings, added domains, or password. GitHub and its infrastructure can receive
+        ordinary connection information such as IP address, request time, user agent, and technical
+        logs under their own policies. Deselected sources are not requested.
+      </p>
+      <p>
+        Responses are treated only as untrusted domain-list data. Quiet Browse uses fixed parsers,
+        rejects malformed or oversized responses, filters selected critical domains, and caps each
+        source below 2,000 installed domains. The independent sources are
+        <a href="https://github.com/jarelllama/Scam-Blocklist#nsfw-blocklist"
+          >Jarelllama's Tranco-derived NSFW list</a
+        >
+        (GPL-3.0) and
+        <a href="https://github.com/v2fly/domain-list-community">V2Fly domain-list-community</a>
+        (MIT). Coverage labels describe intended audiences, not server locations. The sources are
+        not complete or cryptographically signed by this extension's publisher.
+      </p>
+      <h2>Website hosting</h2>
+      <p>
+        This informational website uses no analytics, advertising, account system, or contact form.
+        It is hosted by GitHub Pages. GitHub may receive connection and technical-log information
+        when a visitor loads the site under
+        <a
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement"
+          >GitHub's privacy statement</a
+        >. Support requests use GitHub Issues and are subject to GitHub's privacy practices; users
+        should not include private page content or account information.
+      </p>
+      <h2>User controls and deletion</h2>
+      <p>
+        Users can remove one profile or use the reset control to delete all extension settings and
+        revoke optional host access. Required access to disclosed built-in hosts remains part of the
+        installed manifest, but an inactive or removed profile does not register the page engine.
+        Chrome also lets users disable or uninstall the extension or clear its storage.
+      </p>
+      <h2>Limited Use</h2>
+      <p>
+        The use of information received from Google APIs will adhere to the Chrome Web Store User
+        Data Policy, including the Limited Use requirements. Quiet Browse uses locally handled data
+        only to provide or improve its disclosed user-facing features. The publisher does not sell
+        it, use it for advertising or credit decisions, transfer it to data brokers, or permit
+        humans to read it.
+      </p>
+      <h2>Children, adult content, and limits</h2>
+      <p>
+        The adult-site blocker is an optional browsing-friction tool. It does not display or direct
+        users to explicit material. It is not age verification, guaranteed content detection, or a
+        tamper-proof parental-control boundary. The extension and website contain no explicit
+        imagery.
+      </p>
+      <h2>Changes and contact</h2>
+      <p>
+        A future change that adds data collection or another external service requires updated
+        disclosures and appropriate consent before that behavior begins. Questions can be submitted
+        through
+        <a href="https://github.com/constantinknab/quiet-browse/issues">Quiet Browse support</a>.
+      </p>
+    </main>
+    <footer>
+      <div class="shell">
+        <p>© 2026 Constantin Knab.</p>
+        <p><a href="index.html">Home</a> · <a href="support.html">Support</a></p>
+      </div>
+    </footer>
+  </body>
 </html>

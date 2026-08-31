@@ -1,47 +1,96 @@
 <!doctype html>
+<!-- Toolbar-popup structure. popup.js owns behavior; this document contains no inline code. -->
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Quiet Browse</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body class="popup">
-  <header class="brand"><img src="../icons/icon48.png" alt="" width="36" height="36"><div><h1>Quiet Browse</h1><p>A little less noise. Your choices intact.</p></div></header>
-  <main>
-    <section class="site-panel" aria-labelledby="site">
-      <p class="eyebrow">THIS SITE</p><h2 id="site">Opening controls…</h2>
-      <p id="scope" class="muted">Only sites you choose. Nothing is sent to a server.</p>
-      <button type="button" id="enable" class="primary" disabled>Enable on this site</button>
-      <button id="pause" type="button" class="secondary" hidden>Show original page</button>
-    </section>
-    <p id="message" role="status" aria-live="polite"></p>
-    <fieldset id="youtube-controls" disabled hidden><legend>YouTube picture</legend></fieldset>
-    <p id="youtube-cover-note" class="muted" hidden>A saved cover returns after reloads and when YouTube opens another video. The page-only button below is a temporary override.</p>
-    <section id="session" hidden aria-label="This page only">
-      <p class="eyebrow">THIS PAGE ONLY · RESETS ON RELOAD OR NEXT VIDEO</p>
-      <button id="cover" type="button" class="secondary" hidden>Hide YouTube video picture</button>
-      <p id="cover-note" class="muted" hidden>Hides the video picture, not the audio or edits. Playback and YouTube controls—including mute—remain available.</p>
-      <p id="counts" class="muted"></p>
-    </section>
-    <fieldset id="navigation" disabled><legend>Navigation</legend></fieldset>
-    <p class="muted">A small overlap preserves context. Hold Alt while scrolling for a temporary bypass, or use Normal scroll on the page.</p>
-    <fieldset id="social-controls" disabled hidden><legend id="social-legend">Social feed controls</legend></fieldset>
-    <p id="social-note" class="muted" hidden>Checked means hidden. TikTok's first page counts as short-video and home-feed content, so either checked control stops it. Messages, profiles, and direct post or video links stay available.</p>
-    <fieldset id="grayscale-controls" disabled>
-      <legend>Grayscale</legend>
-      <button id="gray-toggle" type="button" class="secondary">Enable grayscale</button>
-      <label class="field" for="gray-level">Manual amount <output id="gray-value" for="gray-level">100%</output></label>
-      <input id="gray-level" type="range" min="0" max="100" step="1" value="100" aria-label="Manual grayscale percentage">
-      <label class="field" for="gray-mode">When to apply</label>
-      <select id="gray-mode"><option value="manual">Manually, until I turn it off</option><option value="scheduled">During my scheduled times</option></select>
-      <p id="gray-status" class="muted" aria-live="polite"></p>
-      <button id="schedule" type="button" class="link-button">Edit times and days for this site</button>
-    </fieldset>
-    <details class="more-controls"><summary>Other calming controls</summary><fieldset id="features" disabled><legend>Presentation</legend></fieldset></details>
-    <p class="footnote">Never clicks consent, changes purchases, downloads video, or bypasses access controls. Some pages and animations are unsupported.</p>
-  </main>
-  <footer><button type="button" id="options" class="link-button">Sites &amp; privacy</button><span>Local by design · v0.5.6</span></footer>
-  <script type="module" src="popup.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Quiet Browse</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="popup">
+    <header class="brand">
+      <img src="../icons/icon48.png" alt="" width="36" height="36" />
+      <div>
+        <h1>Quiet Browse</h1>
+        <p>A little less noise. Your choices intact.</p>
+      </div>
+    </header>
+    <main>
+      <section class="site-panel" aria-labelledby="site">
+        <p class="eyebrow">THIS SITE</p>
+        <h2 id="site">Opening controls…</h2>
+        <p id="scope" class="muted">Only sites you choose. Nothing is sent to a server.</p>
+        <button type="button" id="enable" class="primary" disabled>Enable on this site</button>
+        <button id="pause" type="button" class="secondary" hidden>Show original page</button>
+      </section>
+      <p id="message" role="status" aria-live="polite"></p>
+      <fieldset id="youtube-controls" disabled hidden><legend>YouTube picture</legend></fieldset>
+      <p id="youtube-cover-note" class="muted" hidden>
+        A saved cover returns after reloads and when YouTube opens another video. The page-only
+        button below is a temporary override.
+      </p>
+      <section id="session" hidden aria-label="This page only">
+        <p class="eyebrow">THIS PAGE ONLY · RESETS ON RELOAD OR NEXT VIDEO</p>
+        <button id="cover" type="button" class="secondary" hidden>
+          Hide YouTube video picture
+        </button>
+        <p id="cover-note" class="muted" hidden>
+          Hides the video picture, not the audio or edits. Playback and YouTube controls—including
+          mute—remain available.
+        </p>
+        <p id="counts" class="muted"></p>
+      </section>
+      <fieldset id="navigation" disabled><legend>Navigation</legend></fieldset>
+      <p class="muted">
+        A small overlap preserves context. Hold Alt while scrolling for a temporary bypass, or use
+        Normal scroll on the page.
+      </p>
+      <fieldset id="social-controls" disabled hidden>
+        <legend id="social-legend">Social feed controls</legend>
+      </fieldset>
+      <p id="social-note" class="muted" hidden>
+        Checked means hidden. TikTok's first page counts as short-video and home-feed content, so
+        either checked control stops it. Messages, profiles, and direct post or video links stay
+        available.
+      </p>
+      <fieldset id="grayscale-controls" disabled>
+        <legend>Grayscale</legend>
+        <button id="gray-toggle" type="button" class="secondary">Enable grayscale</button>
+        <label class="field" for="gray-level"
+          >Manual amount <output id="gray-value" for="gray-level">100%</output></label
+        >
+        <input
+          id="gray-level"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="100"
+          aria-label="Manual grayscale percentage"
+        />
+        <label class="field" for="gray-mode">When to apply</label>
+        <select id="gray-mode">
+          <option value="manual">Manually, until I turn it off</option>
+          <option value="scheduled">During my scheduled times</option>
+        </select>
+        <p id="gray-status" class="muted" aria-live="polite"></p>
+        <button id="schedule" type="button" class="link-button">
+          Edit times and days for this site
+        </button>
+      </fieldset>
+      <details class="more-controls">
+        <summary>Other calming controls</summary>
+        <fieldset id="features" disabled><legend>Presentation</legend></fieldset>
+      </details>
+      <p class="footnote">
+        Never clicks consent, changes purchases, downloads video, or bypasses access controls. Some
+        pages and animations are unsupported.
+      </p>
+    </main>
+    <footer>
+      <button type="button" id="options" class="link-button">Sites &amp; privacy</button
+      ><span>Local by design · v0.5.7</span>
+    </footer>
+    <script type="module" src="popup.js"></script>
+  </body>
 </html>

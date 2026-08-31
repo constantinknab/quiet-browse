@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.6 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.7 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -70,8 +70,8 @@ quiet-browse/
   tests/                     dependency-free Node tests and a plain-English test guide
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
-  docs/                      submission guide, listing draft, release gates, tests
-  dist/quiet-browse-0.5.6.zip ← generated extension-only archive
+  docs/                      submission guide, readability policy, release gates, tests
+  dist/quiet-browse-0.5.7.zip ← generated extension-only archive
 ```
 
 ## Developer commands
@@ -80,6 +80,8 @@ With Node 20+ and Python 3 installed:
 
 ```sh
 cd quiet-browse
+npm install
+npm run format:check
 npm test
 npm run check
 npm run demo
@@ -87,7 +89,7 @@ npm run package
 npm run verify
 ```
 
-There are no third-party runtime or test dependencies. `npm` only runs the scripts; it does not need to install anything. You can also run `node --test tests/*.test.mjs` and `node scripts/check.mjs` directly. Packaging and the local demo use Python:
+There are no third-party runtime dependencies. Development uses the exact Prettier version recorded in `package-lock.json`, so run `npm install` before `npm run format`, `npm run format:check`, or `npm run verify`. The Node tests themselves remain dependency-free: you can run `node --test tests/*.test.mjs` and `node scripts/check.mjs` directly. Packaging and the local demo use Python:
 
 ```sh
 python3 scripts/serve_demo.py
@@ -112,6 +114,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). The source repository, support channel, and privacy website are public. The Chrome Web Store checklist remains incomplete until the publisher performs the live Chrome and website checks and completes the developer-dashboard disclosures. No Chrome Web Store submission has been made.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). The source repository, support channel, and privacy website are public. The Chrome Web Store checklist remains incomplete until the publisher performs the live Chrome and website checks and completes the developer-dashboard disclosures. No Chrome Web Store submission has been made.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.

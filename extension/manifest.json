@@ -1,15 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Quiet Browse",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "minimum_chrome_version": "123",
   "description": "Calmer browsing with scheduled social controls, regional adult-site lists, reliable instant paging, motion limits, and grayscale.",
   "permissions": ["activeTab", "scripting", "storage", "alarms", "declarativeNetRequest"],
   "host_permissions": [
-    "https://www.instagram.com/*", "https://www.facebook.com/*", "https://www.tiktok.com/*",
-    "https://www.amazon.com/*", "https://www.ebay.com/*", "https://www.etsy.com/*",
-    "https://www.walmart.com/*", "https://www.target.com/*", "https://www.temu.com/*",
-    "https://us.shein.com/*", "https://www.aliexpress.com/*"
+    "https://www.instagram.com/*",
+    "https://www.facebook.com/*",
+    "https://www.tiktok.com/*",
+    "https://www.amazon.com/*",
+    "https://www.ebay.com/*",
+    "https://www.etsy.com/*",
+    "https://www.walmart.com/*",
+    "https://www.target.com/*",
+    "https://www.temu.com/*",
+    "https://us.shein.com/*",
+    "https://www.aliexpress.com/*"
   ],
   "optional_host_permissions": ["https://*/*", "http://*/*"],
   "background": { "service_worker": "background.js", "type": "module" },
@@ -19,7 +26,12 @@
     "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png" }
   },
   "options_ui": { "page": "ui/options.html", "open_in_tab": true },
-  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; connect-src https://raw.githubusercontent.com"
   }
