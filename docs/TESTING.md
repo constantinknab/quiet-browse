@@ -1,6 +1,6 @@
 # Verification report and manual acceptance checklist
 
-Updated September 9, 2026. Tests are intentionally split by what they establish. Version 0.5.7 is public in the Chrome Web Store, version 1.0.0 is the current GitHub release, and version 1.0.1 is a local candidate. Complete the live Chrome checks below before publishing or uploading its ZIP.
+Updated September 9, 2026. Tests are intentionally split by what they establish. Version 0.5.7 is public in the Chrome Web Store, and version 1.0.1 is the current GitHub release. Complete the live Chrome checks below before uploading its ZIP to the Web Store.
 
 ## Automated Node tests
 

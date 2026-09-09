@@ -1,6 +1,6 @@
 # From local prototype to Chrome Web Store submission
 
-Updated September 9, 2026. Follow the live dashboard and current policies if they differ from this guide. Version 0.5.7 is public in the Chrome Web Store, version 1.0.0 is the current GitHub release, and version 1.0.1 is an unsubmitted local candidate.
+Updated September 9, 2026. Follow the live dashboard and current policies if they differ from this guide. Version 0.5.7 is public in the Chrome Web Store, and version 1.0.1 is the current GitHub release. Live Chrome checks and store submission remain pending.
 
 ## 1. Finish the live acceptance tests
 
