@@ -1,13 +1,15 @@
 // Options-page controller.
 // It builds site editors and schedules with DOM methods, saves only sanitized settings,
-// and keeps Adult Guard permission requests inside explicit user click handlers.
+// and keeps adult-content-filter permission requests inside explicit user click handlers.
 import {
+  FEATURES,
   SOCIAL_FEATURES,
   cleanSettings,
   grayscaleAt,
   settingAt,
   siteCategory,
   isYouTube,
+  socialPlatform,
 } from '../shared/settings.js';
 import { ADULT_LIST_PERMISSION } from '../shared/adult-domains.js';
 
@@ -15,6 +17,7 @@ const getElement = (elementId) => document.getElementById(elementId);
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const CATEGORY_DESCRIPTIONS = Object.freeze({
   social: ['Social', 'Stories, discovery, short video, and scrollable feeds'],
+  video: ['Video', 'YouTube viewing controls and Shorts recommendation shelves'],
   ecommerce: ['Ecommerce', 'Shopping sites with a calmer 20% grayscale starting point'],
   other: ['Other websites', 'Sites you added from the toolbar'],
 });
@@ -143,7 +146,7 @@ function renderAdultGuard() {
     `${adult.remoteCount.toLocaleString()} downloaded domains`,
   ].join(', ');
   const updateSummary = adult.remoteSources.length
-    ? 'Selected lists refresh about weekly.'
+    ? 'Selected lists refresh about weekly; a failed refresh retries after about six hours.'
     : 'No community list is selected.';
   const passwordSummary = adult.passwordProtected
     ? 'A password is required to weaken or disable the blocker.'
@@ -321,25 +324,25 @@ function createSiteEditor(site, config) {
     const youtube = document.createElement('details');
     youtube.className = 'control-block youtube-control';
     const summary = document.createElement('summary');
-    summary.textContent = 'YouTube picture';
+    summary.textContent = 'YouTube controls';
     youtube.append(summary);
     const body = document.createElement('div');
     body.className = 'control-body';
-    const persistentCover = document.createElement('input');
-    persistentCover.type = 'checkbox';
-    persistentCover.checked = draft.youtubePictureCover;
-    persistentCover.addEventListener('change', () => {
-      draft.youtubePictureCover = persistentCover.checked;
-      changed();
-    });
-    body.append(inputLabel('Keep YouTube video picture hidden', persistentCover));
-    const description = document.createElement('p');
-    description.className = 'muted';
-    description.textContent = [
-      'Automatically returns the picture cover after reloads and YouTube video changes.',
-      'Audio, controls, captions, ads, and picture-in-picture stay available.',
-    ].join(' ');
-    body.append(description);
+    for (const feature of FEATURES.filter((item) => item.key.startsWith('youtube'))) {
+      const toggle = document.createElement('input');
+      toggle.type = 'checkbox';
+      toggle.dataset.feature = feature.key;
+      toggle.checked = draft[feature.key];
+      toggle.addEventListener('change', () => {
+        draft[feature.key] = toggle.checked;
+        changed();
+      });
+      body.append(inputLabel(feature.label, toggle));
+      const description = document.createElement('p');
+      description.className = 'muted';
+      description.textContent = feature.detail;
+      body.append(description);
+    }
     youtube.append(body);
     form.append(youtube);
   }
@@ -404,18 +407,20 @@ function createSiteEditor(site, config) {
   form.append(gray);
 
   if (siteCategory(site) === 'social') {
+    const platformName = socialPlatform(site);
     const heading = document.createElement('h3');
     heading.textContent = 'Social surfaces and times';
     form.append(heading);
     const socialHelp = document.createElement('p');
     socialHelp.className = 'muted';
-    socialHelp.textContent = [
-      'Checked means hidden.',
-      "TikTok's landing stream counts as both short-video and home-feed content,",
-      'so either checked control stops it.',
-    ].join(' ');
+    socialHelp.textContent =
+      platformName === 'TikTok'
+        ? 'Checked means hidden. The landing-feed switch leaves TikTok’s page and navigation available.'
+        : 'Checked means hidden. Stories, followed posts, and follow recommendations use separate page regions.';
     form.append(socialHelp);
-    for (const feature of SOCIAL_FEATURES) {
+    for (const feature of SOCIAL_FEATURES.filter(
+      (item) => !item.platforms || item.platforms.includes(platformName),
+    )) {
       const control = document.createElement('details');
       control.className = 'control-block social-control';
       const controlSummary = document.createElement('summary');
@@ -425,6 +430,7 @@ function createSiteEditor(site, config) {
       body.className = 'control-body';
       const toggle = document.createElement('input');
       toggle.type = 'checkbox';
+      toggle.dataset.feature = feature.key;
       toggle.checked = draft[feature.key];
       toggle.addEventListener('change', () => {
         draft[feature.key] = toggle.checked;
@@ -523,7 +529,7 @@ function createSiteEditor(site, config) {
 function renderSavedSites() {
   const container = getElement('site-categories');
   container.replaceChildren();
-  for (const category of ['social', 'ecommerce', 'other']) {
+  for (const category of ['social', 'video', 'ecommerce', 'other']) {
     const entries = Object.entries(saved.sites)
       .filter(([site]) => siteCategory(site) === category)
       .sort(([firstSite], [secondSite]) =>
@@ -578,7 +584,7 @@ getElement('adult-enable').addEventListener('click', () => {
         await chrome.permissions.remove({ origins: [ADULT_LIST_PERMISSION] });
       throw error;
     }
-  }, 'Quit Porn is on.');
+  }, 'Adult content filter is on.');
 });
 getElement('adult-apply-sources').addEventListener('click', () => {
   const sources = selectedSourceIds('adult-source-options-on');
@@ -618,12 +624,12 @@ getElement('adult-disable').addEventListener('click', () => {
     });
     getElement('adult-current-password').value = '';
     return result;
-  }, 'Quit Porn is off.');
+  }, 'Adult content filter is off.');
 });
 getElement('reset').addEventListener('click', async () => {
   if (!confirm('Delete all Quiet Browse settings and optional access?')) return;
   const password = adult.passwordProtected
-    ? prompt('Enter the Quit Porn protection password:')
+    ? prompt('Enter the adult content filter protection password:')
     : '';
   if (adult.passwordProtected && password === null) return;
   getElement('reset').disabled = true;

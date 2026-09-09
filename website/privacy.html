@@ -25,26 +25,28 @@
       </nav>
     </header>
     <main class="document">
-      <p class="eyebrow">Quiet Browse · Version 0.5.7</p>
+      <p class="eyebrow">Current Quiet Browse privacy policy</p>
       <h1>Privacy policy</h1>
       <p class="meta">
-        Effective August 31, 2026 · Publisher: Constantin Knab · Contact:
+        Effective September 9, 2026 · Covers the public Version 0.5.7 Chrome Web Store build and the
+        Version 1.0.0 GitHub release · Publisher: Constantin Knab · Contact:
         <a href="https://github.com/constantinknab/quiet-browse/issues">Quiet Browse support</a>
       </p>
       <h2>Purpose</h2>
       <p>
         Quiet Browse reduces high-stimulation browsing through reversible presentation controls,
         social-feed controls, instant paging, optional grayscale by local time, and an optional
-        local adult-site blocker. Built-in profiles operate on the disclosed social and shopping
+        local adult content filter. Built-in profiles operate on the disclosed social and shopping
         hosts; other presentation profiles operate only after the user authorizes them.
       </p>
       <h2>Information processed on the device</h2>
       <p>
         The extension uses the current page's host, document structure, limited static labels and
-        text in candidate cookie dialogs, CSS animation properties, and media playback state to
-        provide its visible features. It does not intentionally read form values, website passwords,
-        payment details, or editable content. It does not inspect browser cookies, network-response
-        bodies, or the Chrome history database.
+        text in candidate cookie dialogs, CSS animation properties, media playback state, wheel
+        gestures, supported navigation keystrokes, and clicks on its own controls to provide its
+        visible features. It does not intentionally read form values, website passwords, payment
+        details, or editable content. It does not inspect browser cookies, network-response bodies,
+        or the Chrome history database, and it creates no user-activity log.
       </p>
       <p>
         Website access could technically expose sensitive page content. The extension code limits
@@ -54,8 +56,8 @@
       <h2>Information stored</h2>
       <p>
         Chrome's local extension storage holds enabled HTTP or HTTPS hostnames, feature preferences,
-        grayscale and social-control schedules, and adult-list update status. If the adult-site
-        blocker is enabled, local storage also holds its state, additional domain names, selected
+        grayscale and social-control schedules, and adult-list update status. If the adult content
+        filter is enabled, local storage also holds its state, additional domain names, selected
         regional sources, update timestamps, and short failure statuses. If an optional protection
         password is chosen, the extension stores a random salt, an iteration count, and a
         PBKDF2-SHA-256 hash. It does not store the plaintext password.
@@ -68,7 +70,7 @@
       </p>
       <h2>Request blocking</h2>
       <p>
-        When the adult-site blocker is on, Chrome compares top-level navigation requests with a
+        When the adult content filter is on, Chrome compares top-level navigation requests with a
         packaged starter list, any hostnames added by the user, and the last successfully downloaded
         snapshots of selected regional lists. Chrome blocks a match before navigation. The extension
         does not receive, record, redirect, or transmit the matched address. These rules do not
@@ -79,10 +81,11 @@
         The extension has no analytics, advertising SDK, publisher server, cloud model, or remote
         executable code. When the user selects a regional list and separately grants access, the
         background worker sends an HTTPS request now and about weekly to a fixed address on
-        <code>raw.githubusercontent.com</code>. The request sends no browsing history, matches, page
-        content, settings, added domains, or password. GitHub and its infrastructure can receive
-        ordinary connection information such as IP address, request time, user agent, and technical
-        logs under their own policies. Deselected sources are not requested.
+        <code>raw.githubusercontent.com</code>. A failed refresh is retried after about six hours.
+        The request sends no browsing history, matches, page content, settings, added domains, or
+        password. GitHub and its infrastructure can receive ordinary connection information such as
+        IP address, request time, user agent, and technical logs under their own policies.
+        Deselected sources are not requested.
       </p>
       <p>
         Responses are treated only as untrusted domain-list data. Quiet Browse uses fixed parsers,
@@ -114,6 +117,11 @@
         installed manifest, but an inactive or removed profile does not register the page engine.
         Chrome also lets users disable or uninstall the extension or clear its storage.
       </p>
+      <p>
+        Required HTTPS host access covers only the listed Instagram, Facebook, TikTok, YouTube,
+        Amazon, eBay, Etsy, Walmart, Target, Temu, SHEIN US, and AliExpress hosts. Other ordinary
+        websites require a separate host permission requested after the user enables that site.
+      </p>
       <h2>Limited Use</h2>
       <p>
         The use of information received from Google APIs will adhere to the Chrome Web Store User
@@ -124,9 +132,9 @@
       </p>
       <h2>Children, adult content, and limits</h2>
       <p>
-        The adult-site blocker is an optional browsing-friction tool. It does not display or direct
-        users to explicit material. It is not age verification, guaranteed content detection, or a
-        tamper-proof parental-control boundary. The extension and website contain no explicit
+        The adult content filter is an optional browsing-friction tool. It does not display or
+        direct users to explicit material. It is not age verification, guaranteed content detection,
+        or a tamper-proof parental-control boundary. The extension and website contain no explicit
         imagery.
       </p>
       <h2>Changes and contact</h2>

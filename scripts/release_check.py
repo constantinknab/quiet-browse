@@ -6,9 +6,11 @@ from urllib.parse import urlparse
 root = Path(__file__).resolve().parents[1]
 release = json.loads((root / 'docs/release.json').read_text())
 missing = []
-for name in ["publisherName", "supportEmail"]:
+for name in ["publisherName"]:
     if not isinstance(release.get(name), str) or not release[name].strip():
         missing.append(name)
+if release.get("supportEmailVerified") is not True:
+    missing.append("supportEmailVerified")
 for name in ["privacyPolicyUrl", "supportUrl"]:
     url = urlparse(release.get(name, ""))
     placeholder_hosts = ["localhost", "127.0.0.1", "example.com"]

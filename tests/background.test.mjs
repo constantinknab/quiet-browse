@@ -19,7 +19,7 @@ function event() {
   return {
     listeners,
     addListener: (listener) => listeners.push(listener),
-    emit: (value) => listeners.forEach((listener) => listener(value)),
+    emit: async (value) => Promise.all(listeners.map((listener) => listener(value))),
   };
 }
 function fakeChrome() {
@@ -27,10 +27,12 @@ function fakeChrome() {
   const grants = new Set();
   const registered = new Map();
   const injected = [];
+  const insertedCss = [];
+  const removedCss = [];
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 9;
+  let receiverVersion = 10;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -78,8 +80,8 @@ function fakeChrome() {
       },
     },
     scripting: {
-      insertCSS: async () => {},
-      removeCSS: async () => {},
+      insertCSS: async (options) => insertedCss.push(structuredClone(options)),
+      removeCSS: async (options) => removedCss.push(structuredClone(options)),
       getRegisteredContentScripts: async () => [...registered.values()],
       registerContentScripts: async (scripts) =>
         scripts.forEach((script) => registered.set(script.id, script)),
@@ -91,7 +93,7 @@ function fakeChrome() {
         if (options.files) {
           if (failInjection) throw new Error('Fixture injection failure');
           receiver = true;
-          receiverVersion = 9;
+          receiverVersion = 10;
         }
       },
     },
@@ -111,17 +113,33 @@ function fakeChrome() {
     grants,
     registered,
     injected,
+    insertedCss,
+    removedCss,
     messages,
     alarms,
     dynamicRules,
     data: () => data,
-    resetData: () => {
+    resetEnvironment: () => {
+      // Installation and migration cases must not inherit permissions, scripts,
+      // alarms, rules, or simulated page state from an earlier lifecycle case.
       data = {};
+      grants.clear();
+      registered.clear();
+      injected.length = 0;
+      insertedCss.length = 0;
+      removedCss.length = 0;
+      messages.length = 0;
+      alarms.clear();
+      dynamicRules.clear();
+      receiver = false;
+      receiverVersion = 10;
+      failInjection = false;
+      failDynamicUpdate = false;
     },
     setData: (value) => {
       data = structuredClone(value);
     },
-    setReceiver: (value, version = 9) => {
+    setReceiver: (value, version = 10) => {
       receiver = value;
       receiverVersion = version;
     },
@@ -243,9 +261,12 @@ test('background permission, scope, messaging, persistence and revocation lifecy
       assert.equal(response.ok, true);
       assert.equal(fixture.registered.size, 1);
       assert.deepEqual([...fixture.registered.values()][0].matches, ['https://example.com/*']);
+      assert.deepEqual([...fixture.registered.values()][0].css, ['content/presentation.css']);
       assert.equal([...fixture.registered.values()][0].allFrames, false);
       assert.equal([...fixture.registered.values()][0].runAt, 'document_start');
       assert.equal(fixture.injected.filter((entry) => entry.files).length, 1);
+      assert.deepEqual(fixture.insertedCss.at(-1)?.files, ['content/presentation.css']);
+      assert.equal(fixture.insertedCss.at(-1)?.target?.tabId, 1);
       assert.equal(response.data.pageReady, true);
       assert.equal(JSON.stringify(fixture.data()).includes('private'), false);
     },
@@ -281,6 +302,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
       'content/social.js',
       'content/engine.js',
     ]);
+    assert.deepEqual([...fixture.registered.values()][0].css, ['content/presentation.css']);
     assert.equal((await send({ type: 'QB_POLICY' }, page)).data.settings.pageMode, true);
     assert.equal(fixture.alarms.size, 0);
   });
@@ -381,8 +403,8 @@ test('background permission, scope, messaging, persistence and revocation lifecy
     'alarm wakes pages without resetting their session or invoking full refresh',
     async () => {
       const start = fixture.messages.length;
-      fixture.chrome.alarms.onAlarm.emit({ name: 'unrelated' });
-      fixture.chrome.alarms.onAlarm.emit({ name: 'qb-schedule-clock' });
+      await fixture.chrome.alarms.onAlarm.emit({ name: 'unrelated' });
+      await fixture.chrome.alarms.onAlarm.emit({ name: 'qb-schedule-clock' });
       await new Promise((resolve) => setImmediate(resolve));
       assert.deepEqual(
         fixture.messages.slice(start).map((sentMessage) => sentMessage.message.type),
@@ -428,7 +450,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
       fixture.grants.add('https://example.com/*');
       await send({ type: 'QB_SAVE', site: 'https://example.com', enabled: true });
       fixture.grants.clear();
-      fixture.chrome.permissions.onRemoved.emit({ origins: ['https://example.com/*'] });
+      await fixture.chrome.permissions.onRemoved.emit({ origins: ['https://example.com/*'] });
       const saved = await send({ type: 'QB_LIST' });
       assert.equal(saved.data.sites['https://example.com'].enabled, false);
       assert.equal(fixture.registered.size, 0);
@@ -458,7 +480,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
   await testContext.test(
     'every built-in site preserves every feature through off, on, page reload, and worker restart cycles',
     async (testContext) => {
-      const sites = [...RECOMMENDED_SITES.map((entry) => entry.site), 'https://www.youtube.com'];
+      const sites = RECOMMENDED_SITES.map((entry) => entry.site);
       const allOn = completeFeatureSettings(true);
       const allOff = completeFeatureSettings(false);
       assert.deepEqual(
@@ -473,9 +495,11 @@ test('background permission, scope, messaging, persistence and revocation lifecy
           'socialShortVideo',
           'socialStories',
           'socialSuggestions',
+          'tiktokLandingFeed',
           'youtubePictureCover',
           'youtubeQuiet',
           'youtubeRecommendations',
+          'youtubeShortsRecommendations',
         ].sort(),
         'the lifecycle matrix must include every boolean feature',
       );
@@ -504,7 +528,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
               (script) => script.matches[0] === sitePattern(site),
             ),
           );
-          fixture.chrome.runtime.onStartup.emit();
+          await fixture.chrome.runtime.onStartup.emit();
           await send({ type: 'QB_LIST' }); // Serialized behind worker initialization.
           current = await send({ type: 'QB_POLICY' }, page);
           assert.equal(current.data.enabled, true);
@@ -523,13 +547,26 @@ test('background permission, scope, messaging, persistence and revocation lifecy
             ),
           );
 
+          // Restart and re-enable before changing any feature. This is the
+          // retained-settings case that catches effects leaking through a disabled
+          // master switch or choices being erased by a reload.
+          await fixture.chrome.runtime.onStartup.emit();
+          saved = (await send({ type: 'QB_LIST' })).data.sites[site];
+          assert.equal(saved.enabled, false);
+          assert.deepEqual(saved.settings, allOn);
+          assert.equal((await send({ type: 'QB_POLICY' }, page)).data.enabled, false);
+          assert.equal((await send({ type: 'QB_SAVE', site, enabled: true })).ok, true);
+          current = await send({ type: 'QB_POLICY' }, page);
+          assert.equal(current.data.enabled, true);
+          assert.deepEqual(current.data.settings, allOn);
+
           // Change every feature while the extension is off, reload/restart, and
           // verify those disabled choices do not leak into the page prematurely.
           assert.equal(
             (await send({ type: 'QB_SAVE', site, enabled: false, settings: allOff })).ok,
             true,
           );
-          fixture.chrome.runtime.onStartup.emit();
+          await fixture.chrome.runtime.onStartup.emit();
           saved = (await send({ type: 'QB_LIST' })).data.sites[site];
           assert.equal(saved.enabled, false);
           assert.deepEqual(saved.settings, allOff);
@@ -541,7 +578,7 @@ test('background permission, scope, messaging, persistence and revocation lifecy
           current = await send({ type: 'QB_POLICY' }, page);
           assert.equal(current.data.enabled, true);
           assert.deepEqual(current.data.settings, allOff);
-          fixture.chrome.runtime.onStartup.emit();
+          await fixture.chrome.runtime.onStartup.emit();
           await send({ type: 'QB_LIST' });
           current = await send({ type: 'QB_POLICY' }, page);
           assert.equal(current.data.enabled, true);
@@ -758,10 +795,12 @@ test('background permission, scope, messaging, persistence and revocation lifecy
   await testContext.test(
     'shopping-default migration preserves customized grayscale and removed profiles',
     async () => {
+      fixture.resetEnvironment();
       fixture.setData({
         [STATE_KEY]: {
-          version: 3,
-          recommendedVersion: 1,
+          // This is the exact persisted schema used by the public 0.5.7 build.
+          version: 4,
+          recommendedVersion: 2,
           sites: {
             'https://www.amazon.com': {
               enabled: true,
@@ -773,27 +812,60 @@ test('background permission, scope, messaging, persistence and revocation lifecy
       });
       for (const site of ['https://www.amazon.com', 'https://www.ebay.com'])
         fixture.grants.add(sitePattern(site));
-      fixture.chrome.runtime.onInstalled.emit({ reason: 'update' });
+      await fixture.chrome.runtime.onInstalled.emit({ reason: 'update' });
       const migrated = await send({ type: 'QB_LIST' });
-      assert.equal(migrated.data.recommendedVersion, 2);
+      assert.equal(migrated.data.recommendedVersion, 3);
       assert.equal(migrated.data.sites['https://www.amazon.com'].settings.grayscale.level, 47);
-      assert.equal(migrated.data.sites['https://www.ebay.com'].settings.grayscale.enabled, true);
-      assert.equal(migrated.data.sites['https://www.ebay.com'].settings.grayscale.level, 20);
+      assert.equal(migrated.data.sites['https://www.ebay.com'].settings.grayscale.enabled, false);
+      // Version 1.0 must not recreate a profile an existing user may have removed.
+      assert.equal(migrated.data.sites['https://www.youtube.com'], undefined);
       assert.equal(migrated.data.sites['https://www.etsy.com'], undefined);
     },
   );
   await testContext.test(
     'first installation seeds the disclosed recommended profiles once',
     async () => {
-      fixture.resetData();
+      fixture.resetEnvironment();
       RECOMMENDED_SITES.forEach(({ site }) => fixture.grants.add(sitePattern(site)));
-      fixture.chrome.runtime.onInstalled.emit({ reason: 'install' });
+      await fixture.chrome.runtime.onInstalled.emit({ reason: 'install' });
       const installed = await send({ type: 'QB_LIST' });
-      assert.equal(installed.data.recommendedVersion, 2);
+      assert.equal(installed.data.recommendedVersion, 3);
       assert.equal(Object.keys(installed.data.sites).length, RECOMMENDED_SITES.length);
       assert.equal(installed.data.sites['https://www.instagram.com'].settings.socialHomeFeed, true);
+      assert.equal(installed.data.sites['https://www.tiktok.com'].settings.tiktokLandingFeed, true);
+      assert.equal(
+        installed.data.sites['https://www.youtube.com'].settings.youtubeShortsRecommendations,
+        true,
+      );
       assert.equal(installed.data.sites['https://www.amazon.com'].settings.socialHomeFeed, false);
       assert.equal(installed.data.sites['https://www.amazon.com'].settings.grayscale.level, 20);
+      const youtubeRegistration = [...fixture.registered.values()].find(
+        (script) => script.matches[0] === sitePattern('https://www.youtube.com'),
+      );
+      assert.deepEqual(youtubeRegistration?.css, ['content/presentation.css']);
+      assert.deepEqual(youtubeRegistration?.js, [
+        'shared/comfort.js',
+        'content/comfort.js',
+        'content/social.js',
+        'content/engine.js',
+      ]);
+
+      // A repeated installation event is harmless: settings edits and removed
+      // profiles remain the user's choices instead of being reset to defaults.
+      await send({
+        type: 'QB_SAVE',
+        site: 'https://www.youtube.com',
+        enabled: true,
+        settings: { youtubeShortsRecommendations: false },
+      });
+      await send({ type: 'QB_FORGET', site: 'https://www.etsy.com' });
+      await fixture.chrome.runtime.onInstalled.emit({ reason: 'install' });
+      const repeated = await send({ type: 'QB_LIST' });
+      assert.equal(
+        repeated.data.sites['https://www.youtube.com'].settings.youtubeShortsRecommendations,
+        false,
+      );
+      assert.equal(repeated.data.sites['https://www.etsy.com'], undefined);
     },
   );
 });

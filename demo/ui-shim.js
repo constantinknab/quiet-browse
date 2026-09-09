@@ -1,12 +1,16 @@
 // UI preview/test only. This file is not packaged and never requests real permissions.
 (() => {
   const socialPreview = new URLSearchParams(location.search).has('social');
+  const tiktokPreview = new URLSearchParams(location.search).has('tiktok');
   const shoppingPreview = new URLSearchParams(location.search).has('shopping');
-  const site = socialPreview
-    ? 'https://www.instagram.com'
-    : shoppingPreview
-      ? 'https://www.amazon.com'
-      : 'https://www.youtube.com';
+  const site =
+    socialPreview || tiktokPreview
+      ? tiktokPreview
+        ? 'https://www.tiktok.com'
+        : 'https://www.instagram.com'
+      : shoppingPreview
+        ? 'https://www.amazon.com'
+        : 'https://www.youtube.com';
   const isOptions = location.pathname.includes('/options');
   const repairable = new URLSearchParams(location.search).has('repair');
   const stale = new URLSearchParams(location.search).has('stale');
@@ -19,6 +23,7 @@
         'socialShortVideo',
         'socialExplore',
         'socialHomeFeed',
+        'tiktokLandingFeed',
       ].map((key) => [key, { scheduled: false, windows: [] }]),
     );
   const defaults = {
@@ -28,21 +33,25 @@
     backgroundVideo: false,
     youtubeQuiet: true,
     youtubeRecommendations: false,
+    youtubeShortsRecommendations: true,
     youtubePictureCover: false,
     socialStories: true,
     socialSuggestions: true,
     socialShortVideo: true,
     socialExplore: true,
     socialHomeFeed: true,
+    tiktokLandingFeed: true,
     grayscale: { enabled: false, scheduled: false, level: 100, windows: [] },
     socialSchedules: schedules(),
   };
   const saved = {
-    version: 4,
-    recommendedVersion: 2,
+    version: 5,
+    recommendedVersion: 3,
     sites: isOptions
       ? {
           'https://www.instagram.com': { enabled: true, settings: structuredClone(defaults) },
+          'https://www.facebook.com': { enabled: true, settings: structuredClone(defaults) },
+          'https://www.tiktok.com': { enabled: true, settings: structuredClone(defaults) },
           'https://www.amazon.com': {
             enabled: true,
             settings: {
@@ -52,6 +61,7 @@
               socialShortVideo: false,
               socialExplore: false,
               socialHomeFeed: false,
+              tiktokLandingFeed: false,
               grayscale: { enabled: true, scheduled: false, level: 20, windows: [] },
             },
           },
@@ -113,7 +123,7 @@
   };
   let granted = isOptions;
   const page = {
-    engineVersion: stale ? 8 : 9,
+    engineVersion: stale ? 9 : 10,
     active: false,
     paused: false,
     covered: false,
@@ -122,8 +132,8 @@
     choices: 0,
     videos: 0,
     recommendations: 0,
-    platform: socialPreview ? 'instagram' : null,
-    hidden: socialPreview ? 5 : 0,
+    platform: socialPreview ? 'instagram' : tiktokPreview ? 'tiktok' : null,
+    hidden: socialPreview || tiktokPreview ? 5 : 0,
   };
   window.chrome = {
     runtime: {
@@ -296,7 +306,7 @@
       executeScript: async (options) => {
         if (options.files) {
           pageUnavailable = false;
-          page.engineVersion = 9;
+          page.engineVersion = 10;
           page.active = true;
         }
       },

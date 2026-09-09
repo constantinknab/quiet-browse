@@ -19,6 +19,45 @@
       This is a local structural fixture, not YouTube. It tests DOM behavior, not compatibility with
       the live service.
     </p>
+    <nav>
+      <a id="shorts-nav" href="/shorts/">Shorts navigation</a>
+      <a id="direct-short" href="/shorts/direct-item">Direct Shorts link</a>
+    </nav>
+    <ytd-rich-section-renderer id="shorts-section">
+      <ytd-rich-shelf-renderer id="shorts-shelf" is-shorts>
+        <a href="/shorts/one">Short one</a><a href="/shorts/two">Short two</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-reel-shelf-renderer id="reel-shelf">
+      <a href="/shorts/three">Short three</a>
+    </ytd-reel-shelf-renderer>
+    <grid-shelf-view-model id="grid-shorts-shelf">
+      <a href="/shorts/four">Short four</a>
+    </grid-shelf-view-model>
+    <ytd-rich-section-renderer id="generic-shorts-section">
+      <ytd-rich-shelf-renderer id="generic-shorts-shelf">
+        <a href="/shorts/five">Short five</a><a href="/shorts/six">Short six</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-rich-section-renderer id="mixed-section">
+      <ytd-rich-shelf-renderer id="mixed-shorts-shelf" is-shorts>
+        <a href="/shorts/seven">Short seven</a>
+      </ytd-rich-shelf-renderer>
+      <ytd-rich-shelf-renderer id="mixed-ordinary-shelf">
+        <a href="/watch?v=mixed-ordinary">Ordinary video beside Shorts</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-rich-section-renderer id="mixed-link-section">
+      <ytd-rich-shelf-renderer id="mixed-link-shelf">
+        <a href="/shorts/eight">One Short</a>
+        <a href="/watch?v=ordinary-in-the-same-shelf">One ordinary video</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-rich-section-renderer id="ordinary-section">
+      <ytd-rich-shelf-renderer id="ordinary-shelf">
+        <a href="/watch?v=ordinary">Ordinary video recommendation</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
     <ytd-watch-flexy
       ><div id="movie_player">
         <video class="html5-main-video"></video>

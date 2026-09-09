@@ -1,10 +1,10 @@
 # From local prototype to Chrome Web Store submission
 
-Prepared August 29, 2026. Follow the live dashboard and current policies if they differ from this guide. **Submission and approval have not happened.**
+Updated September 9, 2026. Follow the live dashboard and current policies if they differ from this guide. Version 0.5.7 is public in the Chrome Web Store; version 1.0.0 is the GitHub release prepared for submission as an update.
 
 ## 1. Finish the live acceptance tests
 
-Load `extension/` unpacked and complete `TESTING.md` in actual Chrome, including new install/update warnings, built-in profile seeding, dynamic adult-site rules, password behavior, real Instagram/Facebook/TikTok routes, shopping checkout paths, and desktop YouTube. Do not treat local test doubles as evidence of live-platform compatibility. Keep a small private pilot before broad distribution.
+Load `extension/` unpacked and complete `TESTING.md` in actual Chrome, including new install/update warnings, built-in profile seeding, dynamic adult-content-filter rules, password behavior, real Instagram/Facebook/TikTok routes, shopping checkout paths, and desktop YouTube. Do not treat local test doubles as evidence of live-platform compatibility. Keep a small private pilot before broad distribution.
 
 ## 2. Identify the publisher
 
@@ -14,7 +14,7 @@ Enable two-step verification and complete the dashboard's contact/identity discl
 
 ## 3. Publish an accurate privacy policy
 
-Use `extension/ui/privacy.html` as the starting content. Before public release, replace its local-build/publisher caveat with your real publisher identity and support contact. Put the finalized policy on a public HTTPS page you control and verify it works without signing in. The extension-internal URL is not an adequate public store-policy link.
+Use `extension/ui/privacy.html` as the packaged policy and keep it aligned with the public `website/privacy.html`. The publisher is Constantin Knab and GitHub Issues is the public support channel; verify both public pages over HTTPS without signing in before release. The extension-internal URL is not an adequate public store-policy link.
 
 Disclose **local processing of page structure/text, required built-in hosts, optional hosts, stored adult-domain additions, salted password hashes, local navigation blocking, and opt-in requests to selected regional lists through GitHub's raw-content host**. Explain that GitHub receives ordinary connection metadata but no browsing history, matches, settings, or password. Include each fixed source and its license. Do not describe the product as accessing no user data or having no external requests. Keep the Limited Use statement. If your support site adds analytics or collects reports, disclose that separately. [Chrome Web Store privacy requirements](https://developer.chrome.com/docs/webstore/program-policies/policies#protecting-user-privacy)
 
@@ -29,7 +29,7 @@ Disclose **local processing of page structure/text, required built-in hosts, opt
 
 ## 5. Build and inspect the ZIP
 
-Run the tests and static check, then `python3 scripts/package.py`. The generated archive is `dist/quiet-browse-0.5.7.zip`, with `manifest.json` at its root. Only extension assets are included; fixtures and developer tools are excluded. The packager validates file paths and writes a SHA-256 checksum.
+Run the tests and static check, then `python3 scripts/package.py`. The generated archive is `dist/quiet-browse-1.0.0.zip`, with `manifest.json` at its root. Only extension assets are included; fixtures and developer tools are excluded. The packager validates file paths and writes a SHA-256 checksum.
 
 This command produces a local package even when release gates are incomplete. `python3 scripts/release_check.py` separately explains whether publication prerequisites have been recorded. Do not tick those gates without doing the work.
 

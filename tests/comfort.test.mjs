@@ -21,11 +21,12 @@ test('old preferences migrate with paging and grayscale off and no shared mutabl
     sites: { 'https://example.com': { enabled: true, settings: { motion: false } } },
   };
   const state = cleanState(original);
-  assert.equal(state.version, 4);
+  assert.equal(state.version, 5);
   assert.equal(state.recommendedVersion, 0);
   assert.equal(state.sites['https://example.com'].settings.motion, false);
   assert.equal(state.sites['https://example.com'].settings.pageMode, false);
   assert.equal(state.sites['https://example.com'].settings.youtubePictureCover, false);
+  assert.equal(state.sites['https://example.com'].settings.youtubeShortsRecommendations, true);
   assert.equal(state.sites['https://example.com'].settings.socialSuggestions, true);
   assert.equal(state.sites['https://example.com'].settings.grayscale.enabled, false);
   const firstSettings = cleanSettings();

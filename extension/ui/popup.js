@@ -21,7 +21,7 @@ let page = null;
 let operationInProgress = false;
 let isYouTubeSite = false;
 let socialPlatformName = null;
-const EXPECTED_ENGINE_VERSION = 9;
+const EXPECTED_ENGINE_VERSION = 10;
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
@@ -58,6 +58,7 @@ async function repairContentScripts() {
           '__quietBrowseV7',
           '__quietBrowseV8',
           '__quietBrowseV9',
+          '__quietBrowseV10',
         ]) {
           try {
             globalThis[key]?.dispose?.();
@@ -251,9 +252,9 @@ for (const feature of [...FEATURES, ...SOCIAL_FEATURES]) {
   getElement(
     feature.key === 'pageMode'
       ? 'navigation'
-      : feature.key.startsWith('social')
+      : SOCIAL_FEATURES.some((item) => item.key === feature.key)
         ? 'social-controls'
-        : feature.key === 'youtubePictureCover'
+        : feature.key.startsWith('youtube')
           ? 'youtube-controls'
           : 'features',
   ).append(featureLabel);
@@ -386,6 +387,12 @@ try {
       : 'Social feed controls';
     for (const feature of FEATURES.filter((item) => item.key.startsWith('youtube'))) {
       getElement(feature.key).closest('label').hidden = !isYouTube(site);
+    }
+    for (const feature of SOCIAL_FEATURES) {
+      const available =
+        !!socialPlatformName &&
+        (!feature.platforms || feature.platforms.includes(socialPlatformName));
+      getElement(feature.key).closest('label').hidden = !available;
     }
     if (isYouTube(site)) getElement('backgroundVideo').closest('label').hidden = true;
     await refreshPageStatus();

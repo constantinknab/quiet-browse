@@ -1,4 +1,4 @@
-// Adult Guard source metadata and the small, always-available packaged starter list.
+// Adult content filter source metadata and the small, always-available packaged starter list.
 // Remote updates are inert domain data only, are opt in, and cannot execute code.
 export const ADULT_LIST_PERMISSION = 'https://raw.githubusercontent.com/*';
 

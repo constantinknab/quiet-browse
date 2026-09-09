@@ -26,11 +26,14 @@ function assert(condition, label) {
 try {
   if (location.pathname.includes('/popup')) {
     const parameters = new URLSearchParams(location.search);
-    const testSite = parameters.has('social')
-      ? 'https://www.instagram.com'
-      : parameters.has('shopping')
-        ? 'https://www.amazon.com'
-        : 'https://www.youtube.com';
+    const testSite =
+      parameters.has('social') || parameters.has('tiktok')
+        ? parameters.has('tiktok')
+          ? 'https://www.tiktok.com'
+          : 'https://www.instagram.com'
+        : parameters.has('shopping')
+          ? 'https://www.amazon.com'
+          : 'https://www.youtube.com';
     await waitFor(() => !document.getElementById('enable').disabled);
     const enable = document.getElementById('enable');
     enable.click();
@@ -77,9 +80,22 @@ try {
       !parameters.has('repair')
     ) {
       const persistentCover = document.getElementById('youtubePictureCover');
+      const shortsShelves = document.getElementById('youtubeShortsRecommendations');
       assert(
-        !document.getElementById('youtube-controls').hidden && !persistentCover.checked,
-        'YouTube exposes a separate saved picture-cover preference',
+        !document.getElementById('youtube-controls').hidden &&
+          !persistentCover.checked &&
+          shortsShelves.checked,
+        'YouTube exposes separate picture-cover and default-on Shorts-shelf preferences',
+      );
+      shortsShelves.click();
+      await waitFor(() => !shortsShelves.checked);
+      let youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
+        testSite
+      ];
+      assert(
+        youtubeConfig.settings.youtubeShortsRecommendations === false &&
+          youtubeConfig.settings.youtubePictureCover === false,
+        'The YouTube Shorts-shelf switch saves without changing picture covering',
       );
       persistentCover.click();
       await waitFor(
@@ -87,9 +103,7 @@ try {
           persistentCover.checked &&
           document.getElementById('cover').textContent === 'Show YouTube video picture',
       );
-      let youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
-        testSite
-      ];
+      youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[testSite];
       assert(
         youtubeConfig.settings.youtubePictureCover === true,
         'Persistent picture covering is saved for the YouTube host',
@@ -105,11 +119,15 @@ try {
         'Page-only Show picture leaves the saved preference intact',
       );
     }
-    if (new URLSearchParams(location.search).has('social')) {
+    if (parameters.has('social')) {
+      const visibleSocialControls = [
+        ...document.querySelectorAll('#social-controls label:not([hidden]) input'),
+      ].map((input) => input.id);
       assert(
         !document.getElementById('social-controls').hidden &&
-          document.querySelectorAll('#social-controls input').length === 5,
-        'A supported social site shows five independent controls',
+          visibleSocialControls.join('|') ===
+            'socialStories|socialSuggestions|socialShortVideo|socialExplore|socialHomeFeed',
+        'Instagram shows exactly its five independent surface controls',
       );
       const stories = document.getElementById('socialStories');
       stories.click();
@@ -125,6 +143,31 @@ try {
       assert(
         socialConfig.settings.socialSuggestions === true,
         'Restoring Stories does not restore follow recommendations',
+      );
+    }
+    if (parameters.has('tiktok')) {
+      const landingFeed = document.getElementById('tiktokLandingFeed');
+      const homeFeed = document.getElementById('socialHomeFeed');
+      const visibleSocialControls = [
+        ...document.querySelectorAll('#social-controls label:not([hidden]) input'),
+      ].map((input) => input.id);
+      assert(
+        !document.getElementById('social-controls').hidden &&
+          !landingFeed.closest('label').hidden &&
+          homeFeed.closest('label').hidden &&
+          visibleSocialControls.join('|') ===
+            'socialStories|socialSuggestions|socialShortVideo|socialExplore|tiktokLandingFeed',
+        'TikTok shows exactly its dedicated landing and routed social controls',
+      );
+      landingFeed.click();
+      await waitFor(() => !landingFeed.checked);
+      const tiktokConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
+        'https://www.tiktok.com'
+      ];
+      assert(
+        tiktokConfig.settings.tiktokLandingFeed === false &&
+          tiktokConfig.settings.socialShortVideo === true,
+        'The TikTok landing-feed preference saves independently from short-video routes',
       );
     }
     if (new URLSearchParams(location.search).has('offline')) {
@@ -165,21 +208,54 @@ try {
       );
     }
   } else {
-    await waitFor(() => document.querySelectorAll('.site-category').length === 3);
+    await waitFor(() => document.querySelectorAll('.site-category').length === 4);
     const categories = [...document.querySelectorAll('.site-category')];
     assert(
       categories.map((group) => group.querySelector('summary strong').textContent).join('|') ===
-        'Social|Ecommerce|Other websites',
-      'Saved sites are grouped into Social, Ecommerce, and Other dropdowns',
+        'Social|Video|Ecommerce|Other websites',
+      'Saved sites are grouped into Social, Video, Ecommerce, and Other dropdowns',
     );
-    const ecommerce = categories[1];
+    const ecommerce = categories[2];
     assert(
       !ecommerce.open && !ecommerce.querySelector('.site-card').open,
       'The ecommerce list stays compact until its category and a site are opened',
     );
     const social = categories[0];
     social.open = true;
-    const instagram = social.querySelector('.site-card');
+    const expectedControls = {
+      'https://www.instagram.com': [
+        'socialStories',
+        'socialSuggestions',
+        'socialShortVideo',
+        'socialExplore',
+        'socialHomeFeed',
+      ],
+      'https://www.facebook.com': [
+        'socialStories',
+        'socialSuggestions',
+        'socialShortVideo',
+        'socialExplore',
+        'socialHomeFeed',
+      ],
+      'https://www.tiktok.com': [
+        'socialStories',
+        'socialSuggestions',
+        'socialShortVideo',
+        'socialExplore',
+        'tiktokLandingFeed',
+      ],
+    };
+    for (const [socialSite, expected] of Object.entries(expectedControls)) {
+      const socialCard = document.querySelector(`[data-site="${socialSite}"]`);
+      const actual = [...socialCard.querySelectorAll('.social-control input[data-feature]')].map(
+        (input) => input.dataset.feature,
+      );
+      assert(
+        actual.join('|') === expected.join('|'),
+        `${new URL(socialSite).hostname} renders only its supported social controls`,
+      );
+    }
+    const instagram = document.querySelector('[data-site="https://www.instagram.com"]');
     instagram.open = true;
     const form = instagram.querySelector('form');
     const grayControl = form.querySelector('.control-block');
@@ -221,15 +297,39 @@ try {
     assert(
       !settings.socialSchedules.socialSuggestions.scheduled &&
         !settings.socialSchedules.socialShortVideo.scheduled &&
-        !settings.socialSchedules.socialHomeFeed.scheduled,
+        !settings.socialSchedules.socialHomeFeed.scheduled &&
+        !settings.socialSchedules.tiktokLandingFeed.scheduled,
       'Stories, follow recommendations, short video, and scrollable-feed schedules remain independent',
+    );
+    const tiktokCard = document.querySelector('[data-site="https://www.tiktok.com"]');
+    tiktokCard.open = true;
+    const tiktokForm = tiktokCard.querySelector('form');
+    const tiktokSchedule = tiktokForm
+      .querySelector('[data-feature="tiktokLandingFeed"]')
+      .closest('.social-control');
+    tiktokSchedule.open = true;
+    const tiktokMode = tiktokSchedule.querySelector('select');
+    tiktokMode.value = 'scheduled';
+    tiktokMode.dispatchEvent(new Event('change', { bubbles: true }));
+    tiktokSchedule.querySelector('.windows-editor > button').click();
+    tiktokForm.requestSubmit();
+    await waitFor(() => tiktokForm.querySelector('.message').textContent === 'Saved.');
+    const tiktokSettings = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
+      'https://www.tiktok.com'
+    ].settings;
+    assert(
+      tiktokSettings.socialSchedules.tiktokLandingFeed.scheduled &&
+        !tiktokSettings.socialSchedules.socialShortVideo.scheduled &&
+        !tiktokSettings.socialSchedules.socialHomeFeed.scheduled,
+      'TikTok landing-feed times save without changing routed short-video or home-feed schedules',
     );
     const youtubeCard = document.querySelector('[data-site="https://www.youtube.com"]');
     youtubeCard.open = true;
     const youtubeForm = youtubeCard.querySelector('form');
     const youtubeControl = youtubeForm.querySelector('.youtube-control');
     youtubeControl.open = true;
-    youtubeControl.querySelector('input[type="checkbox"]').click();
+    youtubeControl.querySelector('[data-feature="youtubePictureCover"]').click();
+    youtubeControl.querySelector('[data-feature="youtubeShortsRecommendations"]').click();
     youtubeForm.requestSubmit();
     await waitFor(() => youtubeForm.querySelector('.message').textContent === 'Saved.');
     const youtubeSettings = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
@@ -238,6 +338,15 @@ try {
     assert(
       youtubeSettings.youtubePictureCover === true,
       'Sites & privacy can save persistent YouTube picture covering',
+    );
+    assert(
+      youtubeSettings.youtubeShortsRecommendations === false,
+      'Sites & privacy can independently restore YouTube Shorts shelves',
+    );
+    assert(
+      document.querySelector('#adult-guard h2')?.textContent.trim() === 'Adult content filter' &&
+        !document.body.textContent.includes('Quit porn'),
+      'The settings category uses the Adult content filter name throughout',
     );
     document.getElementById('adult-domains').value = 'custom.example';
     const sourceChoices = [...document.querySelectorAll('#adult-source-options-off input')];
@@ -252,7 +361,7 @@ try {
     await waitFor(() => !document.getElementById('adult-on').hidden);
     assert(
       document.getElementById('adult-status').textContent.includes('1 added'),
-      'Quit Porn activates the local blocker and an additional domain',
+      'The adult content filter activates local blocking and an additional domain',
     );
     assert(
       document.querySelectorAll('#adult-source-options-on input:checked').length === 3 &&

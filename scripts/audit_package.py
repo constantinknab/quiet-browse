@@ -19,7 +19,11 @@ def package_source_files():
     """Return the same non-hidden files that the packager is allowed to copy."""
     return sorted(
         path for path in EXTENSION_ROOT.rglob("*")
-        if path.is_file() and not path.name.startswith(".")
+        if path.is_file()
+        and not any(
+            part.startswith(".")
+            for part in path.relative_to(EXTENSION_ROOT).parts
+        )
     )
 
 

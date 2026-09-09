@@ -28,7 +28,7 @@ assert.deepEqual(
   manifest.permissions.sort(),
   ['activeTab', 'scripting', 'storage', 'alarms', 'declarativeNetRequest'].sort(),
 );
-assert.equal(manifest.host_permissions.length, 11);
+assert.equal(manifest.host_permissions.length, 12);
 assert.ok(
   manifest.host_permissions.every(
     (pattern) => pattern.startsWith('https://') && !pattern.includes('<all_urls>'),

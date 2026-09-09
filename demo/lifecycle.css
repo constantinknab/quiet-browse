@@ -73,6 +73,13 @@ section,
   min-height: 180vh;
   padding-top: 30px;
 }
+#column-list-container {
+  height: 90px;
+  overflow-y: scroll;
+}
+#column-list-container > article {
+  min-height: 70px;
+}
 .pass {
   color: #277568;
 }

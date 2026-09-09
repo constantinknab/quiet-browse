@@ -46,18 +46,14 @@
       if (/^\/@[^/]+\/video\/[^/]+/.test(path)) return 'direct';
       if (/^\/(?:foryou|following|live)(?:\/|$)/.test(path)) return 'short';
       if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
-      // TikTok serves its vertically scrollable For You stream at `/`.
-      return path === '/' ? 'short' : 'other';
+      // The root stays a usable landing page. Its inner feed has a separate setting.
+      return path === '/' ? 'home' : 'other';
     }
     return 'other';
   }
 
   function routeCategories(name, pathname) {
-    const route = routeFor(name, pathname);
-    // The landing stream is both TikTok's home feed and a short-video feed.
-    // Either independent control must be able to stop it.
-    if (name === 'tiktok' && normalizedPath(pathname) === '/') return ['short', 'home'];
-    return [route];
+    return [routeFor(name, pathname)];
   }
 
   function categoryForLink(name, pathname) {
@@ -65,8 +61,7 @@
     if (/^\/stories(?:\/|$)/.test(path)) return 'stories';
     if (name === 'instagram' && /^\/reels(?:\/|$)/.test(path)) return 'short';
     if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
-    if (name === 'tiktok' && (path === '/' || /^\/(?:foryou|following|live)(?:\/|$)/.test(path)))
-      return 'short';
+    if (name === 'tiktok' && /^\/(?:foryou|following|live)(?:\/|$)/.test(path)) return 'short';
     if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
     return null;
   }
@@ -107,19 +102,8 @@
         if (element.getAttribute(HIDDEN) !== category) element.setAttribute(HIDDEN, category);
       }
     }
-    function surface(category) {
-      const fixture = document.querySelector(`[data-qb-social-surface="${category}"]`);
-      if (fixture) return fixture;
-      if (category === 'stories') {
-        return document.querySelector('[aria-label*="Stories" i],[data-e2e*="story" i]');
-      }
-      if (name === 'facebook') return document.querySelector('[role="feed"]');
-      if (name === 'tiktok')
-        return document.querySelector(
-          '[data-e2e="recommend-list"],[data-e2e="explore-item-list"],main',
-        );
-      if (name === 'instagram') return document.querySelector('main');
-      return null;
+    function explicitSurfaces(category) {
+      return new Set(document.querySelectorAll(`[data-qb-social-surface="${category}"]`));
     }
     function safeSurface(element) {
       return element && element.isConnected && !element.matches('html,body,main,[role="main"]')
@@ -232,8 +216,211 @@
       }
       return found;
     }
+    function ownedByIndependentSurface(element, independentSurfaces) {
+      return independentSurfaces.some(
+        (surface) => surface === element || surface.contains(element),
+      );
+    }
+    function hasPostEvidence(element) {
+      if (!element) return false;
+      const hasPostLink = [...element.querySelectorAll('a[href]')].some((anchor) => {
+        try {
+          return /^\/(?:p|reel|tv)\//.test(
+            new URL(anchor.getAttribute('href'), location.href).pathname,
+          );
+        } catch {
+          return false;
+        }
+      });
+      if (hasPostLink || element.querySelector('video')) return true;
+      return (
+        !!element.querySelector('img') &&
+        [...element.querySelectorAll('button,[role="button"]')].some((control) =>
+          /^(?:like|comment|share|save)(?:\b|$)/i.test(
+            (control.getAttribute('aria-label') || control.textContent || '').trim(),
+          ),
+        )
+      );
+    }
+    function postSurfacesWithin(container, independentSurfaces = []) {
+      const found = new Set();
+      if (!container) return found;
+      const articles = Array.from(container.querySelectorAll('article,[role="article"]')).slice(
+        0,
+        500,
+      );
+      articles.forEach((article) => {
+        if (ownedByIndependentSurface(article, independentSurfaces) || !hasPostEvidence(article))
+          return;
+        const target = safeSurface(article);
+        if (target) found.add(target);
+      });
+      return found;
+    }
+    function instagramPostSurfaces() {
+      const found = new Set();
+      const main = document.querySelector('main,[role="main"]');
+      const independentSurfaces = [...storySurfaces(), ...suggestionSurfaces()];
+      postSurfacesWithin(main, independentSurfaces).forEach((element) => found.add(element));
+      if (!main) return found;
+      for (const anchor of Array.from(main.querySelectorAll('a[href]')).slice(0, 1000)) {
+        let path;
+        try {
+          path = new URL(anchor.getAttribute('href'), location.href).pathname;
+        } catch {
+          continue;
+        }
+        if (
+          !/^\/(?:p|reel|tv)\//.test(path) ||
+          independentSurfaces.some((surface) => surface.contains(anchor))
+        )
+          continue;
+        let candidate = anchor.closest('article,[role="article"]');
+        if (!candidate) {
+          candidate = anchor.parentElement;
+          for (let depth = 0; candidate && candidate !== main && depth < 7; depth += 1) {
+            const postLinks = candidate.querySelectorAll(
+              'a[href^="/p/"],a[href^="/reel/"],a[href^="/tv/"]',
+            );
+            if (postLinks.length === 1 && candidate.querySelector('img,video')) break;
+            candidate = candidate.parentElement;
+          }
+        }
+        const target = safeSurface(candidate);
+        if (target) found.add(target);
+      }
+      return found;
+    }
+    function homeFeedSurfaces() {
+      const found = explicitSurfaces('home');
+      if (found.size) return found;
+      const feed = document.querySelector('[role="feed"]');
+      if (name === 'instagram') {
+        instagramPostSurfaces().forEach((element) => found.add(element));
+        return found;
+      }
+      if (name === 'facebook') {
+        const posts = postSurfacesWithin(feed);
+        if (posts.size) posts.forEach((element) => found.add(element));
+        else if (safeSurface(feed)) found.add(feed);
+      }
+      return found;
+    }
+    function tiktokFeedContainer() {
+      const explicit = document.querySelector('[data-qb-social-surface="tiktokLanding"]');
+      if (explicit) return safeSurface(explicit);
+      const isScrollableFeed = (candidate) => {
+        if (!safeSurface(candidate)) return false;
+        const itemCount = candidate.querySelectorAll(
+          '[data-e2e="recommend-list-item-container"],article',
+        ).length;
+        const style = getComputedStyle(candidate);
+        return (
+          itemCount >= 2 &&
+          (/^(?:auto|scroll)$/.test(style.overflowY) ||
+            candidate.scrollHeight > candidate.clientHeight + 1)
+        );
+      };
+      // TikTok currently gives its primary vertical stream this stable ID. Check it
+      // before generic recommendation modules because document order can put a
+      // smaller sidebar module first.
+      const primary = document.querySelector('#column-list-container');
+      if (isScrollableFeed(primary)) return primary;
+      for (const candidate of document.querySelectorAll('[data-e2e="recommend-list"]')) {
+        if (isScrollableFeed(candidate)) return candidate;
+      }
+      const item = document.querySelector('[data-e2e="recommend-list-item-container"]');
+      let candidate = item?.parentElement;
+      for (let depth = 0; candidate && depth < 6; depth += 1, candidate = candidate.parentElement) {
+        if (!safeSurface(candidate)) break;
+        const itemCount = candidate.querySelectorAll(
+          '[data-e2e="recommend-list-item-container"]',
+        ).length;
+        const style = getComputedStyle(candidate);
+        const scrollable =
+          /^(?:auto|scroll)$/.test(style.overflowY) ||
+          candidate.scrollHeight > candidate.clientHeight + 1;
+        if (itemCount >= 2 && scrollable) return candidate;
+      }
+      return null;
+    }
+    function instagramRoutedFeedSurfaces(route) {
+      const found = new Set();
+      const feed = safeSurface(document.querySelector('[role="feed"]'));
+      if (feed) found.add(feed);
+      const main = document.querySelector('main,[role="main"]');
+      if (!main) return found;
+      for (const child of main.children) {
+        const target = safeSurface(child);
+        if (!target) continue;
+        if (route === 'short') {
+          const label = child.getAttribute('aria-label') || '';
+          const hasShortVideo =
+            !!child.querySelector('video') ||
+            !!child.querySelector('[role="group"][aria-label*="video player" i]');
+          if (hasShortVideo && !/navigation controls/i.test(label)) found.add(target);
+          continue;
+        }
+        const discoveryLinks = child.querySelectorAll(
+          'a[href^="/p/"],a[href^="/reel/"],a[href^="/reels/"],a[href^="/popular/"],a[href^="/explore/"]',
+        ).length;
+        if (discoveryLinks >= 3) found.add(target);
+      }
+      return found;
+    }
+    function routedFeedSurfaces(route) {
+      const found = explicitSurfaces(route);
+      if (found.size) return found;
+      if (name === 'tiktok') {
+        const target =
+          route === 'explore'
+            ? safeSurface(document.querySelector('[data-e2e="explore-item-list"]'))
+            : tiktokFeedContainer();
+        if (target) found.add(target);
+        return found;
+      }
+      if (name === 'instagram') return instagramRoutedFeedSurfaces(route);
+      const feed = safeSurface(document.querySelector('[role="feed"]'));
+      if (feed) found.add(feed);
+      return found;
+    }
+    function labeledContinuationSurfaces() {
+      const found = explicitSurfaces('recommendations');
+      const main = document.querySelector('main,[role="main"]');
+      if (!main) return found;
+      const labels = Array.from(main.querySelectorAll('h1,h2,h3,h4,span,div')).slice(0, 1600);
+      for (const label of labels) {
+        if (label.childElementCount > 2) continue;
+        const text = label.textContent.replace(/\s+/g, ' ').trim();
+        if (
+          !/^(?:more posts from\b|see more posts$|suggested posts?$|you might also like$|related videos?$)/i.test(
+            text,
+          )
+        )
+          continue;
+        let candidate = label.parentElement;
+        for (
+          let depth = 0;
+          candidate && candidate !== main && depth < 6;
+          depth += 1, candidate = candidate.parentElement
+        ) {
+          if (!safeSurface(candidate) || candidate.querySelector('video')) break;
+          const continuationLinks = candidate.querySelectorAll(
+            'a[href^="/p/"],a[href^="/reel/"],a[href^="/video/"],a[href*="/video/"]',
+          ).length;
+          if (continuationLinks >= 2) {
+            found.add(candidate);
+            break;
+          }
+        }
+      }
+      return found;
+    }
     function showNotice(target, route) {
-      if (!target?.parentElement || !['home', 'short', 'explore'].includes(route)) {
+      if (
+        !target?.parentElement ||
+        !['home', 'short', 'explore', 'tiktokLanding'].includes(route)
+      ) {
         notice?.remove();
         notice = null;
         return;
@@ -243,7 +430,12 @@
         notice.setAttribute('data-qb-social-notice', '');
         notice.setAttribute('role', 'status');
       }
-      const labels = { home: 'Home feed', short: 'Short-video feed', explore: 'Explore feed' };
+      const labels = {
+        home: 'Home feed',
+        short: 'Short-video feed',
+        explore: 'Explore feed',
+        tiktokLanding: 'TikTok landing feed',
+      };
       const message = `${labels[route]} hidden by Quiet Browse. Messages, profiles, and direct links still work.`;
       if (notice.textContent !== message) notice.textContent = message;
       if (notice.parentElement !== target.parentElement || notice.nextSibling !== target)
@@ -253,7 +445,6 @@
     function sync(settings = {}, now = new Date()) {
       if (!name) return;
       const route = routeFor(name, location.pathname);
-      const currentCategories = routeCategories(name, location.pathname);
       const desired = new Map();
       const at = (key) =>
         globalThis.QuietBrowseComfort.settingAt(
@@ -267,22 +458,19 @@
         short: at('socialShortVideo'),
         explore: at('socialExplore'),
         home: at('socialHomeFeed'),
+        tiktokLanding: at('tiktokLandingFeed'),
       };
       for (const anchor of Array.from(document.querySelectorAll('a[href]')).slice(0, 800)) {
         try {
           const url = new URL(anchor.getAttribute('href'), location.href);
           if (url.hostname !== location.hostname) continue;
-          const categories =
-            name === 'tiktok' && normalizedPath(url.pathname) === '/'
-              ? routeCategories(name, url.pathname)
-              : [categoryForLink(name, url.pathname)];
-          const category = categories.find((item) => item && enabled[item]);
+          const category = categoryForLink(name, url.pathname);
           if (
             route === 'direct' &&
             normalizedPath(url.pathname) === normalizedPath(location.pathname)
           )
             continue;
-          if (category) want(desired, navTarget(anchor), category);
+          if (category && enabled[category]) want(desired, navTarget(anchor), category);
         } catch {
           /* Malformed page URL. */
         }
@@ -295,24 +483,35 @@
       }
       if (enabled.stories && !['direct', 'messages'].includes(route))
         storySurfaces().forEach((element) => want(desired, element, 'stories'));
-      if (enabled.suggestions && currentCategories.includes('home'))
+      if (enabled.suggestions && route === 'home')
         suggestionSurfaces().forEach((element) => want(desired, element, 'suggestions'));
-      let routedTarget = null;
-      const blockedRoute = currentCategories.find(
-        (category) => enabled[category] && ['home', 'short', 'explore'].includes(category),
-      );
-      if (blockedRoute) {
-        routedTarget = surface(blockedRoute);
-        want(desired, routedTarget, blockedRoute);
+      let blockedCategory = null;
+      let noticeTarget = null;
+      if (name === 'tiktok' && route === 'home' && enabled.tiktokLanding) {
+        const target = tiktokFeedContainer();
+        want(desired, target, 'tiktokLanding');
+        blockedCategory = target ? 'tiktokLanding' : null;
+        noticeTarget = target;
+      } else if (route === 'home' && name !== 'tiktok' && enabled.home) {
+        const surfaces = homeFeedSurfaces();
+        surfaces.forEach((element) => want(desired, element, 'home'));
+        noticeTarget = surfaces.values().next().value || null;
+        blockedCategory = noticeTarget ? 'home' : null;
+      } else if (['short', 'explore'].includes(route) && enabled[route]) {
+        const surfaces = routedFeedSurfaces(route);
+        surfaces.forEach((element) => want(desired, element, route));
+        noticeTarget = surfaces.values().next().value || null;
+        blockedCategory = noticeTarget ? route : null;
       }
-      // Direct items and conversations stay usable; only an explicitly marked continuation feed is removed.
+      // Direct items and conversations stay usable; only a bounded, separately
+      // labeled continuation section is removed.
       if (['direct', 'messages'].includes(route)) {
-        document
-          .querySelectorAll('[data-qb-social-surface="recommendations"]')
-          .forEach((element) => want(desired, element, 'recommendations'));
+        labeledContinuationSurfaces().forEach((element) =>
+          want(desired, element, 'recommendations'),
+        );
       }
       reconcile(desired);
-      showNotice(routedTarget, blockedRoute);
+      showNotice(noticeTarget, blockedCategory);
       if (!markedRoot) {
         originalRoot = document.documentElement.getAttribute(ROOT);
         originalRoute = document.documentElement.getAttribute(ROUTE);

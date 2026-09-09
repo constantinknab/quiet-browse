@@ -19,12 +19,12 @@
       <section class="site-panel" aria-labelledby="site">
         <p class="eyebrow">THIS SITE</p>
         <h2 id="site">Opening controls…</h2>
-        <p id="scope" class="muted">Only sites you choose. Nothing is sent to a server.</p>
+        <p id="scope" class="muted">Page analysis stays on your device.</p>
         <button type="button" id="enable" class="primary" disabled>Enable on this site</button>
         <button id="pause" type="button" class="secondary" hidden>Show original page</button>
       </section>
       <p id="message" role="status" aria-live="polite"></p>
-      <fieldset id="youtube-controls" disabled hidden><legend>YouTube picture</legend></fieldset>
+      <fieldset id="youtube-controls" disabled hidden><legend>YouTube controls</legend></fieldset>
       <p id="youtube-cover-note" class="muted" hidden>
         A saved cover returns after reloads and when YouTube opens another video. The page-only
         button below is a temporary override.
@@ -49,9 +49,8 @@
         <legend id="social-legend">Social feed controls</legend>
       </fieldset>
       <p id="social-note" class="muted" hidden>
-        Checked means hidden. TikTok's first page counts as short-video and home-feed content, so
-        either checked control stops it. Messages, profiles, and direct post or video links stay
-        available.
+        Checked means hidden. TikTok has a dedicated landing-feed switch. Messages, profiles, and
+        direct post or video links stay available.
       </p>
       <fieldset id="grayscale-controls" disabled>
         <legend>Grayscale</legend>
@@ -89,7 +88,7 @@
     </main>
     <footer>
       <button type="button" id="options" class="link-button">Sites &amp; privacy</button
-      ><span>Local by design · v0.5.7</span>
+      ><span>Local by design · v1.0.0</span>
     </footer>
     <script type="module" src="popup.js"></script>
   </body>

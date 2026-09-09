@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir, lstat } from 'node:fs/promises';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { inflateSync } from 'node:zlib';
 
 import { ADULT_LIST_PERMISSION, ADULT_SOURCES } from '../extension/shared/adult-domains.js';
 
@@ -29,6 +30,68 @@ async function text(path) {
 
 function occurrences(source, pattern) {
   return [...source.matchAll(pattern)].length;
+}
+
+function pngAlphaBounds(png) {
+  // Reading decoded alpha catches accidental edge-to-edge artwork even when the
+  // outer canvas still has the correct dimensions. PNG row filters only change
+  // storage, so undo them before measuring the nontransparent pixels.
+  assert.equal(png.readUInt8(24), 8, 'icon must use 8-bit channels');
+  assert.equal(png.readUInt8(25), 6, 'icon must use RGBA color');
+  const width = png.readUInt32BE(16);
+  const height = png.readUInt32BE(20);
+  const compressedChunks = [];
+  for (let offset = 8; offset < png.length;) {
+    const length = png.readUInt32BE(offset);
+    const type = png.subarray(offset + 4, offset + 8).toString('ascii');
+    if (type === 'IDAT') compressedChunks.push(png.subarray(offset + 8, offset + 8 + length));
+    offset += 12 + length;
+  }
+  const pixels = inflateSync(Buffer.concat(compressedChunks));
+  const bytesPerPixel = 4;
+  const rowLength = width * bytesPerPixel;
+  let previousRow = Buffer.alloc(rowLength);
+  let left = width;
+  let top = height;
+  let right = 0;
+  let bottom = 0;
+  for (let row = 0; row < height; row += 1) {
+    const rowStart = row * (1 + rowLength);
+    const filter = pixels[rowStart];
+    const decodedRow = Buffer.from(pixels.subarray(rowStart + 1, rowStart + 1 + rowLength));
+    for (let byteIndex = 0; byteIndex < rowLength; byteIndex += 1) {
+      const leftByte = byteIndex >= bytesPerPixel ? decodedRow[byteIndex - bytesPerPixel] : 0;
+      const upperByte = previousRow[byteIndex];
+      const upperLeftByte = byteIndex >= bytesPerPixel ? previousRow[byteIndex - bytesPerPixel] : 0;
+      if (filter === 1) decodedRow[byteIndex] = (decodedRow[byteIndex] + leftByte) & 255;
+      else if (filter === 2) decodedRow[byteIndex] = (decodedRow[byteIndex] + upperByte) & 255;
+      else if (filter === 3)
+        decodedRow[byteIndex] =
+          (decodedRow[byteIndex] + Math.floor((leftByte + upperByte) / 2)) & 255;
+      else if (filter === 4) {
+        const estimate = leftByte + upperByte - upperLeftByte;
+        const leftDistance = Math.abs(estimate - leftByte);
+        const upperDistance = Math.abs(estimate - upperByte);
+        const upperLeftDistance = Math.abs(estimate - upperLeftByte);
+        const predictor =
+          leftDistance <= upperDistance && leftDistance <= upperLeftDistance
+            ? leftByte
+            : upperDistance <= upperLeftDistance
+              ? upperByte
+              : upperLeftByte;
+        decodedRow[byteIndex] = (decodedRow[byteIndex] + predictor) & 255;
+      } else assert.equal(filter, 0, `unsupported PNG row filter ${filter}`);
+    }
+    for (let column = 0; column < width; column += 1) {
+      if (decodedRow[column * bytesPerPixel + 3] === 0) continue;
+      left = Math.min(left, column);
+      top = Math.min(top, row);
+      right = Math.max(right, column + 1);
+      bottom = Math.max(bottom, row + 1);
+    }
+    previousRow = decodedRow;
+  }
+  return { left, top, right, bottom };
 }
 
 const manifest = JSON.parse(await text(join(extensionRoot, 'manifest.json')));
@@ -86,6 +149,7 @@ test('host access is explicit for built-in sites and optional everywhere else', 
     'https://www.instagram.com/*',
     'https://www.facebook.com/*',
     'https://www.tiktok.com/*',
+    'https://www.youtube.com/*',
     'https://www.amazon.com/*',
     'https://www.ebay.com/*',
     'https://www.etsy.com/*',
@@ -104,6 +168,18 @@ test('host access is explicit for built-in sites and optional everywhere else', 
   assert.equal(manifest.web_accessible_resources, undefined);
   assert.equal(manifest.oauth2, undefined);
   assert.equal(manifest.update_url, undefined);
+});
+
+test('store icon uses the required canvas and Chrome-recommended artwork padding', async () => {
+  for (const path of [
+    join(extensionRoot, 'icons/icon128.png'),
+    join(projectRoot, 'store-assets/store-icon-128.png'),
+  ]) {
+    const png = await readFile(path);
+    assert.equal(png.readUInt32BE(16), 128);
+    assert.equal(png.readUInt32BE(20), 128);
+    assert.deepEqual(pngAlphaBounds(png), { left: 16, top: 16, right: 112, bottom: 112 });
+  }
 });
 
 test('all executable logic is packaged locally and protected by a strict CSP', async () => {
@@ -385,9 +461,21 @@ test('adult-site rules can only block top-level navigation', async () => {
 test('public disclosures stay aligned with the package behavior and version', async () => {
   const publicPrivacy = await text(join(projectRoot, 'website/privacy.html'));
   const packagedPrivacy = await text(join(extensionRoot, 'ui/privacy.html'));
+  const popup = await text(join(extensionRoot, 'ui/popup.html'));
+  const website = await text(join(projectRoot, 'website/index.html'));
   const listing = await text(join(projectRoot, 'docs/STORE-LISTING.md'));
   const readme = await text(join(projectRoot, 'README.md'));
+  const packageMetadata = JSON.parse(await text(join(projectRoot, 'package.json')));
+  const packageLock = JSON.parse(await text(join(projectRoot, 'package-lock.json')));
   const normalizedPublicPrivacy = publicPrivacy.replace(/\s+/g, ' ');
+
+  // The human-visible version and both package metadata files must move with the
+  // manifest so a reviewed ZIP is never described as a different release.
+  assert.equal(packageMetadata.version, manifest.version);
+  assert.equal(packageLock.version, manifest.version);
+  assert.equal(packageLock.packages[''].version, manifest.version);
+  assert.ok(popup.includes(`v${manifest.version}`));
+  assert.ok(website.replace(/\s+/g, ' ').includes(`Version ${manifest.version}`));
 
   for (const policy of [publicPrivacy, packagedPrivacy]) {
     // HTML formatting may wrap prose across lines. Normalize layout whitespace so
@@ -402,6 +490,7 @@ test('public disclosures stay aligned with the package behavior and version', as
       'raw.githubusercontent.com',
       'no analytics',
       'remote executable code',
+      'YouTube',
     ]) {
       assert.ok(normalizedPolicy.includes(fact), `privacy policy is missing: ${fact}`);
     }
@@ -413,10 +502,31 @@ test('public disclosures stay aligned with the package behavior and version', as
   );
   assert.ok(normalizedPublicPrivacy.includes('Chrome Web Store User Data Policy'));
   assert.ok(listing.includes('not affiliated with or endorsed by Google, Meta, TikTok'));
-  assert.ok(readme.includes('has not been submitted to or approved by the Chrome Web Store'));
+  assert.ok(readme.includes('Version 1.0.0 is released on GitHub'));
+  assert.ok(readme.includes('Version 0.5.7 remains public in the Chrome Web Store'));
+
+  const userFacingReleaseText = (
+    await Promise.all([
+      ...htmlFiles.map(text),
+      text(join(projectRoot, 'docs/STORE-LISTING.md')),
+      text(join(projectRoot, 'website/index.html')),
+      text(join(projectRoot, 'website/privacy.html')),
+      text(join(projectRoot, 'website/support.html')),
+    ])
+  ).join('\n');
+  assert.match(userFacingReleaseText, /Adult content filter/);
+  assert.doesNotMatch(userFacingReleaseText, /Quit porn/i);
 });
 
 test('the release package boundary excludes secrets, hidden files, and unknown formats', async () => {
+  const packager = await text(join(projectRoot, 'scripts/package.py'));
+  const packageAuditor = await text(join(projectRoot, 'scripts/audit_package.py'));
+  for (const packagingScript of [packager, packageAuditor]) {
+    // Checking every relative path component excludes files such as
+    // extension/.private/secret.txt, not merely dotfiles at the tree root.
+    assert.match(packagingScript, /part\.startswith\(["']\.["']\)/);
+    assert.ok(packagingScript.includes('relative_to'));
+  }
   const allowedExtensions = new Set(['.css', '.html', '.js', '.json', '.png', '.txt']);
   const packageFiles = extensionFiles.filter(
     (path) =>

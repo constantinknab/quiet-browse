@@ -11,12 +11,14 @@ const BOOLEAN_DEFAULTS = Object.freeze({
   backgroundVideo: false,
   youtubeQuiet: true,
   youtubeRecommendations: false,
+  youtubeShortsRecommendations: true,
   youtubePictureCover: false,
   socialStories: true,
   socialSuggestions: true,
   socialShortVideo: true,
   socialExplore: true,
   socialHomeFeed: true,
+  tiktokLandingFeed: true,
 });
 const EMPTY_SCHEDULE = Object.freeze({ scheduled: false, windows: Object.freeze([]) });
 const SOCIAL_SCHEDULE_DEFAULTS = Object.freeze(
@@ -27,6 +29,7 @@ const SOCIAL_SCHEDULE_DEFAULTS = Object.freeze(
       'socialShortVideo',
       'socialExplore',
       'socialHomeFeed',
+      'tiktokLandingFeed',
     ].map((key) => [key, EMPTY_SCHEDULE]),
   ),
 );
@@ -70,8 +73,14 @@ export const FEATURES = Object.freeze([
   },
   {
     key: 'youtubeRecommendations',
-    label: 'Collapse YouTube recommendations',
-    detail: 'Adds a Show recommendations button. Keeps the original links.',
+    label: 'Collapse watch-page recommendations',
+    detail: 'Adds a Show recommendations button beside a video. Keeps the original links.',
+  },
+  {
+    key: 'youtubeShortsRecommendations',
+    label: 'Hide YouTube Shorts shelves',
+    detail:
+      'Removes supported Shorts shelves and carousels while keeping ordinary recommendations, navigation, and direct links.',
   },
   {
     key: 'youtubePictureCover',
@@ -98,7 +107,7 @@ export const SOCIAL_FEATURES = Object.freeze([
     key: 'socialShortVideo',
     label: 'Hide short-video feeds and tabs',
     detail:
-      "Removes supported Reels, Watch, and TikTok's landing, For You, Following, and Live streams. A direct video link still opens.",
+      'Removes supported Reels, Watch, and TikTok For You, Following, and Live routes. A direct video link still opens.',
   },
   {
     key: 'socialExplore',
@@ -109,16 +118,26 @@ export const SOCIAL_FEATURES = Object.freeze([
   {
     key: 'socialHomeFeed',
     label: 'Hide the home feed',
-    detail: 'Keeps navigation and messages while removing the supported infinite home feed.',
+    detail:
+      'Keeps navigation, Stories, recommendations, and messages while removing supported post-feed regions.',
+    platforms: Object.freeze(['Instagram', 'Facebook']),
+  },
+  {
+    key: 'tiktokLandingFeed',
+    label: 'Hide TikTok landing feed',
+    detail:
+      'Keeps TikTok’s landing page and navigation while removing only its vertically scrollable For You stream.',
+    platforms: Object.freeze(['TikTok']),
   },
 ]);
 export const SOCIAL_SCHEDULE_KEYS = Object.freeze(SOCIAL_FEATURES.map((feature) => feature.key));
 
-export const RECOMMENDED_VERSION = 2;
+export const RECOMMENDED_VERSION = 3;
 export const RECOMMENDED_SITES = Object.freeze([
   { site: 'https://www.instagram.com', kind: 'social' },
   { site: 'https://www.facebook.com', kind: 'social' },
   { site: 'https://www.tiktok.com', kind: 'social' },
+  { site: 'https://www.youtube.com', kind: 'video' },
   { site: 'https://www.amazon.com', kind: 'shopping' },
   { site: 'https://www.ebay.com', kind: 'shopping' },
   { site: 'https://www.etsy.com', kind: 'shopping' },
@@ -165,15 +184,54 @@ export function cleanSettings(value = {}) {
   };
 }
 
+function legacyTikTokLandingPreferences(value = {}) {
+  const controls = ['socialShortVideo', 'socialHomeFeed'].map((key) => ({
+    enabled: value?.[key] !== false,
+    schedule: cleanSchedule(value?.socialSchedules?.[key]),
+  }));
+  const enabledControls = controls.filter((control) => control.enabled);
+  if (!enabledControls.length) return { enabled: false, schedule: cleanSchedule() };
+
+  // Either legacy switch used to hide the root feed. One unscheduled enabled
+  // switch therefore means the migrated dedicated control must remain always on.
+  if (enabledControls.some((control) => !control.schedule.scheduled))
+    return { enabled: true, schedule: cleanSchedule() };
+
+  // When both legacy controls were scheduled, preserve their union. Duplicate
+  // windows are removed before the normal 12-window safety limit is applied.
+  const seen = new Set();
+  const windows = [];
+  for (const control of enabledControls) {
+    for (const window of control.schedule.windows) {
+      const identifier = JSON.stringify(window);
+      if (seen.has(identifier)) continue;
+      seen.add(identifier);
+      windows.push(window);
+    }
+  }
+  return { enabled: true, schedule: cleanSchedule({ scheduled: true, windows }) };
+}
+
 export function cleanState(value) {
   const sites = Object.create(null);
   for (const [site, config] of Object.entries(value?.sites ?? {})) {
     if (isValidSite(site) && config && typeof config === 'object') {
-      sites[site] = { enabled: config.enabled === true, settings: cleanSettings(config.settings) };
+      const settings = cleanSettings(config.settings);
+      if (
+        socialPlatform(site) === 'TikTok' &&
+        typeof config.settings?.tiktokLandingFeed !== 'boolean'
+      ) {
+        // Before 1.0, either of two generic switches stopped TikTok's landing stream.
+        // Preserve their combined setting and schedule under the dedicated switch.
+        const migrated = legacyTikTokLandingPreferences(config.settings);
+        settings.tiktokLandingFeed = migrated.enabled;
+        settings.socialSchedules.tiktokLandingFeed = migrated.schedule;
+      }
+      sites[site] = { enabled: config.enabled === true, settings };
     }
   }
   return {
-    version: 4,
+    version: 5,
     recommendedVersion: Number.isInteger(value?.recommendedVersion)
       ? Math.max(0, value.recommendedVersion)
       : 0,
@@ -208,6 +266,7 @@ export function isRecommendedSite(site) {
 export function siteCategory(site) {
   const kind = RECOMMENDED_SITES.find((entry) => entry.site === site)?.kind;
   if (kind === 'social' || socialPlatform(site)) return 'social';
+  if (kind === 'video' || isYouTube(site)) return 'video';
   if (kind === 'shopping') return 'ecommerce';
   return 'other';
 }
@@ -218,7 +277,7 @@ export function defaultsForSite(site) {
   if (!socialPlatform(site)) {
     for (const feature of SOCIAL_FEATURES) settings[feature.key] = false;
   }
-  settings.backgroundVideo = !!profile;
+  settings.backgroundVideo = ['social', 'shopping'].includes(profile?.kind);
   if (profile?.kind === 'shopping')
     settings.grayscale = cleanGrayscale({
       enabled: true,

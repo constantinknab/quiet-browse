@@ -2,6 +2,7 @@
 (async () => {
   const { assert, send, wait } = window.lab;
   const getElement = (elementId) => document.getElementById(elementId);
+  const isRendered = (elementId) => getComputedStyle(getElement(elementId)).display !== 'none';
   const video = document.querySelector('#movie_player video');
   video.volume = 0.65;
   video.muted = false;
@@ -28,6 +29,93 @@
       getComputedStyle(getElement('cinematics')).visibility === 'hidden',
       'Ambient background is visually quieted',
     );
+    assert(
+      getElement('shorts-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getElement('reel-shelf').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getElement('grid-shorts-shelf').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getElement('generic-shorts-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !isRendered('shorts-section') &&
+        !isRendered('reel-shelf') &&
+        !isRendered('grid-shorts-shelf') &&
+        !isRendered('generic-shorts-section'),
+      'Supported YouTube Shorts shelves and carousels are hidden by default',
+    );
+    assert(
+      !getElement('ordinary-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !getElement('shorts-nav').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !getElement('direct-short').hasAttribute('data-qb-youtube-shorts-hidden'),
+      'Ordinary recommendations, Shorts navigation, and direct links remain available',
+    );
+    assert(
+      !getElement('mixed-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getElement('mixed-shorts-shelf').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !isRendered('mixed-shorts-shelf') &&
+        isRendered('mixed-ordinary-shelf'),
+      'A Shorts shelf hides alone when its enclosing section also contains ordinary videos',
+    );
+    assert(
+      !getElement('mixed-link-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !getElement('mixed-link-shelf').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        isRendered('mixed-link-shelf'),
+      'A mixed shelf with both Shorts and ordinary videos remains available',
+    );
+
+    window.lab.policy.settings.youtubeShortsRecommendations = false;
+    await send({ type: 'QB_REFRESH' });
+    await wait();
+    assert(
+      !document.querySelector('[data-qb-youtube-shorts-hidden]') &&
+        getComputedStyle(getElement('related')).display === 'none' &&
+        isRendered('generic-shorts-section') &&
+        isRendered('mixed-shorts-shelf'),
+      'The Shorts-shelf switch restores Shorts without changing watch-page recommendations',
+    );
+
+    const offDynamicShelf = document.createElement('ytd-reel-shelf-renderer');
+    offDynamicShelf.id = 'off-dynamic-shorts-shelf';
+    const offDynamicLink = document.createElement('a');
+    offDynamicLink.href = '/shorts/off-dynamic';
+    offDynamicLink.textContent = 'Short loaded while setting is off';
+    offDynamicShelf.append(offDynamicLink);
+    document.body.append(offDynamicShelf);
+    await wait();
+    assert(
+      !offDynamicShelf.hasAttribute('data-qb-youtube-shorts-hidden') &&
+        isRendered('off-dynamic-shorts-shelf'),
+      'A Shorts shelf loaded while the switch is off remains rendered and unmarked',
+    );
+
+    window.lab.policy.settings.youtubeShortsRecommendations = true;
+    window.lab.policy.settings.youtubeRecommendations = false;
+    await send({ type: 'QB_REFRESH' });
+    await wait();
+    assert(
+      getElement('shorts-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getComputedStyle(getElement('related')).display !== 'none' &&
+        !document.querySelector('[data-qb-reveal]'),
+      'Watch-page recommendations can be restored while Shorts shelves remain hidden',
+    );
+
+    const dynamicSection = document.createElement('ytd-rich-section-renderer');
+    dynamicSection.id = 'dynamic-shorts-section';
+    const dynamicShelf = document.createElement('ytd-rich-shelf-renderer');
+    dynamicShelf.setAttribute('is-shorts', '');
+    const dynamicLink = document.createElement('a');
+    dynamicLink.href = '/shorts/dynamic';
+    dynamicLink.textContent = 'Dynamically loaded Short';
+    dynamicShelf.append(dynamicLink);
+    dynamicSection.append(dynamicShelf);
+    document.body.append(dynamicSection);
+    await wait();
+    assert(
+      dynamicSection.hasAttribute('data-qb-youtube-shorts-hidden') &&
+        !isRendered('dynamic-shorts-section'),
+      'A lazily loaded Shorts shelf is hidden by the existing page observer',
+    );
+
+    window.lab.policy.settings.youtubeRecommendations = true;
+    await send({ type: 'QB_REFRESH' });
+    await wait();
     window.lab.policy.settings.youtubePictureCover = true;
     let coverStatus = await send({ type: 'QB_REFRESH' });
     await wait();
@@ -43,6 +131,9 @@
           19,
       'Fixture player controls and captions remain above cover',
     );
+    // Keep the real control inside the viewport before hit-testing. Headless
+    // Chrome uses a smaller default viewport than the interactive fixture tab.
+    getElement('mute').scrollIntoView({ block: 'center' });
     const muteRect = getElement('mute').getBoundingClientRect();
     const hit = document.elementFromPoint(
       muteRect.left + muteRect.width / 2,
@@ -139,17 +230,27 @@
       'The page-only Show picture action removes its cover',
     );
     await send({ type: 'QB_PAUSE', paused: true });
+    const disabledShelf = document.createElement('ytd-reel-shelf-renderer');
+    disabledShelf.id = 'disabled-shorts-shelf';
+    const disabledShelfLink = document.createElement('a');
+    disabledShelfLink.href = '/shorts/disabled-dynamic';
+    disabledShelfLink.textContent = 'Short loaded while Quiet Browse is disabled';
+    disabledShelf.append(disabledShelfLink);
+    document.body.append(disabledShelf);
+    await wait();
     assert(
       !document.querySelector('[data-qb-reveal]') &&
-        getComputedStyle(getElement('related')).display !== 'none',
-      'Show original restores recommendation presentation',
+        getComputedStyle(getElement('related')).display !== 'none' &&
+        !document.querySelector('[data-qb-youtube-shorts-hidden]') &&
+        isRendered('disabled-shorts-shelf'),
+      'Show original restores existing shelves and leaves newly loaded Shorts untouched',
     );
     assert(
       getComputedStyle(getElement('mouseover-overlay')).visibility === 'visible',
       'Show original restores previews',
     );
     getElement('test-status').textContent =
-      'PASS — 22 YouTube adapter fixture checks. Live YouTube still needs manual verification.';
+      `PASS — ${document.querySelectorAll('#results .pass').length} YouTube adapter fixture checks. Live YouTube still needs manual verification.`;
   } catch (error) {
     getElement('test-status').textContent = `FAIL — ${error.message}`;
     console.error(error);

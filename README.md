@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult-site blocker with a packaged fallback and three opt-in regional sources. **Version 0.5.7 is a user-tested beta that has not been submitted to or approved by the Chrome Web Store; it is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.0 is the current GitHub release; version 0.5.7 remains the public Chrome Web Store release until the 1.0.0 update is reviewed there. It is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -13,11 +13,11 @@ The extension code and build/test scripts are MIT licensed. Documentation, the p
 3. Turn on **Developer mode** in the top-right corner.
 4. Click **Load unpacked**, then select the extracted folder containing `manifest.json` (or this repository's `extension/` folder). Do not select the ZIP or repository root.
 5. Open Chrome's puzzle-piece Extensions menu and pin **Quiet Browse**.
-6. Review Chrome's install warnings. Built-in profiles start enabled for the exact HTTPS social and shopping hosts listed below. Open any other ordinary website, click the extension icon, and choose **Enable on this site** to request that host separately.
+6. Review Chrome's install warnings. Built-in profiles start enabled for the exact HTTPS social, video, and shopping hosts listed below. Open any other ordinary website, click the extension icon, and choose **Enable on this site** to request that host separately.
 7. Turn on **Instant page-by-page navigation** if you want wheel gestures and the page arrows to jump one screen at a time.
 8. Use **Grayscale** for a manual 0–100% amount. Choose **Edit times and days** for per-site grayscale, Stories, follow-recommendation, short-video, Explore, and home-feed windows.
 9. Use **Normal scroll** for a temporary bypass, **Show original page** if something looks wrong, or **Turn off for this site** for a lasting change.
-10. Open **Sites & privacy** for categorized Social, Ecommerce, and Other site dropdowns, plus **Quit Porn**, additional blocked hostnames, optional password protection, and the selectable US-coverage, China-coverage, and Japan-coverage lists. Chrome asks separately before the selected sources can be contacted.
+10. Open **Sites & privacy** for categorized Social, Video, Ecommerce, and Other site dropdowns, plus the **Adult content filter**, additional blocked hostnames, optional password protection, and the selectable US-coverage, China-coverage, and Japan-coverage lists. Chrome asks separately before the selected sources can be contacted.
 
 No developer account, registration payment, API key, npm install, or Google review is needed just to load your own unpacked copy. Managed Chrome profiles may prohibit developer mode; do not circumvent an administrator's restrictions.
 
@@ -31,20 +31,22 @@ No developer account, registration payment, API key, npm install, or Google revi
 | Cookie choices | On | Styles recognized English accept and reject controls equally; never clicks or submits. |
 | Background autoplay | Off | Pauses muted autoplay videos lacking native controls and adds those controls. Excludes YouTube. |
 | YouTube previews | On | Hides supported preview surfaces and ambient decoration. Does not stop all decoding or network activity. |
-| YouTube recommendations | Off | Collapses the supported watch-page list behind a reveal button. |
+| YouTube watch-page recommendations | Off | Collapses the supported watch-page list behind a reveal button. |
+| YouTube Shorts shelves | On for the built-in YouTube profile | Hides bounded Shorts shelves and carousels on supported YouTube pages while preserving ordinary recommendations, navigation, and direct Shorts links. |
 | Hide YouTube video picture | Manual by default; optional saved mode | Covers the picture while playback continues. A saved preference reapplies after reloads and YouTube video changes; Show picture remains a page-only override. It does not edit cuts or change audio. Native controls, including mute, and captions remain available; recognized ads and picture-in-picture are uncovered. |
 | Social Stories | On for built-in social profiles | Hides supported Stories navigation and trays on Instagram, Facebook, and TikTok, always or during up to 12 local-time windows. |
 | Social follow recommendations | On for built-in social profiles | Hides supported suggested-account modules on home pages, independently from Stories and the followed-post feed. |
-| Social short video | On for built-in social profiles | Hides supported Reels, Watch, and TikTok short-video hubs and entry points, always or on a separate schedule. TikTok's `/` landing stream counts as both short-video and home-feed content, so either hide control stops it. A direct item URL remains viewable. |
+| Social short video | On for built-in social profiles | Hides supported Reels, Watch, and TikTok short-video hubs and entry points, always or on a separate schedule. A direct item URL remains viewable. |
 | Social Explore | On for built-in social profiles | Hides supported Explore and Discover navigation and route feeds, always or on a separate schedule, while leaving search, profiles, and messages available. |
-| Social home feed | On for built-in social profiles | Hides supported home/infinite feeds, always or on a separate schedule. Direct items and conversations remain; marked continuation recommendations are removed. |
-| Quit Porn | Off | Adds local Chrome request-blocking rules for a packaged starter list plus up to 500 user-entered hostnames. With separate consent, it downloads any selected bounded US-coverage, China-coverage, and Japan-coverage lists now and about weekly. It only blocks top-level navigation and stores no visit log. |
+| Social home feed | On for built-in Instagram and Facebook profiles | Hides individual supported home-feed posts without hiding the shared page container, so Stories and follow recommendations remain independently controllable. Direct items and conversations remain; marked continuation recommendations are removed. |
+| TikTok landing feed | On for the built-in TikTok profile | Hides only the supported vertically scrolling feed inside TikTok's `/` landing page. The landing page, navigation, messages, profiles, and direct links remain available. |
+| Adult content filter | Off | Adds local Chrome request-blocking rules for a packaged starter list plus up to 500 user-entered hostnames. With separate consent, it downloads any selected bounded US-coverage, China-coverage, and Japan-coverage lists now and about weekly, retrying a failed refresh after about six hours. It only blocks top-level navigation and stores no visit log. |
 
-Built-in profiles start enabled for `www.instagram.com`, `www.facebook.com`, `www.tiktok.com`, `www.amazon.com`, `www.ebay.com`, `www.etsy.com`, `www.walmart.com`, `www.target.com`, `www.temu.com`, `us.shein.com`, and `www.aliexpress.com`. These exact HTTPS host permissions are required because automatic operation is a core feature. Other hosts remain off until separately authorized. Each profile can be turned off or removed.
+Built-in profiles start enabled for `www.instagram.com`, `www.facebook.com`, `www.tiktok.com`, `www.youtube.com`, `www.amazon.com`, `www.ebay.com`, `www.etsy.com`, `www.walmart.com`, `www.target.com`, `www.temu.com`, `us.shein.com`, and `www.aliexpress.com`. These exact HTTPS host permissions are required because automatic operation is a core feature. Other hosts remain off until separately authorized. Each profile can be turned off or removed.
 
 Downloaded lists are treated only as untrusted domain data. Each fixed parser accepts its documented plain format, filters selected critical domains, and caps output at 1,995 US-coverage entries, 1,900 China-coverage entries, or 1,500 Japan-coverage entries. One source can fail without replacing the other sources or its own last successful rules. The sources are [Jarelllama's Tranco-derived NSFW list](https://github.com/jarelllama/Scam-Blocklist#nsfw-blocklist) (GPL-3.0) and [V2Fly domain-list-community](https://github.com/v2fly/domain-list-community) (MIT). Coverage labels describe the intended audience and do not prove where a domain or server is located. These independent, unsigned lists can contain false positives and omissions. Optional requests expose ordinary connection metadata such as IP address and time to GitHub's raw-content host, but send no browsing history, settings, matches, or password.
 
-The adult-site password is stored only as a salted PBKDF2-SHA-256 hash. There is no recovery. It adds friction for settings changes, but anyone with control of Chrome can disable or uninstall the extension, clear its data, or use another profile or browser.
+The adult-content-filter password is stored only as a salted PBKDF2-SHA-256 hash. There is no recovery. It adds friction for settings changes, but anyone with control of Chrome can disable or uninstall the extension, clear its data, or use another profile or browser.
 
 ## What is not implemented
 
@@ -71,7 +73,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, readability policy, release gates, tests
-  dist/quiet-browse-0.5.7.zip ← generated extension-only archive
+  dist/quiet-browse-1.0.0.zip ← generated extension-only archive
 ```
 
 ## Developer commands
@@ -83,13 +85,14 @@ cd quiet-browse
 npm install
 npm run format:check
 npm test
+npm run test:browser
 npm run check
 npm run demo
 npm run package
 npm run verify
 ```
 
-There are no third-party runtime dependencies. Development uses the exact Prettier version recorded in `package-lock.json`, so run `npm install` before `npm run format`, `npm run format:check`, or `npm run verify`. The Node tests themselves remain dependency-free: you can run `node --test tests/*.test.mjs` and `node scripts/check.mjs` directly. Packaging and the local demo use Python:
+There are no third-party runtime dependencies. Development uses the exact Prettier version recorded in `package-lock.json`, so run `npm install` before `npm run format`, `npm run format:check`, or `npm run verify`. The Node tests themselves remain dependency-free. `npm run test:browser` starts a loopback-only fixture server and an isolated local Chrome/Chromium profile; set `CHROME_BIN` if the browser is not in a standard path. Packaging and the local demo use Python:
 
 ```sh
 python3 scripts/serve_demo.py
@@ -110,10 +113,10 @@ The server binds only to `127.0.0.1:8674`. Visit these URLs while it runs:
 
 Use only the manual lab when testing the actual installed extension. Automated fixture pages inject a test double and should not also run an enabled installed copy.
 
-After installing this update, Chrome may require acceptance of the exact built-in host permissions and request-blocking permission. Regional lists remain off until the user selects them and accepts a separate runtime permission for `raw.githubusercontent.com`. Reload the extension card at `chrome://extensions`, accept only if the disclosed scope is acceptable, and reload affected pages after saving unfinished work. Existing preferences migrate locally; the built-in profiles are seeded once, and the adult-site blocker starts off.
+After installing this update, Chrome may require acceptance of the exact built-in host permissions and request-blocking permission. Regional lists remain off until the user selects them and accepts a separate runtime permission for `raw.githubusercontent.com`. Reload the extension card at `chrome://extensions`, accept only if the disclosed scope is acceptable, and reload affected pages after saving unfinished work. Existing preferences migrate locally; the built-in profiles are seeded once, and the adult content filter starts off.
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). The source repository, support channel, and privacy website are public. The Chrome Web Store checklist remains incomplete until the publisher performs the live Chrome and website checks and completes the developer-dashboard disclosures. No Chrome Web Store submission has been made.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.0 is released on GitHub. Version 0.5.7 remains public in the Chrome Web Store until Google reviews and publishes the 1.0.0 update.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.

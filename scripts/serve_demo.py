@@ -2,6 +2,7 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlsplit
+import os
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +49,8 @@ class FixtureRequestHandler(SimpleHTTPRequestHandler):
                 '__SHORT_SURFACE__': (
                     '' if profile == 'tiktok' else 'data-qb-social-surface="short"'
                 ),
+                '__HOME_ID__': 'column-list-container' if profile == 'tiktok' else 'home',
+                '__HOME_SURFACE__': 'tiktokLanding' if profile == 'tiktok' else 'home',
             }
             for token, value in replacements.items():
                 source = source.replace(token, value)
@@ -81,7 +84,10 @@ class FixtureRequestHandler(SimpleHTTPRequestHandler):
             return self.html((ROOT / 'demo/youtube.html').read_text())
         if route == '/demo/engine-youtube.js':
             # Fixture-only host adapter. Packaged engine is unchanged; no real YouTube claim.
-            fake_location = "const location = { hostname: 'www.youtube.com' };"
+            fake_location = (
+                "const location = { hostname: 'www.youtube.com', pathname: '/', "
+                "href: 'https://www.youtube.com/' };"
+            )
             source = wrapped_extension_script(
                 fake_location, ROOT / 'extension/content/engine.js'
             )
@@ -159,7 +165,10 @@ class FixtureRequestHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
 if __name__ == '__main__':
-    print('Quiet Browse local lab: http://127.0.0.1:8674/demo/index.html', flush=True)
+    port = int(os.environ.get('QUIET_BROWSE_DEMO_PORT', '8674'))
+    if not 1024 <= port <= 65535:
+        raise SystemExit('QUIET_BROWSE_DEMO_PORT must be between 1024 and 65535.')
+    print(f'Quiet Browse local lab: http://127.0.0.1:{port}/demo/index.html', flush=True)
     print(
         'Automated DOM fixtures: /demo/tests.html, /demo/youtube-tests.html, '
         '/demo/social-tests.html, /demo/tiktok-tests.html, /demo/comfort.html, '
@@ -167,6 +176,6 @@ if __name__ == '__main__':
         flush=True,
     )
     try:
-        ThreadingHTTPServer(('127.0.0.1', 8674), FixtureRequestHandler).serve_forever()
+        ThreadingHTTPServer(('127.0.0.1', port), FixtureRequestHandler).serve_forever()
     except KeyboardInterrupt:
         print('\nLocal test server stopped.')

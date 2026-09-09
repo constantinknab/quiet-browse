@@ -24,12 +24,12 @@
 
       <section id="adult-guard" aria-labelledby="adult-title">
         <p class="eyebrow">OPTIONAL LOCAL BLOCKER</p>
-        <h2 id="adult-title">Quit Porn</h2>
+        <h2 id="adult-title">Adult content filter</h2>
         <p class="muted">
           Blocks top-level navigation to a small packaged starter set, your additions, and any
-          regional community lists you select. Lists update about weekly and remain below 2,000
-          installed domains each. Coverage labels describe the audience a preset is meant to help;
-          they do not claim where a domain or server is located.
+          regional community lists you select. Lists update about weekly, retry failures after about
+          six hours, and remain below 2,000 installed domains each. Coverage labels describe the
+          audience a preset is meant to help; they do not claim where a domain or server is located.
         </p>
         <div id="adult-off">
           <div
@@ -57,7 +57,9 @@
             Browse stores a salted PBKDF2 hash, never the plaintext password. This is friction, not
             tamper-proof parental control.
           </p>
-          <button id="adult-enable" class="primary" type="button">Turn on Quit Porn</button>
+          <button id="adult-enable" class="primary" type="button">
+            Turn on adult content filter
+          </button>
         </div>
         <div id="adult-on" hidden>
           <p id="adult-status" class="notice"></p>
@@ -82,7 +84,9 @@
           </label>
           <div class="button-row">
             <button id="adult-save" type="button">Save additional domains</button
-            ><button id="adult-disable" class="danger" type="button">Turn off Quit Porn</button>
+            ><button id="adult-disable" class="danger" type="button">
+              Turn off adult content filter
+            </button>
           </div>
         </div>
         <p id="adult-message" class="message" role="status"></p>

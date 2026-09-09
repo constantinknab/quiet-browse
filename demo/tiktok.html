@@ -16,14 +16,29 @@
   <body class="document">
     <h1>TikTok landing-feed fixture</h1>
     <p>
-      This is a local structural fixture, not TikTok. It verifies that the root route cannot bypass
-      short-video or home-feed controls.
+      This is a local structural fixture, not TikTok. It verifies that the landing page remains
+      usable while its inner short-video stream is independently hidden.
     </p>
     <nav>
       <a id="home-nav" href="/">For You</a> <a id="following-nav" href="/following/">Following</a>
       <a id="messages-nav" href="/messages/">Messages</a>
     </nav>
-    <main id="landing"><article>Vertically scrollable short-video item</article></main>
+    <aside id="recommend-list-decoy" data-e2e="recommend-list">
+      <article>Non-scrollable recommendation module one</article>
+      <article>Non-scrollable recommendation module two</article>
+    </aside>
+    <main id="landing">
+      <section id="landing-tools">Search, navigation, and landing-page controls</section>
+      <div id="column-list-container">
+        <article data-e2e="recommend-list-item-container">
+          Vertically scrollable short-video item one
+        </article>
+        <article data-e2e="recommend-list-item-container">
+          Vertically scrollable short-video item two
+        </article>
+      </div>
+      <aside id="landing-sidebar">Landing-page sidebar</aside>
+    </main>
     <section id="recommendations" data-qb-social-surface="recommendations">
       Continuation recommendations
     </section>

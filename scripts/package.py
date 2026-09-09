@@ -8,7 +8,14 @@ root = Path(__file__).resolve().parents[1]
 source = root / 'extension'
 manifest = json.loads((source / 'manifest.json').read_text())
 assert manifest['manifest_version'] == 3
-files = sorted(p for p in source.rglob('*') if p.is_file() and not p.name.startswith('.'))
+# Ignore a hidden file or any file nested under a hidden directory. This keeps
+# editor metadata and accidentally copied secrets outside the Web Store package.
+files = sorted(
+    path
+    for path in source.rglob('*')
+    if path.is_file()
+    and not any(part.startswith('.') for part in path.relative_to(source).parts)
+)
 allowed = {'.js', '.json', '.css', '.html', '.png', '.txt'}
 for p in files:
     assert not p.is_symlink(), f'Symlinks are not packaged: {p}'
@@ -31,4 +38,4 @@ checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
 (dist / (archive.name + '.sha256')).write_text(checksum + '  ' + archive.name + '\n')
 print(f'Packaged {len(files)} extension files: {archive}')
 print(f'SHA-256: {checksum}')
-print('Not submitted or approved. Run scripts/release_check.py before public submission.')
+print('Packaging does not submit the build or obtain Chrome Web Store approval.')

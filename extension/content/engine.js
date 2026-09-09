@@ -5,8 +5,8 @@
 // to their focused controllers instead of combining all logic in one file.
 (() => {
   'use strict';
-  const INSTANCE = '__quietBrowseV9';
-  const ENGINE_VERSION = 9;
+  const INSTANCE = '__quietBrowseV10';
+  const ENGINE_VERSION = 10;
   if (globalThis[INSTANCE]) {
     globalThis[INSTANCE].refresh();
     return;
@@ -32,6 +32,7 @@
   const choices = new Map();
   const videos = new Map();
   const recommendations = new Map();
+  const shortsRecommendations = new Map();
   const allowedVideos = new WeakSet();
   const youtube = ['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(location.hostname);
   const SAFE_PROPERTIES = new Set([
@@ -298,7 +299,75 @@
         recommendations.delete(target);
       }
     }
+    scanYouTubeShortsRecommendations();
     updateCover();
+  }
+
+  function isShortDestination(anchor) {
+    try {
+      return new URL(anchor.getAttribute('href'), location.href).pathname.startsWith('/shorts/');
+    } catch {
+      return false;
+    }
+  }
+  function isOrdinaryVideoDestination(anchor) {
+    try {
+      return /^\/(?:watch|live)(?:\/|$)/.test(
+        new URL(anchor.getAttribute('href'), location.href).pathname,
+      );
+    } catch {
+      return false;
+    }
+  }
+  function isShortsShelf(shelf) {
+    if (shelf.matches('[is-shorts],ytd-reel-shelf-renderer,ytm-reel-shelf-renderer')) return true;
+    const links = [...shelf.querySelectorAll('a[href]')];
+    return links.some(isShortDestination) && !links.some(isOrdinaryVideoDestination);
+  }
+
+  function shortsShelfTarget(shelf) {
+    if (!shelf.matches('ytd-rich-shelf-renderer')) return shelf;
+    const section = shelf.closest('ytd-rich-section-renderer');
+    if (!section) return shelf;
+    const competingShelves = [
+      ...section.querySelectorAll(
+        'ytd-rich-shelf-renderer,ytd-reel-shelf-renderer,ytm-reel-shelf-renderer,grid-shelf-view-model',
+      ),
+    ].some((candidate) => candidate !== shelf && !isShortsShelf(candidate));
+    const ordinaryOutsideShelf = [...section.querySelectorAll('a[href]')].some(
+      (anchor) => !shelf.contains(anchor) && isOrdinaryVideoDestination(anchor),
+    );
+    return competingShelves || ordinaryOutsideShelf ? shelf : section;
+  }
+
+  function scanYouTubeShortsRecommendations() {
+    const desired = new Set();
+    if (settings.youtubeShortsRecommendations) {
+      const shelves = document.querySelectorAll(
+        [
+          'ytd-rich-shelf-renderer[is-shorts]',
+          'ytd-rich-shelf-renderer',
+          'ytd-reel-shelf-renderer',
+          'ytm-reel-shelf-renderer',
+          'grid-shelf-view-model',
+        ].join(','),
+      );
+      for (const shelf of shelves) {
+        if (!isShortsShelf(shelf)) continue;
+        const target = shortsShelfTarget(shelf);
+        if (target?.isConnected) desired.add(target);
+      }
+    }
+    for (const [target, original] of shortsRecommendations) {
+      if (desired.has(target) && target.isConnected) continue;
+      restoreAttribute(target, 'data-qb-youtube-shorts-hidden', original);
+      shortsRecommendations.delete(target);
+    }
+    for (const target of desired) {
+      if (!shortsRecommendations.has(target))
+        shortsRecommendations.set(target, target.getAttribute('data-qb-youtube-shorts-hidden'));
+      target.setAttribute('data-qb-youtube-shorts-hidden', 'true');
+    }
   }
 
   function updateCover() {
@@ -456,6 +525,9 @@
       button.remove();
     }
     recommendations.clear();
+    for (const [target, original] of shortsRecommendations)
+      restoreAttribute(target, 'data-qb-youtube-shorts-hidden', original);
+    shortsRecommendations.clear();
     if (appliedMarker)
       restoreAttribute(document.documentElement, 'data-qb-youtube', originalYouTubeAttribute);
     appliedMarker = false;
@@ -527,6 +599,7 @@
       choices: choices.size,
       videos: [...videos.keys()].filter((video) => video.paused).length,
       recommendations: recommendations.size,
+      shortsRecommendations: shortsRecommendations.size,
     };
   }
 

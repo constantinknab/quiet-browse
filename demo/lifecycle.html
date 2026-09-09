@@ -34,8 +34,14 @@
       </section>
       <section id="short" __SHORT_SURFACE__>Short-video tray</section>
       <section id="explore" data-qb-social-surface="explore">Explore tray</section>
-      <section id="home" role="feed" data-e2e="recommend-list" data-qb-social-surface="home">
-        Home feed
+      <section
+        id="__HOME_ID__"
+        role="feed"
+        data-e2e="recommend-list"
+        data-qb-social-surface="__HOME_SURFACE__"
+      >
+        <article data-e2e="recommend-list-item-container">Home feed item one</article>
+        <article data-e2e="recommend-list-item-container">Home feed item two</article>
       </section>
       <div id="promo" class="promo-loop">Decorative promotional loop</div>
       <div id="spinner" role="status" class="loading-loop">Functional loading loop</div>
@@ -55,6 +61,11 @@
         <ytd-thumbnail><div id="mouseover-overlay">Preview</div></ytd-thumbnail>
         <div id="cinematics">Ambient background</div></ytd-watch-flexy
       >
+      <ytd-rich-section-renderer id="youtube-shorts-section">
+        <ytd-rich-shelf-renderer is-shorts>
+          <a href="/shorts/fixture">Shorts recommendation</a>
+        </ytd-rich-shelf-renderer>
+      </ytd-rich-section-renderer>
       <div class="long-content">Long page content for navigation testing.</div>
       <h2>Results</h2>
       <ol id="results"></ol>

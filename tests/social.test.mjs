@@ -25,10 +25,12 @@ test('supported social hosts and routes preserve messages and direct items', () 
   assert.equal(routeFor('facebook', '/watch/'), 'short');
   assert.equal(routeFor('facebook', '/discover/'), 'explore');
 
-  assert.equal(routeFor('tiktok', '/'), 'short');
-  assert.deepEqual(routeCategories('tiktok', '/'), ['short', 'home']);
-  assert.deepEqual(routeCategories('tiktok', '////'), ['short', 'home']);
-  assert.equal(categoryForLink('tiktok', '/'), 'short');
+  // TikTok's root route remains a usable landing page. A separate setting hides
+  // only its inner scrolling feed, so the root navigation link has no category.
+  assert.equal(routeFor('tiktok', '/'), 'home');
+  assert.deepEqual(routeCategories('tiktok', '/'), ['home']);
+  assert.deepEqual(routeCategories('tiktok', '////'), ['home']);
+  assert.equal(categoryForLink('tiktok', '/'), null);
   assert.equal(routeFor('tiktok', '/messages/'), 'messages');
   assert.equal(routeFor('tiktok', '/@user/video/123'), 'direct');
   assert.equal(routeFor('tiktok', '/following/'), 'short');

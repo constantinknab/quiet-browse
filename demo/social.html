@@ -31,6 +31,11 @@
     <main>
       <section>
         <div id="stories">
+          <article id="story-article-decoy">
+            <a href="/p/story-preview/"
+              ><img src="/extension/icons/icon32.png" alt="Story preview"
+            /></a>
+          </article>
           <a href="/stories/quiet-user/123/" role="button"
             ><img src="/extension/icons/icon32.png" alt="quiet-user profile picture" />quiet-user</a
           ><button type="button">
@@ -50,9 +55,10 @@
           </button>
         </div>
       </section>
-      <div id="home" data-qb-social-surface="home">
+      <div id="home">
         <article id="post-carousel">
           <p>Home feed post carousel</p>
+          <a href="/p/home-carousel/">Open post</a>
           <img src="/extension/icons/icon32.png" alt="Post image one" /><img
             src="/extension/icons/icon32.png"
             alt="Post image two"
@@ -62,16 +68,29 @@
             </svg>
           </button>
         </article>
-      </div>
-    </main>
-    <aside>
-      <div id="suggestions">
-        <span>Suggested for you</span>
-        <div>
-          <a href="/suggested-user/">Suggested profile</a><button type="button">Follow</button>
+        <article id="second-post">
+          <a href="/p/second-post/"><img src="/extension/icons/icon32.png" alt="Second post" /></a>
+        </article>
+        <div id="unwrapped-post">
+          <a href="/p/unwrapped-post/"
+            ><img src="/extension/icons/icon32.png" alt="Post without an article wrapper"
+          /></a>
         </div>
       </div>
-    </aside>
+      <aside>
+        <div id="suggestions">
+          <span>Suggested for you</span>
+          <article id="suggestion-article-decoy">
+            <a href="/p/suggested-preview/"
+              ><img src="/extension/icons/icon32.png" alt="Suggested account preview"
+            /></a>
+          </article>
+          <div>
+            <a href="/suggested-user/">Suggested profile</a><button type="button">Follow</button>
+          </div>
+        </div>
+      </aside>
+    </main>
     <article id="direct-item">Directly opened post or video</article>
     <section id="recommendations" data-qb-social-surface="recommendations">
       Infinite continuation recommendations

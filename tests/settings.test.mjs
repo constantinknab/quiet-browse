@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   DEFAULTS,
   RECOMMENDED_SITES,
+  SOCIAL_SCHEDULE_KEYS,
   cleanState,
   cleanSettings,
   defaultsForSite,
@@ -47,7 +48,8 @@ test('social and recommended profiles are exact and use calmer defaults', () => 
   assert.equal(socialPlatform('https://instagram.com.evil.test'), null);
   assert.equal(isRecommendedSite('https://www.amazon.com'), true);
   assert.equal(isRecommendedSite('https://amazon.com.evil.test'), false);
-  assert.equal(RECOMMENDED_SITES.length, 11);
+  assert.equal(RECOMMENDED_SITES.length, 12);
+  assert.equal(isRecommendedSite('https://www.youtube.com'), true);
   assert.equal(defaultsForSite('https://www.instagram.com').socialHomeFeed, true);
   assert.equal(defaultsForSite('https://www.instagram.com').socialSuggestions, true);
   assert.equal(defaultsForSite('https://www.amazon.com').socialHomeFeed, false);
@@ -57,20 +59,121 @@ test('social and recommended profiles are exact and use calmer defaults', () => 
   assert.equal(defaultsForSite('https://www.amazon.com').grayscale.level, 20);
   assert.equal(defaultsForSite('https://www.instagram.com').grayscale.enabled, false);
   assert.equal(defaultsForSite('https://www.youtube.com').youtubePictureCover, false);
+  assert.equal(defaultsForSite('https://www.youtube.com').youtubeShortsRecommendations, true);
+  assert.equal(defaultsForSite('https://www.tiktok.com').tiktokLandingFeed, true);
   assert.equal(defaultsForSite('https://example.com').grayscale.enabled, false);
   assert.equal(siteCategory('https://www.instagram.com'), 'social');
+  assert.equal(siteCategory('https://www.youtube.com'), 'video');
   assert.equal(siteCategory('https://www.amazon.com'), 'ecommerce');
   assert.equal(siteCategory('https://example.com'), 'other');
 });
 test('settings accept only known boolean flags', () => {
+  assert.deepEqual(SOCIAL_SCHEDULE_KEYS, [
+    'socialStories',
+    'socialSuggestions',
+    'socialShortVideo',
+    'socialExplore',
+    'socialHomeFeed',
+    'tiktokLandingFeed',
+  ]);
   assert.deepEqual(
     cleanSettings({ motion: false, backgroundVideo: 'yes', remoteScript: 'https://evil.test' }),
     { ...DEFAULTS, motion: false },
   );
   assert.equal(cleanSettings({ youtubePictureCover: true }).youtubePictureCover, true);
   assert.equal(cleanSettings({ youtubePictureCover: 'yes' }).youtubePictureCover, false);
+  assert.equal(
+    cleanSettings({ youtubeShortsRecommendations: false }).youtubeShortsRecommendations,
+    false,
+  );
+  assert.equal(
+    cleanSettings({ youtubeShortsRecommendations: 'no' }).youtubeShortsRecommendations,
+    true,
+  );
   assert.equal(cleanSettings({ socialSuggestions: false }).socialSuggestions, false);
   assert.equal(cleanSettings({ socialSuggestions: 'yes' }).socialSuggestions, true);
+});
+test('legacy TikTok settings migrate their old combined landing-feed result', () => {
+  const hidden = cleanState({
+    sites: {
+      'https://www.tiktok.com': {
+        enabled: true,
+        settings: { socialShortVideo: false, socialHomeFeed: true },
+      },
+    },
+  });
+  const available = cleanState({
+    sites: {
+      'https://www.tiktok.com': {
+        enabled: true,
+        settings: { socialShortVideo: false, socialHomeFeed: false },
+      },
+    },
+  });
+  const partiallyStored = cleanState({
+    sites: {
+      'https://www.tiktok.com': {
+        enabled: true,
+        settings: { socialShortVideo: false },
+      },
+    },
+  });
+  const scheduled = cleanState({
+    sites: {
+      'https://www.tiktok.com': {
+        enabled: true,
+        settings: {
+          socialShortVideo: true,
+          socialHomeFeed: true,
+          socialSchedules: {
+            socialShortVideo: {
+              scheduled: true,
+              windows: [{ days: [1], start: '09:00', end: '10:00' }],
+            },
+            socialHomeFeed: {
+              scheduled: true,
+              windows: [{ days: [2], start: '20:00', end: '22:00' }],
+            },
+          },
+        },
+      },
+    },
+  });
+  const alwaysWins = cleanState({
+    sites: {
+      'https://www.tiktok.com': {
+        enabled: true,
+        settings: {
+          socialShortVideo: true,
+          socialHomeFeed: true,
+          socialSchedules: {
+            socialShortVideo: { scheduled: false, windows: [] },
+            socialHomeFeed: {
+              scheduled: true,
+              windows: [{ days: [2], start: '20:00', end: '22:00' }],
+            },
+          },
+        },
+      },
+    },
+  });
+  assert.equal(hidden.sites['https://www.tiktok.com'].settings.tiktokLandingFeed, true);
+  assert.equal(available.sites['https://www.tiktok.com'].settings.tiktokLandingFeed, false);
+  assert.equal(partiallyStored.sites['https://www.tiktok.com'].settings.tiktokLandingFeed, true);
+  assert.deepEqual(
+    scheduled.sites['https://www.tiktok.com'].settings.socialSchedules.tiktokLandingFeed,
+    {
+      scheduled: true,
+      windows: [
+        { days: [1], start: '09:00', end: '10:00' },
+        { days: [2], start: '20:00', end: '22:00' },
+      ],
+    },
+  );
+  assert.deepEqual(
+    alwaysWins.sites['https://www.tiktok.com'].settings.socialSchedules.tiktokLandingFeed,
+    { scheduled: false, windows: [] },
+  );
 });
 test('malformed stored scopes and account-like data are discarded', () => {
   const state = cleanState({

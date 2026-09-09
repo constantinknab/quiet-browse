@@ -1,13 +1,13 @@
-# Quiet Browse 0.5.7 — complete Chrome Web Store submission guide
+# Quiet Browse 1.0.0 — complete Chrome Web Store submission guide
 
-Prepared August 29, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
+Updated September 9, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
 
 ## What is ready
 
-- Store package: `dist/quiet-browse-0.5.7.zip`
-- SHA-256: `ad8ff672447dd69c66187fa4bc5f4f471430aabd709c11388fb3a28b4437ebf4`
+- Store package: `dist/quiet-browse-1.0.0.zip`
+- SHA-256: `bf56f1b5669d1ab3d87d96c53266590cdbb74feefe46d469cc90b4e99c13cad0`
 - Manifest V3, 21 packaged files, and no remote executable code
-- 64 Node tests, 164 browser fixture checks, 3,780 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
+- 66 Node tests, 228 browser fixture checks, 4,500 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
 - Draft listing copy: `docs/STORE-LISTING.md`
 - Public website source: `website/`
 - Store icon and promotional tiles: `store-assets/`
@@ -51,32 +51,12 @@ The prepared repository uses:
 
 Creative Commons recommends software-specific licenses for software. Do not change the code to a CC license merely for branding consistency without understanding the compatibility and patent consequences. Publishing a permissive license grants rights to copies already received and is not a reversible trial.
 
-## Phase 3 — publish the code and free website on GitHub
+## Phase 3 — keep the candidate local while testing
 
-1. Sign in to the GitHub account that should own the project.
-2. Create a **public** repository named `quiet-browse` without adding a generated README, license, or `.gitignore` because the local project already contains them.
-3. From the project folder, initialize and push the prepared source:
-
-   ```bash
-   git init
-   git branch -M main
-   git add .
-   git commit -m "Publish Quiet Browse 0.5.7"
-   git remote add origin https://github.com/YOUR-GITHUB-USERNAME/quiet-browse.git
-   git push -u origin main
-   ```
-
-4. In the repository, open **Settings → Pages**.
-5. Under **Build and deployment**, choose **GitHub Actions**. The included `.github/workflows/pages.yml` deploys only `website/`.
-6. Open **Actions** and wait for **Deploy Quiet Browse website** to pass.
-7. Visit:
-
-   - `https://YOUR-GITHUB-USERNAME.github.io/quiet-browse/`
-   - `https://YOUR-GITHUB-USERNAME.github.io/quiet-browse/privacy.html`
-   - `https://YOUR-GITHUB-USERNAME.github.io/quiet-browse/support.html`
-
-8. Verify all three URLs load over HTTPS in a signed-out/private browser window. They must not require a GitHub login.
-9. Do not add analytics, a contact form, advertising, a chat widget, or remote fonts before submission. Those additions change the website and possibly extension disclosures.
+1. Work on the local `release/1.0.0` branch.
+2. Do not push, tag, create a GitHub release, or upload the ZIP while live testing is incomplete.
+3. Keep `docs/release.json` gates false until the corresponding work has actually happened.
+4. Run `git diff --check` after each fix and repeat the automated verification before testing again.
 
 ## Phase 4 — complete live Chrome acceptance testing
 
@@ -118,7 +98,7 @@ Suggested caption: **Replace continuous scrolling with calmer page-by-page navig
 ### Screenshot 2 — categorized site settings
 
 1. Open **Sites & privacy**.
-2. Show the Social, Ecommerce, and Other website categories.
+2. Show the Social, Video, Ecommerce, and Other website categories.
 3. Expand one ecommerce site so the 20% grayscale setting is visible.
 4. Do not show test-result banners or localhost URLs.
 
@@ -140,7 +120,7 @@ Suggested caption: **Hide high-stimulation social surfaces always or on your own
 
 Suggested caption: **Reduce color and move one screen at a time without animated scrolling.**
 
-### Screenshot 5 — optional adult-site blocker settings
+### Screenshot 5 — optional adult content filter settings
 
 1. Show the blocker settings page with US, China, and Japan list choices.
 2. Do not show explicit pages, explicit imagery, or a list of adult domains.
@@ -155,7 +135,7 @@ Suggested caption: **Optional local top-level blocking with selectable lists and
 - No personal accounts, messages, carts, orders, addresses, or payment details.
 - No fixture pages presented as the real extension.
 - No excessive platform logos or implication of affiliation.
-- No feature shown unless it exists in version 0.5.7.
+- No feature shown unless it exists in version 1.0.0.
 
 ## Phase 6 — prepare the promotional video
 
@@ -168,7 +148,7 @@ Google's current listing documentation asks for a YouTube promo-video URL. Make 
 5. 40–52 seconds: show the blocker settings using `example.com`, never an adult page.
 6. 52–60 seconds: disable the blocker and show that ordinary access returns.
 
-Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.7 — Chrome extension demonstration`. In the description, state that it shows version 0.5.7 and contains no paid endorsement.
+Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.0 — Chrome extension demonstration`. In the description, state that it shows version 1.0.0 and contains no paid endorsement.
 
 ## Phase 7 — register the Chrome Web Store developer account
 
@@ -182,21 +162,61 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 0.5.7 — Chrome ex
 8. Enable publication/review notification emails.
 9. Add a physical address only if the current dashboard requires one for the selected business or monetization status; do not invent one.
 
-## Phase 8 — create the item and upload version 0.5.7
+## Phase 8 — run the final gate and publish the approved source
 
-1. In the dashboard, choose **Add new item**.
-2. Upload `dist/quiet-browse-0.5.7.zip`.
-3. Confirm the dashboard identifies Manifest V3 and version 0.5.7.
+1. Record completed acceptance work honestly in `docs/release.json`.
+2. Run the complete local gate:
+
+   ```bash
+   npm run verify
+   python3 -m py_compile scripts/*.py
+   python3 scripts/check_publish_site.py
+   python3 scripts/release_check.py
+   git diff --check
+   ```
+
+3. Stop if any command fails. These checks document preparation; they do not represent Google approval or legal certification.
+4. Obtain explicit publisher approval for the tested bytes, then commit and publish the source:
+
+   ```bash
+   git add .
+   git status --short
+   git diff --cached --stat
+   git diff --cached
+   git commit -m "Publish Quiet Browse 1.0.0"
+   git switch main
+   git merge --ff-only release/1.0.0
+   git push origin main
+   git tag -a v1.0.0 -m "Quiet Browse 1.0.0"
+   git push origin v1.0.0
+   gh release create v1.0.0 dist/quiet-browse-1.0.0.zip --title "Quiet Browse 1.0.0" --notes "Stable 1.0 release. See README and the Chrome Web Store listing for features, privacy details, and limitations."
+   ```
+
+5. Confirm the GitHub release page contains the exact extension-only ZIP. Do not attach a repository source archive as the Web Store upload.
+6. Wait for **Deploy Quiet Browse website** in GitHub Actions to pass. The existing workflow deploys only `website/`.
+7. Verify these URLs over HTTPS in a signed-out/private window:
+
+   - `https://constantinknab.github.io/quiet-browse/`
+   - `https://constantinknab.github.io/quiet-browse/privacy.html`
+   - `https://constantinknab.github.io/quiet-browse/support.html`
+
+8. Do not add analytics, a contact form, advertising, a chat widget, or remote fonts between verification and submission. Those additions change the reviewed disclosures.
+
+## Phase 9 — upload version 1.0.0
+
+1. Open the existing Quiet Browse item in the dashboard.
+2. Upload `dist/quiet-browse-1.0.0.zip` as an update to the existing item.
+3. Confirm the dashboard identifies Manifest V3 and version 1.0.0.
 4. Do not upload the source repository ZIP. The Web Store package must have `manifest.json` at its root.
 
-## Phase 9 — Store Listing tab
+## Phase 10 — Store Listing tab
 
 Use these fields:
 
 - **Name:** `Quiet Browse`
 - **Primary language:** English
-- **Category:** Productivity
-- **Summary:** `Calmer browsing with scheduled social controls, reliable instant paging, grayscale, and selectable regional adult-site lists.`
+- **Category:** Well-being (this matches the current public listing and the extension's single purpose)
+- **Summary:** `Calmer browsing with social controls, an adult content filter, instant paging, motion limits, and grayscale.`
 - **Detailed description:** Start from `docs/STORE-LISTING.md`. Keep its limits and independence statement; do not add universal effectiveness, addiction-treatment, safety-certification, or approval claims.
 - **Homepage URL:** the GitHub Pages homepage
 - **Support URL:** the GitHub Pages `support.html` URL
@@ -206,15 +226,15 @@ Use these fields:
 - **Marquee tile:** `store-assets/marquee-1400x560.png` (optional)
 - **Promo video:** the unlisted YouTube URL
 
-Turn on **Mature content** because the extension includes an adult-site blocking integration. This does not permit explicit material; keep the item, website, screenshots, and video free of it.
+Turn on **Mature content** because the extension includes an adult content filter. This does not permit explicit material; keep the item, website, screenshots, and video free of it.
 
-## Phase 10 — Privacy tab
+## Phase 11 — Privacy tab
 
 ### Single purpose
 
 Paste:
 
-> Reduce high-stimulation and compulsive browsing with local, user-controlled presentation changes and optional top-level adult-site blocking.
+> Reduce high-stimulation and compulsive browsing with local, user-controlled presentation changes and optional top-level adult-content filtering.
 
 ### Remote code
 
@@ -222,7 +242,7 @@ Choose **No, I am not using remote code**.
 
 If a reviewer asks about downloads, explain:
 
-> The optional regional sources are fixed domain-list data fetched from disclosed raw GitHub URLs. Bundled source-specific parsers accept domain strings only. The extension does not download or execute JavaScript, CSS, WebAssembly, instructions, actions, or rule definitions.
+> The optional regional sources are fixed domain-list data fetched from disclosed raw GitHub URLs. Although a source may use an ad-block-list text format, bundled source-specific parsers retain only validated domain identifiers. Remote data cannot choose an action, resource type, priority, redirect, or executable behavior. The extension does not download or execute JavaScript, CSS, WebAssembly, or other executable code.
 
 ### Conservative data-category mapping
 
@@ -231,6 +251,7 @@ Read the dashboard's live definitions before answering. For the current code, di
 - **Website content:** yes; limited structure, labels, animation properties, and media state are processed locally for visible features.
 - **Web history/browsing activity:** yes under Google's broad definition; the current hostname is processed and chosen hostnames are stored, although the extension has no `history` permission and creates no chronological history log.
 - **Authentication information:** disclose the optional extension-protection password if the dashboard definition includes passwords. Only its salted PBKDF2 hash is stored locally; website credentials are not read.
+- **User activity:** yes under Google's broad definition; the extension handles wheel gestures, supported navigation keystrokes, clicks on its own controls, and limited media interaction state locally to provide paging and reversible controls. It does not store or transmit a user-activity log.
 
 For every category, state that data is used only for the disclosed feature, remains on the device, is not sold, is not used for advertising or credit decisions, and is not transmitted to the publisher. The only optional external requests fetch selected list data; GitHub receives ordinary connection metadata but no page content, settings, matches, added domains, or password.
 
@@ -240,37 +261,26 @@ Use the public GitHub Pages `privacy.html` URL. Confirm that the public wording 
 
 ### Permission justifications
 
-Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTTPS patterns are optional declarations and Chrome requests access to one user-selected origin at a time. Explain every one of the eleven exact required hosts as disclosed built-in profiles.
+Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTTPS patterns are optional declarations and Chrome requests access to one user-selected origin at a time. Explain every one of the 12 exact required hosts as disclosed built-in profiles.
 
-## Phase 11 — Distribution and reviewer instructions
+## Phase 12 — Distribution and reviewer instructions
 
 1. Start with **Private** for named trusted testers or **Unlisted** for a link-based pilot.
 2. Select only the regions where you are prepared to support the extension.
 3. Do not claim the extension is a regulated health, safety, parental-control, or age-verification product.
 4. Paste these reviewer instructions:
 
-> No account, API key, payment, or developer server is required. Open the toolbar popup on a neutral HTTPS page and authorize that host to test paging, grayscale, motion limits, and undo. Open Sites & privacy to inspect the exact built-in Social and Ecommerce profiles and the separate social schedules. YouTube preview/recommendation and picture-cover controls can be tested signed out; the picture cover must leave native controls, including mute, usable. To test top-level blocking without visiting adult content, deselect all regional lists, add example.com as an additional hostname, enable the blocker, navigate to https://example.com and observe Chrome's ERR_BLOCKED_BY_CLIENT page, then disable the blocker and confirm access returns. Regional lists require a separate optional raw.githubusercontent.com permission and are parsed only as bounded domain data. The extension contains no analytics, remote executable code, advertising, media downloading, ad skipping, purchase automation, or access-control bypass.
+> No account, API key, payment, or developer server is required. Open the toolbar popup on a neutral HTTPS page and authorize that host to test paging, grayscale, motion limits, and undo. Open Sites & privacy to inspect the exact built-in Social, Video, and Ecommerce profiles and the separate social schedules. YouTube preview/recommendation and picture-cover controls can be tested signed out; the picture cover must leave native controls, including mute, usable. To test top-level blocking without visiting adult content, deselect all regional lists, add example.com as an additional hostname, enable the blocker, navigate to https://example.com and observe Chrome's ERR_BLOCKED_BY_CLIENT page, then disable the blocker and confirm access returns. Regional lists require a separate optional raw.githubusercontent.com permission and are parsed only as bounded domain data. The extension contains no analytics, remote executable code, advertising, media downloading, ad skipping, purchase automation, or access-control bypass.
 
 5. Do not give reviewers personal social-media credentials. If a signed-in layout is necessary, provide a dedicated test account only after reviewing that platform's rules.
 
-## Phase 12 — submit safely
+## Phase 13 — submit safely
 
 1. Review every dashboard tab for warnings.
-2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 0.5.7.
+2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 1.0.0.
 3. Choose **Submit for Review**.
 4. Disable automatic publication so approval produces a staged release.
 5. Monitor the verified publisher email.
 6. If Google requests clarification, answer directly and update code/listing rather than adding review-only behavior.
 7. If approved, run a short private/unlisted pilot before switching to public visibility.
 8. Publish the staged release within the dashboard's stated window; Google's documentation currently gives up to 30 days.
-
-## Phase 13 — final local release gate
-
-Fill in `docs/release.json` only after each item is actually complete, then run:
-
-```bash
-python3 scripts/check_publish_site.py
-python3 scripts/release_check.py
-```
-
-The checks record preparation; they do not represent Google approval or legal certification.

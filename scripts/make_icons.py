@@ -12,11 +12,14 @@ def rounded(x, y, left, top, right, bottom, radius):
     return left <= x <= right and top <= y <= bottom and dx*dx + dy*dy <= radius*radius
 
 def pixel(x, y):
-    if not rounded(x, y, 4, 4, 124, 124, 29):
+    # Chrome's 128 px store-icon guidance reserves 16 transparent pixels on
+    # every edge, leaving a 96 px artwork area. The same vector-like coordinates
+    # scale cleanly to the smaller toolbar sizes.
+    if not rounded(x, y, 16, 16, 112, 112, 23):
         return (0, 0, 0, 0)
     color = (38, 82, 60, 255)
-    for l, t, r, b in [(29, 37, 98, 48), (29, 59, 81, 70), (29, 81, 62, 92)]:
-        if rounded(x, y, l, t, r, b, 5.5):
+    for l, t, r, b in [(36, 42, 91, 51), (36, 60, 78, 69), (36, 78, 62, 86)]:
+        if rounded(x, y, l, t, r, b, 4.5):
             color = (229, 239, 205, 255)
     return color
 

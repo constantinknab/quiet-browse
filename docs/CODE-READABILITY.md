@@ -14,7 +14,7 @@ obfuscated, transpiled, or generated JavaScript bundle.
 - `content/social.js` classifies social routes and hides selected social surfaces.
 - `content/engine.js` coordinates reversible general page and YouTube treatments.
 - `ui/popup.js` controls the active-tab popup.
-- `ui/options.js` controls saved-site, schedule, and Adult Guard settings.
+- `ui/options.js` controls saved-site, schedule, and adult content filter settings.
 
 The split is intentional: a reviewer can inspect one responsibility without tracing an
 unrelated bundled file. HTML contains structure, CSS contains presentation, and UI

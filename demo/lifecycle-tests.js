@@ -12,12 +12,14 @@
     'backgroundVideo',
     'youtubeQuiet',
     'youtubeRecommendations',
+    'youtubeShortsRecommendations',
     'youtubePictureCover',
     'socialStories',
     'socialSuggestions',
     'socialShortVideo',
     'socialExplore',
     'socialHomeFeed',
+    'tiktokLandingFeed',
     'grayscale',
   ];
   const socialCategory = {
@@ -26,12 +28,15 @@
     socialShortVideo: 'short',
     socialExplore: 'explore',
     socialHomeFeed: 'home',
+    tiktokLandingFeed: 'tiktokLanding',
   };
   const applicable = (key) =>
     ['pageMode', 'motion', 'consentChoices', 'grayscale'].includes(key) ||
     (key === 'backgroundVideo' && group !== 'youtube') ||
     (key.startsWith('youtube') && group === 'youtube') ||
-    (key.startsWith('social') && group === 'social');
+    (key === 'tiktokLandingFeed' && profile === 'tiktok') ||
+    (key === 'socialHomeFeed' && group === 'social' && profile !== 'tiktok') ||
+    (key.startsWith('social') && key !== 'socialHomeFeed' && group === 'social');
   const schedule = () => ({ scheduled: false, windows: [] });
   function settings(selected = []) {
     const on = new Set(selected);
@@ -43,6 +48,7 @@
         'socialShortVideo',
         'socialExplore',
         'socialHomeFeed',
+        'tiktokLandingFeed',
       ].map((key) => [
         key,
         on.has(key)
@@ -57,12 +63,14 @@
       backgroundVideo: on.has('backgroundVideo'),
       youtubeQuiet: on.has('youtubeQuiet'),
       youtubeRecommendations: on.has('youtubeRecommendations'),
+      youtubeShortsRecommendations: on.has('youtubeShortsRecommendations'),
       youtubePictureCover: on.has('youtubePictureCover'),
       socialStories: on.has('socialStories'),
       socialSuggestions: on.has('socialSuggestions'),
       socialShortVideo: on.has('socialShortVideo'),
       socialExplore: on.has('socialExplore'),
       socialHomeFeed: on.has('socialHomeFeed'),
+      tiktokLandingFeed: on.has('tiktokLandingFeed'),
       socialSchedules,
       grayscale: on.has('grayscale')
         ? {
@@ -90,14 +98,19 @@
       backgroundVideo: status.videos > 0,
       youtubeQuiet: document.documentElement.getAttribute('data-qb-youtube') === 'quiet',
       youtubeRecommendations: status.recommendations > 0,
+      youtubeShortsRecommendations:
+        status.shortsRecommendations > 0 &&
+        document
+          .getElementById('youtube-shorts-section')
+          .hasAttribute('data-qb-youtube-shorts-hidden') &&
+        getComputedStyle(document.getElementById('youtube-shorts-section')).display === 'none',
       youtubePictureCover: status.covered === true && !!document.querySelector('[data-qb-cover]'),
       grayscale: status.grayscale === 65,
     };
-    for (const [key, category] of Object.entries(socialCategory))
-      output[key] =
-        key === 'socialHomeFeed'
-          ? document.getElementById('home').hasAttribute('data-qb-social-hidden')
-          : !!document.querySelector(`[data-qb-social-hidden="${category}"]`);
+    for (const [key, category] of Object.entries(socialCategory)) {
+      const hiddenSurface = document.querySelector(`[data-qb-social-hidden="${category}"]`);
+      output[key] = !!hiddenSurface && getComputedStyle(hiddenSurface).display === 'none';
+    }
     return { status, output };
   }
   async function expectOnly(selected, label, active = true) {
@@ -107,13 +120,7 @@
       `${profile} · ${label} · engine ${active ? 'active' : 'inactive'}`,
     );
     for (const key of keys) {
-      const expected =
-        active &&
-        applicable(key) &&
-        (selected.includes(key) ||
-          (profile === 'tiktok' &&
-            key === 'socialHomeFeed' &&
-            selected.includes('socialShortVideo')));
+      const expected = active && applicable(key) && selected.includes(key);
       assert(
         output[key] === expected,
         `${profile} · ${label} · ${key} ${expected ? 'applies' : 'is absent'}`,
@@ -155,17 +162,34 @@
       await expectOnly(keys, 'all features together');
       await apply(false, all);
       await expectOnly([], 'master switch off', false);
-      persist('disabled-reload', false, off);
+      // Retain every saved feature while disabled. The reload below proves the
+      // master switch, rather than cleared preferences, is what removes effects.
+      persist('disabled-reload', false, all);
       return;
     }
     if (phase === 'disabled-reload') {
-      const off = settings();
       await expectOnly([], 'disabled page reload', false);
-      await apply(true, off);
-      await expectOnly([], 're-enabled with saved off choices');
+      const dynamicSurface = document.createElement('section');
+      dynamicSurface.id = 'disabled-dynamic-surface';
+      dynamicSurface.setAttribute(
+        'data-qb-social-surface',
+        profile === 'tiktok' ? 'tiktokLanding' : 'home',
+      );
+      dynamicSurface.textContent = 'Content loaded while the extension is disabled';
+      document.querySelector('.content').append(dynamicSurface);
+      await wait(260);
+      assert(
+        !dynamicSurface.hasAttribute('data-qb-social-hidden') &&
+          getComputedStyle(dynamicSurface).display !== 'none',
+        `${profile} · disabled observer leaves newly loaded content untouched`,
+      );
+
+      // Re-enable without replacing the retained settings from the prior reload.
+      policy.enabled = true;
+      await send({ type: 'QB_REFRESH' });
+      await wait(180);
+      await expectOnly(keys, 're-enabled with retained all-on choices');
       const all = settings(keys);
-      await apply(true, all);
-      await expectOnly(keys, 'features restored after re-enable');
       persist('enabled-reload', true, all);
       return;
     }

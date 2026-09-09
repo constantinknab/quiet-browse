@@ -19,6 +19,7 @@
             backgroundVideo: true,
             youtubeQuiet: true,
             youtubeRecommendations: true,
+            youtubeShortsRecommendations: true,
             youtubePictureCover: false,
           },
         };

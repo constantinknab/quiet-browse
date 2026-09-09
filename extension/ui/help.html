@@ -25,8 +25,8 @@
           site for a lasting change.
         </li>
         <li>
-          Open Sites &amp; privacy for grayscale schedules, saved profiles, and the optional
-          adult-site blocker.
+          Open Sites &amp; privacy for grayscale schedules, saved profiles, and the optional adult
+          content filter.
         </li>
       </ol>
       <h2>What the controls do</h2>
@@ -68,6 +68,11 @@
           desktop YouTube watch pages.
         </li>
         <li>
+          <strong>Hide YouTube Shorts shelves:</strong> hides supported Shorts recommendation
+          shelves and carousels while keeping ordinary recommendations, navigation, and direct
+          Shorts links available.
+        </li>
+        <li>
           <strong>Hide YouTube video picture:</strong> overlays the picture while leaving playback
           unchanged. The page-only button resets after reload or a YouTube video change. The
           separate saved preference automatically reapplies the cover after both events; page-only
@@ -82,24 +87,25 @@
         Instagram, Facebook, and TikTok show separate switches for Stories, follow recommendations,
         short-video hubs, Explore/Discover, and the home feed. Checked means hidden. On supported
         Instagram layouts, restoring the followed-post feed does not restore Stories or
-        suggested-account modules. TikTok's first page is both a short-video stream and its home
-        feed, so either checked control stops it. Messages, profiles, searches, and direct post or
-        video URLs remain available. On a direct item or conversation, supported continuation
-        recommendations are removed so the page stops instead of becoming another feed. Long
-        content, comments, and conversations can still scroll. Website changes, languages,
-        experiments, and signed-in layouts may break selectors.
+        suggested-account modules. TikTok has a separate landing-feed control that hides only its
+        vertical video stream while leaving the landing page and navigation available. Messages,
+        profiles, searches, and direct post or video URLs remain available. On a direct item or
+        conversation, supported continuation recommendations are removed so the page stops instead
+        of becoming another feed. Long content, comments, and conversations can still scroll.
+        Website changes, languages, experiments, and signed-in layouts may break selectors.
       </p>
-      <h2>Quit porn</h2>
+      <h2>Adult content filter</h2>
       <p>
         This optional setting blocks top-level navigation to a packaged adult-domain starter list
-        and hostnames you add. If you separately authorize weekly community updates, Quiet Browse
-        downloads only the US-coverage, China-coverage, and Japan-coverage lists you select through
-        GitHub's raw-content host now and about weekly. Each source is capped below 2,000 installed
-        domains. Invalid or unexpectedly sized updates are rejected, and each source keeps its own
-        last working rules. The lists are independent and unsigned, so false positives, omissions,
-        source compromise, and outages remain possible. The request sends no browsing history or
-        settings, although GitHub receives ordinary connection information such as IP address and
-        request time. Source and license details appear in the privacy policy.
+        and hostnames you add. If you separately authorize community updates, Quiet Browse downloads
+        only the US-coverage, China-coverage, and Japan-coverage lists you select through GitHub's
+        raw-content host now and about weekly, with failures retried after about six hours. Each
+        source is capped below 2,000 installed domains. Invalid or unexpectedly sized updates are
+        rejected, and each source keeps its own last working rules. The lists are independent and
+        unsigned, so false positives, omissions, source compromise, and outages remain possible. The
+        request sends no browsing history or settings, although GitHub receives ordinary connection
+        information such as IP address and request time. Source and license details appear in the
+        privacy policy.
       </p>
       <p>
         A password can be handed to a trusted person and is stored only as a salted hash. There is

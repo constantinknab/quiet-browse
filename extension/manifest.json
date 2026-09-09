@@ -1,14 +1,15 @@
 {
   "manifest_version": 3,
   "name": "Quiet Browse",
-  "version": "0.5.7",
+  "version": "1.0.0",
   "minimum_chrome_version": "123",
-  "description": "Calmer browsing with scheduled social controls, regional adult-site lists, reliable instant paging, motion limits, and grayscale.",
+  "description": "Calmer browsing with social controls, an adult content filter, instant paging, motion limits, and grayscale.",
   "permissions": ["activeTab", "scripting", "storage", "alarms", "declarativeNetRequest"],
   "host_permissions": [
     "https://www.instagram.com/*",
     "https://www.facebook.com/*",
     "https://www.tiktok.com/*",
+    "https://www.youtube.com/*",
     "https://www.amazon.com/*",
     "https://www.ebay.com/*",
     "https://www.etsy.com/*",

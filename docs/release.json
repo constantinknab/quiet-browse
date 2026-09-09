@@ -1,6 +1,6 @@
 {
   "publisherName": "Constantin Knab",
-  "supportEmail": "verified privately in the Chrome Web Store dashboard",
+  "supportEmailVerified": true,
   "privacyPolicyUrl": "https://constantinknab.github.io/quiet-browse/privacy.html",
   "supportUrl": "https://constantinknab.github.io/quiet-browse/support.html",
   "liveChromeChecklistComplete": false,

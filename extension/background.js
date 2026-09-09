@@ -2,7 +2,7 @@
 //
 // This is the extension's trusted coordination layer. It validates messages, owns
 // saved settings, manages exact host permissions and content-script registrations,
-// schedules local-time refreshes, and installs adult-site blocking rules. Content
+// schedules local-time refreshes, and installs adult-content-filter rules. Content
 // scripts cannot read extension storage directly.
 import {
   STATE_KEY,
@@ -32,7 +32,8 @@ const CONTENT_FILES = [
 ];
 const CLOCK_ALARM = 'qb-schedule-clock';
 const OLD_CLOCK_ALARM = 'qb-grayscale-clock';
-const CONTENT_ENGINE_VERSION = 9;
+const CONTENT_ENGINE_VERSION = 10;
+// Keep this legacy key so upgrades preserve passwords, lists, and installed rules.
 const ADULT_KEY = 'quietBrowseAdultGuard';
 const ADULT_RULE_START = 100000;
 const ADULT_RULE_RANGE = 10000;
@@ -74,7 +75,7 @@ async function loadSiteState() {
   return cleanState((await chrome.storage.local.get(STATE_KEY))[STATE_KEY]);
 }
 
-// Adult Guard state is sanitized on every read. Unknown fields never move from
+// Adult content filter state is sanitized on every read. Unknown fields never move from
 // storage into Chrome rules or a response returned to an extension page.
 function cleanAdult(value = {}) {
   const requested = Array.isArray(value.remoteSources)
@@ -599,6 +600,7 @@ async function applyToCurrentPage(tabId, site) {
             '__quietBrowseV7',
             '__quietBrowseV8',
             '__quietBrowseV9',
+            '__quietBrowseV10',
           ]) {
             try {
               globalThis[key]?.dispose?.();
@@ -673,7 +675,7 @@ async function handleRuntimeMessage(message, sender) {
   }
   if (message.type === 'QB_ADULT_UPDATE') {
     const current = await loadAdultGuardState();
-    if (!current.enabled) throw new Error('Turn adult-site blocking on first.');
+    if (!current.enabled) throw new Error('Turn the adult content filter on first.');
     if (!(await verifyAdult(current, message.password)))
       throw new Error('Incorrect protection password.');
     const customDomains = submittedDomains(message.domains);
@@ -689,7 +691,7 @@ async function handleRuntimeMessage(message, sender) {
   }
   if (message.type === 'QB_ADULT_AUTO') {
     const current = await loadAdultGuardState();
-    if (!current.enabled) throw new Error('Turn adult-site blocking on first.');
+    if (!current.enabled) throw new Error('Turn the adult content filter on first.');
     if (!(await verifyAdult(current, message.password)))
       throw new Error('Incorrect protection password.');
     const requested = Array.isArray(message.sources)
@@ -764,12 +766,14 @@ async function handleRuntimeMessage(message, sender) {
   if (message.type === 'QB_RESET') {
     const adult = await loadAdultGuardState();
     if (adult.enabled && !(await verifyAdult(adult, message.password)))
-      throw new Error('The adult-site blocker password is required before deleting all settings.');
+      throw new Error(
+        'The adult content filter password is required before deleting all settings.',
+      );
     const saved = await loadSiteState();
     const optionalOrigins = Object.keys(saved.sites)
       .filter((site) => !isRecommendedSite(site))
       .map(sitePattern);
-    await persistSiteState({ version: 4, recommendedVersion: RECOMMENDED_VERSION, sites: {} });
+    await persistSiteState({ version: 5, recommendedVersion: RECOMMENDED_VERSION, sites: {} });
     await saveAdult({
       enabled: false,
       customDomains: [],

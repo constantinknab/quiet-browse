@@ -9,27 +9,28 @@
   </head>
   <body class="document">
     <main>
-      <p class="eyebrow">QUIET BROWSE · VERSION 0.5.7</p>
+      <p class="eyebrow">QUIET BROWSE · VERSION 1.0.0</p>
       <h1>Privacy policy</h1>
       <p>
-        Effective August 31, 2026. Publisher: Constantin Knab. This policy describes the software in
-        this build. The public website provides the current privacy policy and GitHub-based support
-        channel.
+        Effective September 9, 2026. Publisher: Constantin Knab. This policy describes the software
+        in this build. The public website provides the current privacy policy and GitHub-based
+        support channel.
       </p>
       <h2>Purpose</h2>
       <p>
         Quiet Browse reduces high-stimulation browsing through reversible presentation controls,
         social-feed controls, instant paging, optional grayscale by local time, and an optional
-        local adult-site blocker. Built-in profiles operate on the exact disclosed social and
+        local adult content filter. Built-in profiles operate on the exact disclosed social and
         shopping hosts; other presentation profiles operate only after you authorize them.
       </p>
       <h2>Information processed on your device</h2>
       <p>
         The extension uses the current page's host, document structure, static labels and text in
-        candidate cookie dialogs, CSS animation properties, and media playback state to provide its
-        features. It does not intentionally read form values, passwords, payment details, or
-        editable content. It does not inspect network responses, browser cookies, or your browser
-        history database.
+        candidate cookie dialogs, CSS animation properties, media playback state, wheel gestures,
+        supported navigation keystrokes, and clicks on its own controls to provide its features. It
+        does not intentionally read form values, passwords, payment details, or editable content. It
+        does not inspect network responses, browser cookies, or your browser history database, and
+        it creates no user-activity log.
       </p>
       <p>
         Broad website access could technically expose sensitive page content. The code limits its
@@ -39,7 +40,7 @@
       <p>
         Chrome's local extension storage holds enabled HTTP or HTTPS hostnames, feature preferences,
         optional grayscale weekdays, start/end times and amounts, and optional social-surface
-        weekdays and times for each host. If the adult-site blocker is enabled, it also stores its
+        weekdays and times for each host. If the adult content filter is enabled, it also stores its
         enabled state, additional domain names, selected regional sources, per-source
         downloaded-domain counts, update timestamps, and short failure statuses. If a password is
         chosen, a random salt, iteration count, and PBKDF2-SHA-256 password hash are stored. The
@@ -55,21 +56,22 @@
       </p>
       <h2>Request blocking</h2>
       <p>
-        When Quit Porn is on, Chrome compares top-level navigation requests with the packaged list,
-        any hostnames you add, and the last successfully downloaded snapshots of the regional lists
-        you selected. Chrome blocks a match before navigation. The extension does not receive,
-        record, redirect, or transmit the request address. The rules do not filter subresources or
-        advertisements and cannot cover every adult domain.
+        When the adult content filter is on, Chrome compares top-level navigation requests with the
+        packaged list, any hostnames you add, and the last successfully downloaded snapshots of the
+        regional lists you selected. Chrome blocks a match before navigation. The extension does not
+        receive, record, redirect, or transmit the request address. The rules do not filter
+        subresources or advertisements and cannot cover every adult domain.
       </p>
       <h2>Sharing and remote services</h2>
       <p>
         This version has no analytics, advertising SDKs, developer server, cloud model, or remote
         executable code. If you select a regional list, the background worker sends an HTTPS GET
         request now and about weekly to its fixed address on <code>raw.githubusercontent.com</code>.
-        The request omits credentials and referrer and sends no browsing history, blocked addresses,
-        matches, page content, settings, added domains, or password. GitHub and its infrastructure
-        can receive connection information such as IP address, request time, user agent, and
-        technical logs under their own policies. Deselected sources are not requested.
+        A failed refresh is retried after about six hours. The request omits credentials and
+        referrer and sends no browsing history, blocked addresses, matches, page content, settings,
+        added domains, or password. GitHub and its infrastructure can receive connection information
+        such as IP address, request time, user agent, and technical logs under their own policies.
+        Deselected sources are not requested.
       </p>
       <p>
         Responses are treated only as untrusted domain-list data. Quiet Browse uses a fixed parser
@@ -109,13 +111,13 @@
           <strong>scripting:</strong> installs the bundled presentation engine for an enabled host.
         </li>
         <li>
-          <strong>storage:</strong> saves the local preferences and optional adult-blocker
+          <strong>storage:</strong> saves the local preferences and optional adult-content-filter
           configuration described above.
         </li>
         <li>
           <strong>alarms:</strong> reevaluates scheduled grayscale and social controls about once
-          per minute and schedules selected community-list refreshes about weekly. It cannot wake a
-          sleeping device.
+          per minute, schedules selected community-list refreshes about weekly, and retries a failed
+          refresh after about six hours. It cannot wake a sleeping device.
         </li>
         <li>
           <strong>declarativeNetRequest:</strong> lets Chrome block top-level navigation matching
@@ -124,8 +126,8 @@
         </li>
         <li>
           <strong>Required HTTPS host access:</strong> enables built-in profiles on the exact listed
-          Instagram, Facebook, TikTok, Amazon, eBay, Etsy, Walmart, Target, Temu, SHEIN US, and
-          AliExpress hosts.
+          Instagram, Facebook, TikTok, YouTube, Amazon, eBay, Etsy, Walmart, Target, Temu, SHEIN US,
+          and AliExpress hosts.
         </li>
         <li>
           <strong>Optional HTTP/HTTPS host access:</strong> enables automatic presentation controls
@@ -137,9 +139,8 @@
       <h2>Changes and contact</h2>
       <p>
         A future change that adds data collection or another external service requires an updated
-        policy and appropriate disclosure and consent. For a published version, use the publisher's
-        verified developer contact on its Chrome Web Store listing. This local build has not been
-        submitted or approved.
+        policy and appropriate disclosure and consent. Publication status appears on the Chrome Web
+        Store listing; this policy describes behavior and does not claim review or approval.
       </p>
       <p><a href="options.html">Sites &amp; privacy</a> · <a href="help.html">Help</a></p>
     </main>
