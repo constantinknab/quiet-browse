@@ -17,7 +17,7 @@ const getElement = (elementId) => document.getElementById(elementId);
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const CATEGORY_DESCRIPTIONS = Object.freeze({
   social: ['Social', 'Stories, discovery, short video, and scrollable feeds'],
-  video: ['Video', 'YouTube viewing controls and Shorts recommendation shelves'],
+  video: ['Video', 'YouTube viewing, Shorts, and Playables controls'],
   ecommerce: ['Ecommerce', 'Shopping sites with a calmer 20% grayscale starting point'],
   other: ['Other websites', 'Sites you added from the toolbar'],
 });

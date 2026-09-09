@@ -13,6 +13,8 @@
     'youtubeQuiet',
     'youtubeRecommendations',
     'youtubeShortsRecommendations',
+    'youtubeShortsNavigation',
+    'youtubePlayables',
     'youtubePictureCover',
     'socialStories',
     'socialSuggestions',
@@ -64,6 +66,8 @@
       youtubeQuiet: on.has('youtubeQuiet'),
       youtubeRecommendations: on.has('youtubeRecommendations'),
       youtubeShortsRecommendations: on.has('youtubeShortsRecommendations'),
+      youtubeShortsNavigation: on.has('youtubeShortsNavigation'),
+      youtubePlayables: on.has('youtubePlayables'),
       youtubePictureCover: on.has('youtubePictureCover'),
       socialStories: on.has('socialStories'),
       socialSuggestions: on.has('socialSuggestions'),
@@ -104,6 +108,19 @@
           .getElementById('youtube-shorts-section')
           .hasAttribute('data-qb-youtube-shorts-hidden') &&
         getComputedStyle(document.getElementById('youtube-shorts-section')).display === 'none',
+      youtubeShortsNavigation:
+        status.shortsNavigationEntries > 0 &&
+        document
+          .getElementById('youtube-shorts-navigation')
+          .hasAttribute('data-qb-youtube-shorts-navigation-hidden') &&
+        getComputedStyle(document.getElementById('youtube-shorts-navigation')).display === 'none',
+      youtubePlayables:
+        status.playablesSurfaces > 0 &&
+        document
+          .getElementById('youtube-playables-navigation')
+          .hasAttribute('data-qb-youtube-playables-hidden') &&
+        getComputedStyle(document.getElementById('youtube-playables-navigation')).display ===
+          'none',
       youtubePictureCover: status.covered === true && !!document.querySelector('[data-qb-cover]'),
       grayscale: status.grayscale === 65,
     };

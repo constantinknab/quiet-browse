@@ -20,6 +20,8 @@
             youtubeQuiet: true,
             youtubeRecommendations: true,
             youtubeShortsRecommendations: true,
+            youtubeShortsNavigation: true,
+            youtubePlayables: true,
             youtubePictureCover: false,
           },
         };

@@ -60,6 +60,8 @@ test('social and recommended profiles are exact and use calmer defaults', () => 
   assert.equal(defaultsForSite('https://www.instagram.com').grayscale.enabled, false);
   assert.equal(defaultsForSite('https://www.youtube.com').youtubePictureCover, false);
   assert.equal(defaultsForSite('https://www.youtube.com').youtubeShortsRecommendations, true);
+  assert.equal(defaultsForSite('https://www.youtube.com').youtubeShortsNavigation, true);
+  assert.equal(defaultsForSite('https://www.youtube.com').youtubePlayables, true);
   assert.equal(defaultsForSite('https://www.tiktok.com').tiktokLandingFeed, true);
   assert.equal(defaultsForSite('https://example.com').grayscale.enabled, false);
   assert.equal(siteCategory('https://www.instagram.com'), 'social');
@@ -90,8 +92,53 @@ test('settings accept only known boolean flags', () => {
     cleanSettings({ youtubeShortsRecommendations: 'no' }).youtubeShortsRecommendations,
     true,
   );
+  assert.equal(cleanSettings({ youtubeShortsNavigation: false }).youtubeShortsNavigation, false);
+  assert.equal(cleanSettings({ youtubeShortsNavigation: 'no' }).youtubeShortsNavigation, true);
+  assert.equal(cleanSettings({ youtubePlayables: false }).youtubePlayables, false);
+  assert.equal(cleanSettings({ youtubePlayables: 'no' }).youtubePlayables, true);
   assert.equal(cleanSettings({ socialSuggestions: false }).socialSuggestions, false);
   assert.equal(cleanSettings({ socialSuggestions: 'yes' }).socialSuggestions, true);
+});
+test('version 1.0 settings gain the new YouTube defaults without resetting old choices', () => {
+  const migrated = cleanState({
+    version: 5,
+    recommendedVersion: 3,
+    sites: {
+      'https://www.youtube.com': {
+        enabled: true,
+        settings: {
+          youtubeShortsRecommendations: false,
+          youtubePictureCover: true,
+        },
+      },
+    },
+  });
+  const youtube = migrated.sites['https://www.youtube.com'];
+  assert.equal(migrated.version, 6);
+  assert.equal(youtube.enabled, true);
+  assert.equal(youtube.settings.youtubeShortsRecommendations, false);
+  assert.equal(youtube.settings.youtubePictureCover, true);
+  assert.equal(youtube.settings.youtubeShortsNavigation, true);
+  assert.equal(youtube.settings.youtubePlayables, true);
+
+  const savedOptOut = cleanState({
+    ...migrated,
+    sites: {
+      'https://www.youtube.com': {
+        ...youtube,
+        settings: {
+          ...youtube.settings,
+          youtubeShortsNavigation: false,
+          youtubePlayables: false,
+        },
+      },
+    },
+  });
+  assert.equal(
+    savedOptOut.sites['https://www.youtube.com'].settings.youtubeShortsNavigation,
+    false,
+  );
+  assert.equal(savedOptOut.sites['https://www.youtube.com'].settings.youtubePlayables, false);
 });
 test('legacy TikTok settings migrate their old combined landing-feed result', () => {
   const hidden = cleanState({

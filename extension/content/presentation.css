@@ -17,6 +17,10 @@
 [data-qb-youtube-shorts-hidden='true'] {
   display: none !important;
 }
+[data-qb-youtube-shorts-navigation-hidden='true'],
+[data-qb-youtube-playables-hidden='true'] {
+  display: none !important;
+}
 [data-qb-reveal] {
   display: block;
   margin: 12px 0;

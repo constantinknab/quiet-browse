@@ -20,8 +20,13 @@
       the live service.
     </p>
     <nav>
-      <a id="shorts-nav" href="/shorts/">Shorts navigation</a>
+      <ytd-mini-guide-entry-renderer id="shorts-nav-entry">
+        <a id="shorts-nav" href="/shorts/" aria-label="Shorts">Shorts navigation</a>
+      </ytd-mini-guide-entry-renderer>
       <a id="direct-short" href="/shorts/direct-item">Direct Shorts link</a>
+      <ytd-guide-entry-renderer id="playables-nav-entry">
+        <a id="playables-nav" href="/playables" aria-label="Playables">Playables navigation</a>
+      </ytd-guide-entry-renderer>
     </nav>
     <ytd-rich-section-renderer id="shorts-section">
       <ytd-rich-shelf-renderer id="shorts-shelf" is-shorts>
@@ -58,6 +63,29 @@
         <a href="/watch?v=ordinary">Ordinary video recommendation</a>
       </ytd-rich-shelf-renderer>
     </ytd-rich-section-renderer>
+    <ytd-rich-section-renderer id="playables-section">
+      <ytd-rich-shelf-renderer id="playables-shelf">
+        <a href="/playables/game-one">Game one</a><a href="/playables/game-two">Game two</a>
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-rich-section-renderer id="mixed-playables-section">
+      <ytd-rich-shelf-renderer id="mixed-playables-shelf">
+        <ytd-rich-item-renderer id="playable-card">
+          <ytd-mini-game-card-view-model>
+            <a href="/playables/game-three">Game three</a>
+          </ytd-mini-game-card-view-model>
+        </ytd-rich-item-renderer>
+        <a id="ordinary-beside-playable" href="/watch?v=ordinary-beside-game"
+          >Ordinary video beside a game</a
+        >
+      </ytd-rich-shelf-renderer>
+    </ytd-rich-section-renderer>
+    <ytd-browse id="playables-route" page-subtype="playables" role="main">
+      <a href="/playables/route-game">Playables route content</a>
+    </ytd-browse>
+    <ytd-browse id="playable-game-route" page-subtype="mini_app" role="main">
+      Direct Playable game content
+    </ytd-browse>
     <ytd-watch-flexy
       ><div id="movie_player">
         <video class="html5-main-video"></video>

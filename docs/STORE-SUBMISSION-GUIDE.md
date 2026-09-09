@@ -1,13 +1,13 @@
-# Quiet Browse 1.0.0 — complete Chrome Web Store submission guide
+# Quiet Browse 1.0.1 — complete Chrome Web Store submission guide
 
 Updated September 9, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
 
 ## What is ready
 
-- Store package: `dist/quiet-browse-1.0.0.zip`
-- SHA-256: `bf56f1b5669d1ab3d87d96c53266590cdbb74feefe46d469cc90b4e99c13cad0`
+- Store package: `dist/quiet-browse-1.0.1.zip`
+- SHA-256: `4862766069859022ef3227bce4c735c33b2b859d0ee67553a440ae43b7f0eb46`
 - Manifest V3, 21 packaged files, and no remote executable code
-- 66 Node tests, 228 browser fixture checks, 4,500 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
+- 67 Node tests, 240 browser fixture checks, 5,484 cross-site lifecycle assertions, static checks, and ZIP integrity checks passed
 - Draft listing copy: `docs/STORE-LISTING.md`
 - Public website source: `website/`
 - Store icon and promotional tiles: `store-assets/`
@@ -53,7 +53,7 @@ Creative Commons recommends software-specific licenses for software. Do not chan
 
 ## Phase 3 — keep the candidate local while testing
 
-1. Work on the local `release/1.0.0` branch.
+1. Work on the local `release/1.0.1` branch.
 2. Do not push, tag, create a GitHub release, or upload the ZIP while live testing is incomplete.
 3. Keep `docs/release.json` gates false until the corresponding work has actually happened.
 4. Run `git diff --check` after each fix and repeat the automated verification before testing again.
@@ -135,7 +135,7 @@ Suggested caption: **Optional local top-level blocking with selectable lists and
 - No personal accounts, messages, carts, orders, addresses, or payment details.
 - No fixture pages presented as the real extension.
 - No excessive platform logos or implication of affiliation.
-- No feature shown unless it exists in version 1.0.0.
+- No feature shown unless it exists in version 1.0.1.
 
 ## Phase 6 — prepare the promotional video
 
@@ -148,7 +148,7 @@ Google's current listing documentation asks for a YouTube promo-video URL. Make 
 5. 40–52 seconds: show the blocker settings using `example.com`, never an adult page.
 6. 52–60 seconds: disable the blocker and show that ordinary access returns.
 
-Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.0 — Chrome extension demonstration`. In the description, state that it shows version 1.0.0 and contains no paid endorsement.
+Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.1 — Chrome extension demonstration`. In the description, state that it shows version 1.0.1 and contains no paid endorsement.
 
 ## Phase 7 — register the Chrome Web Store developer account
 
@@ -183,13 +183,13 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.0 — Chrome ex
    git status --short
    git diff --cached --stat
    git diff --cached
-   git commit -m "Publish Quiet Browse 1.0.0"
+   git commit -m "Publish Quiet Browse 1.0.1"
    git switch main
-   git merge --ff-only release/1.0.0
+   git merge --ff-only release/1.0.1
    git push origin main
-   git tag -a v1.0.0 -m "Quiet Browse 1.0.0"
-   git push origin v1.0.0
-   gh release create v1.0.0 dist/quiet-browse-1.0.0.zip --title "Quiet Browse 1.0.0" --notes "Stable 1.0 release. See README and the Chrome Web Store listing for features, privacy details, and limitations."
+   git tag -a v1.0.1 -m "Quiet Browse 1.0.1"
+   git push origin v1.0.1
+   gh release create v1.0.1 dist/quiet-browse-1.0.1.zip --title "Quiet Browse 1.0.1" --notes "Stable 1.0 release. See README and the Chrome Web Store listing for features, privacy details, and limitations."
    ```
 
 5. Confirm the GitHub release page contains the exact extension-only ZIP. Do not attach a repository source archive as the Web Store upload.
@@ -202,11 +202,11 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.0 — Chrome ex
 
 8. Do not add analytics, a contact form, advertising, a chat widget, or remote fonts between verification and submission. Those additions change the reviewed disclosures.
 
-## Phase 9 — upload version 1.0.0
+## Phase 9 — upload version 1.0.1
 
 1. Open the existing Quiet Browse item in the dashboard.
-2. Upload `dist/quiet-browse-1.0.0.zip` as an update to the existing item.
-3. Confirm the dashboard identifies Manifest V3 and version 1.0.0.
+2. Upload `dist/quiet-browse-1.0.1.zip` as an update to the existing item.
+3. Confirm the dashboard identifies Manifest V3 and version 1.0.1.
 4. Do not upload the source repository ZIP. The Web Store package must have `manifest.json` at its root.
 
 ## Phase 10 — Store Listing tab
@@ -270,14 +270,14 @@ Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTT
 3. Do not claim the extension is a regulated health, safety, parental-control, or age-verification product.
 4. Paste these reviewer instructions:
 
-> No account, API key, payment, or developer server is required. Open the toolbar popup on a neutral HTTPS page and authorize that host to test paging, grayscale, motion limits, and undo. Open Sites & privacy to inspect the exact built-in Social, Video, and Ecommerce profiles and the separate social schedules. YouTube preview/recommendation and picture-cover controls can be tested signed out; the picture cover must leave native controls, including mute, usable. To test top-level blocking without visiting adult content, deselect all regional lists, add example.com as an additional hostname, enable the blocker, navigate to https://example.com and observe Chrome's ERR_BLOCKED_BY_CLIENT page, then disable the blocker and confirm access returns. Regional lists require a separate optional raw.githubusercontent.com permission and are parsed only as bounded domain data. The extension contains no analytics, remote executable code, advertising, media downloading, ad skipping, purchase automation, or access-control bypass.
+> No account, API key, payment, or developer server is required. Open the toolbar popup on a neutral HTTPS page and authorize that host to test paging, grayscale, motion limits, and undo. Open Sites & privacy to inspect the exact built-in Social, Video, and Ecommerce profiles and the separate social schedules. YouTube preview/recommendation, Shorts-shelf, Shorts-tab, Playables, and picture-cover controls can be tested signed out; toggle each independently and confirm the picture cover leaves native controls, including mute, usable. To test top-level blocking without visiting adult content, deselect all regional lists, add example.com as an additional hostname, enable the blocker, navigate to https://example.com and observe Chrome's ERR_BLOCKED_BY_CLIENT page, then disable the blocker and confirm access returns. Regional lists require a separate optional raw.githubusercontent.com permission and are parsed only as bounded domain data. The extension contains no analytics, remote executable code, advertising, media downloading, ad skipping, purchase automation, or access-control bypass.
 
 5. Do not give reviewers personal social-media credentials. If a signed-in layout is necessary, provide a dedicated test account only after reviewing that platform's rules.
 
 ## Phase 13 — submit safely
 
 1. Review every dashboard tab for warnings.
-2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 1.0.0.
+2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 1.0.1.
 3. Choose **Submit for Review**.
 4. Disable automatic publication so approval produces a staged release.
 5. Monitor the verified publisher email.

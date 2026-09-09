@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.0 is the current GitHub release; version 0.5.7 remains the public Chrome Web Store release until the 1.0.0 update is reviewed there. It is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.1 is a local release candidate for testing; version 1.0.0 is the current GitHub release and version 0.5.7 remains public in the Chrome Web Store. It is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -32,7 +32,9 @@ No developer account, registration payment, API key, npm install, or Google revi
 | Background autoplay | Off | Pauses muted autoplay videos lacking native controls and adds those controls. Excludes YouTube. |
 | YouTube previews | On | Hides supported preview surfaces and ambient decoration. Does not stop all decoding or network activity. |
 | YouTube watch-page recommendations | Off | Collapses the supported watch-page list behind a reveal button. |
-| YouTube Shorts shelves | On for the built-in YouTube profile | Hides bounded Shorts shelves and carousels on supported YouTube pages while preserving ordinary recommendations, navigation, and direct Shorts links. |
+| YouTube Shorts shelves | On for the built-in YouTube profile | Hides bounded Shorts shelves and carousels on supported YouTube pages while preserving ordinary recommendations and direct Shorts links. |
+| YouTube Shorts tab | On for the built-in YouTube profile | Hides supported navigation entries for the Shorts hub. A separately received direct Shorts link still opens. |
+| YouTube Playables | On for the built-in YouTube profile | Hides supported Playables navigation, shelves, game cards, and Playables route content. Unchecking the control restores them. |
 | Hide YouTube video picture | Manual by default; optional saved mode | Covers the picture while playback continues. A saved preference reapplies after reloads and YouTube video changes; Show picture remains a page-only override. It does not edit cuts or change audio. Native controls, including mute, and captions remain available; recognized ads and picture-in-picture are uncovered. |
 | Social Stories | On for built-in social profiles | Hides supported Stories navigation and trays on Instagram, Facebook, and TikTok, always or during up to 12 local-time windows. |
 | Social follow recommendations | On for built-in social profiles | Hides supported suggested-account modules on home pages, independently from Stories and the followed-post feed. |
@@ -73,7 +75,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, readability policy, release gates, tests
-  dist/quiet-browse-1.0.0.zip ← generated extension-only archive
+  dist/quiet-browse-1.0.1.zip ← generated extension-only archive
 ```
 
 ## Developer commands
@@ -117,6 +119,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.0 is released on GitHub. Version 0.5.7 remains public in the Chrome Web Store until Google reviews and publishes the 1.0.0 update.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.1 remains local until its live YouTube checks are completed and the publisher approves its exact ZIP. Version 1.0.0 is the current GitHub release; version 0.5.7 remains public in the Chrome Web Store.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.

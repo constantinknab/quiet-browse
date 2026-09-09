@@ -34,6 +34,8 @@
     youtubeQuiet: true,
     youtubeRecommendations: false,
     youtubeShortsRecommendations: true,
+    youtubeShortsNavigation: true,
+    youtubePlayables: true,
     youtubePictureCover: false,
     socialStories: true,
     socialSuggestions: true,
@@ -45,7 +47,7 @@
     socialSchedules: schedules(),
   };
   const saved = {
-    version: 5,
+    version: 6,
     recommendedVersion: 3,
     sites: isOptions
       ? {
@@ -123,7 +125,7 @@
   };
   let granted = isOptions;
   const page = {
-    engineVersion: stale ? 9 : 10,
+    engineVersion: stale ? 10 : 11,
     active: false,
     paused: false,
     covered: false,
@@ -306,7 +308,7 @@
       executeScript: async (options) => {
         if (options.files) {
           pageUnavailable = false;
-          page.engineVersion = 10;
+          page.engineVersion = 11;
           page.active = true;
         }
       },

@@ -21,7 +21,7 @@ let page = null;
 let operationInProgress = false;
 let isYouTubeSite = false;
 let socialPlatformName = null;
-const EXPECTED_ENGINE_VERSION = 10;
+const EXPECTED_ENGINE_VERSION = 11;
 
 async function request(message) {
   const response = await chrome.runtime.sendMessage(message);
@@ -59,6 +59,7 @@ async function repairContentScripts() {
           '__quietBrowseV8',
           '__quietBrowseV9',
           '__quietBrowseV10',
+          '__quietBrowseV11',
         ]) {
           try {
             globalThis[key]?.dispose?.();

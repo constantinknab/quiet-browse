@@ -32,7 +32,7 @@ const CONTENT_FILES = [
 ];
 const CLOCK_ALARM = 'qb-schedule-clock';
 const OLD_CLOCK_ALARM = 'qb-grayscale-clock';
-const CONTENT_ENGINE_VERSION = 10;
+const CONTENT_ENGINE_VERSION = 11;
 // Keep this legacy key so upgrades preserve passwords, lists, and installed rules.
 const ADULT_KEY = 'quietBrowseAdultGuard';
 const ADULT_RULE_START = 100000;
@@ -601,6 +601,7 @@ async function applyToCurrentPage(tabId, site) {
             '__quietBrowseV8',
             '__quietBrowseV9',
             '__quietBrowseV10',
+            '__quietBrowseV11',
           ]) {
             try {
               globalThis[key]?.dispose?.();
@@ -773,7 +774,7 @@ async function handleRuntimeMessage(message, sender) {
     const optionalOrigins = Object.keys(saved.sites)
       .filter((site) => !isRecommendedSite(site))
       .map(sitePattern);
-    await persistSiteState({ version: 5, recommendedVersion: RECOMMENDED_VERSION, sites: {} });
+    await persistSiteState({ version: 6, recommendedVersion: RECOMMENDED_VERSION, sites: {} });
     await saveAdult({
       enabled: false,
       customDomains: [],

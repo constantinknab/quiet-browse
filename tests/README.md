@@ -24,13 +24,13 @@ A passing test means its specific assertion held for that build. It is not a gen
 
 - `store-safety.test.mjs` is the policy and package review. Its comments explain the threat behind every group of assertions: permission creep, hidden host access, remote code, telemetry, minified or collapsed source, cryptic names, missing comments, sensitive Chrome APIs, weak password hashing, overly broad request blocking, inaccurate disclosures, secrets, and license omissions.
 - `background.test.mjs` runs the service worker against a controlled fake Chrome API. It checks sender authorization, permissions, persistence, content-script repair, alarms, request-blocking rules, password behavior, list failures, and enable/disable/reload lifecycles for every built-in site.
-- `settings.test.mjs` checks URL scoping, unsafe URL rejection, exact host matching, default settings, state cleanup, and non-identifying registration IDs.
+- `settings.test.mjs` checks URL scoping, unsafe URL rejection, exact host matching, default settings, state cleanup, non-identifying registration IDs, and migration from 1.0.0 without resetting existing YouTube choices.
 - `comfort.test.mjs` checks schedules, grayscale limits, page distances, and scroll-gesture grouping.
 - `social.test.mjs` checks that social routes distinguish feeds from messages and direct items.
 
 ## Browser fixtures
 
-The Node tests cannot prove layout behavior in a real document. Start `python3 scripts/serve_demo.py` and use the pages listed in `docs/TESTING.md`. Those fixtures run the packaged content controllers against real local DOM, CSS animation, media, and reload behavior. They deliberately state when Chrome APIs or platform hosts are simulated.
+The Node tests cannot prove layout behavior in a real document. Start `python3 scripts/serve_demo.py` and use the pages listed in `docs/TESTING.md`. Those fixtures run the packaged content controllers against real local DOM, CSS animation, media, and reload behavior. The YouTube fixture keeps Shorts shelves, the Shorts navigation entry, Playables, ordinary recommendations, and direct links separate so each control can be tested without assuming that one shared container owns them all. The fixtures deliberately state when Chrome APIs or platform hosts are simulated.
 
 ## What still requires a person
 

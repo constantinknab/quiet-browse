@@ -12,6 +12,8 @@ const BOOLEAN_DEFAULTS = Object.freeze({
   youtubeQuiet: true,
   youtubeRecommendations: false,
   youtubeShortsRecommendations: true,
+  youtubeShortsNavigation: true,
+  youtubePlayables: true,
   youtubePictureCover: false,
   socialStories: true,
   socialSuggestions: true,
@@ -80,7 +82,19 @@ export const FEATURES = Object.freeze([
     key: 'youtubeShortsRecommendations',
     label: 'Hide YouTube Shorts shelves',
     detail:
-      'Removes supported Shorts shelves and carousels while keeping ordinary recommendations, navigation, and direct links.',
+      'Removes supported Shorts shelves and carousels while keeping ordinary recommendations and direct links.',
+  },
+  {
+    key: 'youtubeShortsNavigation',
+    label: 'Hide the YouTube Shorts tab',
+    detail:
+      'Removes supported Shorts hub entries from YouTube navigation. Uncheck to restore the tab; direct Shorts links still open.',
+  },
+  {
+    key: 'youtubePlayables',
+    label: 'Hide YouTube Playables',
+    detail:
+      'Removes supported Playables navigation, shelves, game cards, and route content. Uncheck to restore them.',
   },
   {
     key: 'youtubePictureCover',
@@ -231,7 +245,7 @@ export function cleanState(value) {
     }
   }
   return {
-    version: 5,
+    version: 6,
     recommendedVersion: Number.isInteger(value?.recommendedVersion)
       ? Math.max(0, value.recommendedVersion)
       : 0,

@@ -81,11 +81,15 @@ try {
     ) {
       const persistentCover = document.getElementById('youtubePictureCover');
       const shortsShelves = document.getElementById('youtubeShortsRecommendations');
+      const shortsNavigation = document.getElementById('youtubeShortsNavigation');
+      const playables = document.getElementById('youtubePlayables');
       assert(
         !document.getElementById('youtube-controls').hidden &&
           !persistentCover.checked &&
-          shortsShelves.checked,
-        'YouTube exposes separate picture-cover and default-on Shorts-shelf preferences',
+          shortsShelves.checked &&
+          shortsNavigation.checked &&
+          playables.checked,
+        'YouTube exposes separate picture-cover, Shorts-shelf, Shorts-tab, and Playables preferences',
       );
       shortsShelves.click();
       await waitFor(() => !shortsShelves.checked);
@@ -96,6 +100,23 @@ try {
         youtubeConfig.settings.youtubeShortsRecommendations === false &&
           youtubeConfig.settings.youtubePictureCover === false,
         'The YouTube Shorts-shelf switch saves without changing picture covering',
+      );
+      shortsNavigation.click();
+      await waitFor(() => !shortsNavigation.checked);
+      youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[testSite];
+      assert(
+        youtubeConfig.settings.youtubeShortsNavigation === false &&
+          youtubeConfig.settings.youtubePlayables === true &&
+          youtubeConfig.settings.youtubeShortsRecommendations === false,
+        'The YouTube Shorts-tab switch saves without changing Playables or Shorts shelves',
+      );
+      playables.click();
+      await waitFor(() => !playables.checked);
+      youtubeConfig = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[testSite];
+      assert(
+        youtubeConfig.settings.youtubePlayables === false &&
+          youtubeConfig.settings.youtubeShortsNavigation === false,
+        'The YouTube Playables switch saves independently from Shorts navigation',
       );
       persistentCover.click();
       await waitFor(
@@ -330,6 +351,8 @@ try {
     youtubeControl.open = true;
     youtubeControl.querySelector('[data-feature="youtubePictureCover"]').click();
     youtubeControl.querySelector('[data-feature="youtubeShortsRecommendations"]').click();
+    youtubeControl.querySelector('[data-feature="youtubeShortsNavigation"]').click();
+    youtubeControl.querySelector('[data-feature="youtubePlayables"]').click();
     youtubeForm.requestSubmit();
     await waitFor(() => youtubeForm.querySelector('.message').textContent === 'Saved.');
     const youtubeSettings = (await chrome.runtime.sendMessage({ type: 'QB_LIST' })).data.sites[
@@ -342,6 +365,11 @@ try {
     assert(
       youtubeSettings.youtubeShortsRecommendations === false,
       'Sites & privacy can independently restore YouTube Shorts shelves',
+    );
+    assert(
+      youtubeSettings.youtubeShortsNavigation === false &&
+        youtubeSettings.youtubePlayables === false,
+      'Sites & privacy can independently restore the YouTube Shorts tab and Playables',
     );
     assert(
       document.querySelector('#adult-guard h2')?.textContent.trim() === 'Adult content filter' &&

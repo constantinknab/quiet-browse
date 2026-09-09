@@ -32,7 +32,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 10;
+  let receiverVersion = 11;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -93,7 +93,7 @@ function fakeChrome() {
         if (options.files) {
           if (failInjection) throw new Error('Fixture injection failure');
           receiver = true;
-          receiverVersion = 10;
+          receiverVersion = 11;
         }
       },
     },
@@ -132,14 +132,14 @@ function fakeChrome() {
       alarms.clear();
       dynamicRules.clear();
       receiver = false;
-      receiverVersion = 10;
+      receiverVersion = 11;
       failInjection = false;
       failDynamicUpdate = false;
     },
     setData: (value) => {
       data = structuredClone(value);
     },
-    setReceiver: (value, version = 10) => {
+    setReceiver: (value, version = 11) => {
       receiver = value;
       receiverVersion = version;
     },
@@ -500,6 +500,8 @@ test('background permission, scope, messaging, persistence and revocation lifecy
           'youtubeQuiet',
           'youtubeRecommendations',
           'youtubeShortsRecommendations',
+          'youtubeShortsNavigation',
+          'youtubePlayables',
         ].sort(),
         'the lifecycle matrix must include every boolean feature',
       );
@@ -837,6 +839,11 @@ test('background permission, scope, messaging, persistence and revocation lifecy
         installed.data.sites['https://www.youtube.com'].settings.youtubeShortsRecommendations,
         true,
       );
+      assert.equal(
+        installed.data.sites['https://www.youtube.com'].settings.youtubeShortsNavigation,
+        true,
+      );
+      assert.equal(installed.data.sites['https://www.youtube.com'].settings.youtubePlayables, true);
       assert.equal(installed.data.sites['https://www.amazon.com'].settings.socialHomeFeed, false);
       assert.equal(installed.data.sites['https://www.amazon.com'].settings.grayscale.level, 20);
       const youtubeRegistration = [...fixture.registered.values()].find(
@@ -856,7 +863,11 @@ test('background permission, scope, messaging, persistence and revocation lifecy
         type: 'QB_SAVE',
         site: 'https://www.youtube.com',
         enabled: true,
-        settings: { youtubeShortsRecommendations: false },
+        settings: {
+          youtubeShortsRecommendations: false,
+          youtubeShortsNavigation: false,
+          youtubePlayables: false,
+        },
       });
       await send({ type: 'QB_FORGET', site: 'https://www.etsy.com' });
       await fixture.chrome.runtime.onInstalled.emit({ reason: 'install' });
@@ -865,6 +876,11 @@ test('background permission, scope, messaging, persistence and revocation lifecy
         repeated.data.sites['https://www.youtube.com'].settings.youtubeShortsRecommendations,
         false,
       );
+      assert.equal(
+        repeated.data.sites['https://www.youtube.com'].settings.youtubeShortsNavigation,
+        false,
+      );
+      assert.equal(repeated.data.sites['https://www.youtube.com'].settings.youtubePlayables, false);
       assert.equal(repeated.data.sites['https://www.etsy.com'], undefined);
     },
   );

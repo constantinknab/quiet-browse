@@ -5,8 +5,8 @@
 // to their focused controllers instead of combining all logic in one file.
 (() => {
   'use strict';
-  const INSTANCE = '__quietBrowseV10';
-  const ENGINE_VERSION = 10;
+  const INSTANCE = '__quietBrowseV11';
+  const ENGINE_VERSION = 11;
   if (globalThis[INSTANCE]) {
     globalThis[INSTANCE].refresh();
     return;
@@ -33,6 +33,8 @@
   const videos = new Map();
   const recommendations = new Map();
   const shortsRecommendations = new Map();
+  const shortsNavigationEntries = new Map();
+  const playablesSurfaces = new Map();
   const allowedVideos = new WeakSet();
   const youtube = ['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(location.hostname);
   const SAFE_PROPERTIES = new Set([
@@ -300,15 +302,23 @@
       }
     }
     scanYouTubeShortsRecommendations();
+    scanYouTubeShortsNavigation();
+    scanYouTubePlayables();
     updateCover();
   }
 
-  function isShortDestination(anchor) {
+  function youtubePath(anchor) {
     try {
-      return new URL(anchor.getAttribute('href'), location.href).pathname.startsWith('/shorts/');
+      const url = new URL(anchor.getAttribute('href'), location.href);
+      if (!['youtube.com', 'www.youtube.com', 'm.youtube.com'].includes(url.hostname)) return '';
+      return url.pathname.replace(/\/+$/, '') || '/';
     } catch {
-      return false;
+      return '';
     }
+  }
+
+  function isShortDestination(anchor) {
+    return youtubePath(anchor).startsWith('/shorts/');
   }
   function isOrdinaryVideoDestination(anchor) {
     try {
@@ -368,6 +378,107 @@
         shortsRecommendations.set(target, target.getAttribute('data-qb-youtube-shorts-hidden'));
       target.setAttribute('data-qb-youtube-shorts-hidden', 'true');
     }
+  }
+
+  const YOUTUBE_NAVIGATION_ENTRY = [
+    'ytd-guide-entry-renderer',
+    'ytd-mini-guide-entry-renderer',
+    'ytm-guide-entry-renderer',
+    'ytm-pivot-bar-item-renderer',
+    'yt-tab-shape',
+    'tp-yt-paper-tab',
+  ].join(',');
+
+  function navigationEntryFor(anchor) {
+    return anchor.closest(YOUTUBE_NAVIGATION_ENTRY) || anchor;
+  }
+
+  function syncTrackedTargets(tracker, desired, attribute) {
+    for (const [target, original] of tracker) {
+      if (desired.has(target) && target.isConnected) continue;
+      restoreAttribute(target, attribute, original);
+      tracker.delete(target);
+    }
+    for (const target of desired) {
+      if (!tracker.has(target)) tracker.set(target, target.getAttribute(attribute));
+      target.setAttribute(attribute, 'true');
+    }
+  }
+
+  function scanYouTubeShortsNavigation() {
+    const desired = new Set();
+    if (settings.youtubeShortsNavigation) {
+      for (const anchor of document.querySelectorAll('a[href]')) {
+        // Only the hub path is a navigation tab. A direct /shorts/{video} link
+        // remains available independently from this setting.
+        if (youtubePath(anchor) === '/shorts') desired.add(navigationEntryFor(anchor));
+      }
+    }
+    syncTrackedTargets(
+      shortsNavigationEntries,
+      desired,
+      'data-qb-youtube-shorts-navigation-hidden',
+    );
+  }
+
+  function isPlayableDestination(anchor) {
+    const path = youtubePath(anchor);
+    return path === '/playables' || path.startsWith('/playables/');
+  }
+
+  function isPlayablesShelf(shelf) {
+    const links = [...shelf.querySelectorAll('a[href]')];
+    return (
+      links.some(isPlayableDestination) &&
+      !links.some((anchor) => isOrdinaryVideoDestination(anchor) || isShortDestination(anchor))
+    );
+  }
+
+  function playablesShelfTarget(shelf) {
+    if (!shelf.matches('ytd-rich-shelf-renderer')) return shelf;
+    const section = shelf.closest('ytd-rich-section-renderer');
+    if (!section) return shelf;
+    const competingShelves = [
+      ...section.querySelectorAll(
+        'ytd-rich-shelf-renderer,ytd-shelf-renderer,ytd-reel-shelf-renderer,grid-shelf-view-model',
+      ),
+    ].some((candidate) => candidate !== shelf && !isPlayablesShelf(candidate));
+    const otherMediaOutsideShelf = [...section.querySelectorAll('a[href]')].some(
+      (anchor) =>
+        !shelf.contains(anchor) &&
+        (isOrdinaryVideoDestination(anchor) || isShortDestination(anchor)),
+    );
+    return competingShelves || otherMediaOutsideShelf ? shelf : section;
+  }
+
+  function addOuterTarget(desired, target) {
+    if (!target?.isConnected || [...desired].some((existing) => existing.contains(target))) return;
+    for (const existing of desired) if (target.contains(existing)) desired.delete(existing);
+    desired.add(target);
+  }
+
+  function scanYouTubePlayables() {
+    const desired = new Set();
+    if (settings.youtubePlayables) {
+      for (const anchor of document.querySelectorAll('a[href]')) {
+        if (youtubePath(anchor) === '/playables')
+          addOuterTarget(desired, navigationEntryFor(anchor));
+      }
+      for (const page of document.querySelectorAll(
+        'ytd-browse[page-subtype="playables"],ytd-browse[page-subtype="mini_app"]',
+      ))
+        addOuterTarget(desired, page);
+      for (const shelf of document.querySelectorAll(
+        'ytd-rich-shelf-renderer,ytd-shelf-renderer,grid-shelf-view-model',
+      )) {
+        if (isPlayablesShelf(shelf)) addOuterTarget(desired, playablesShelfTarget(shelf));
+      }
+      for (const card of document.querySelectorAll(
+        'ytd-mini-game-card-view-model,mini-game-card-view-model',
+      ))
+        addOuterTarget(desired, card.closest('ytd-rich-item-renderer') || card);
+    }
+    syncTrackedTargets(playablesSurfaces, desired, 'data-qb-youtube-playables-hidden');
   }
 
   function updateCover() {
@@ -528,6 +639,12 @@
     for (const [target, original] of shortsRecommendations)
       restoreAttribute(target, 'data-qb-youtube-shorts-hidden', original);
     shortsRecommendations.clear();
+    for (const [target, original] of shortsNavigationEntries)
+      restoreAttribute(target, 'data-qb-youtube-shorts-navigation-hidden', original);
+    shortsNavigationEntries.clear();
+    for (const [target, original] of playablesSurfaces)
+      restoreAttribute(target, 'data-qb-youtube-playables-hidden', original);
+    playablesSurfaces.clear();
     if (appliedMarker)
       restoreAttribute(document.documentElement, 'data-qb-youtube', originalYouTubeAttribute);
     appliedMarker = false;
@@ -600,6 +717,8 @@
       videos: [...videos.keys()].filter((video) => video.paused).length,
       recommendations: recommendations.size,
       shortsRecommendations: shortsRecommendations.size,
+      shortsNavigationEntries: shortsNavigationEntries.size,
+      playablesSurfaces: playablesSurfaces.size,
     };
   }
 

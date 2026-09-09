@@ -42,9 +42,30 @@
     );
     assert(
       !getElement('ordinary-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
-        !getElement('shorts-nav').hasAttribute('data-qb-youtube-shorts-hidden') &&
-        !getElement('direct-short').hasAttribute('data-qb-youtube-shorts-hidden'),
-      'Ordinary recommendations, Shorts navigation, and direct links remain available',
+        !getElement('direct-short').hasAttribute('data-qb-youtube-shorts-hidden') &&
+        isRendered('ordinary-section') &&
+        isRendered('direct-short'),
+      'Ordinary recommendations and direct Shorts links remain available',
+    );
+    assert(
+      getElement('shorts-nav-entry').hasAttribute('data-qb-youtube-shorts-navigation-hidden') &&
+        !isRendered('shorts-nav-entry') &&
+        isRendered('direct-short'),
+      'The Shorts hub entry is hidden by default without hiding a direct Shorts link',
+    );
+    assert(
+      getElement('playables-nav-entry').hasAttribute('data-qb-youtube-playables-hidden') &&
+        getElement('playables-section').hasAttribute('data-qb-youtube-playables-hidden') &&
+        getElement('playable-card').hasAttribute('data-qb-youtube-playables-hidden') &&
+        getElement('playables-route').hasAttribute('data-qb-youtube-playables-hidden') &&
+        getElement('playable-game-route').hasAttribute('data-qb-youtube-playables-hidden') &&
+        !isRendered('playables-nav-entry') &&
+        !isRendered('playables-section') &&
+        !isRendered('playable-card') &&
+        !isRendered('playables-route') &&
+        !isRendered('playable-game-route') &&
+        isRendered('ordinary-beside-playable'),
+      'Playables navigation, shelves, cards, and route content hide without swallowing ordinary videos',
     );
     assert(
       !getElement('mixed-section').hasAttribute('data-qb-youtube-shorts-hidden') &&
@@ -67,8 +88,10 @@
       !document.querySelector('[data-qb-youtube-shorts-hidden]') &&
         getComputedStyle(getElement('related')).display === 'none' &&
         isRendered('generic-shorts-section') &&
-        isRendered('mixed-shorts-shelf'),
-      'The Shorts-shelf switch restores Shorts without changing watch-page recommendations',
+        isRendered('mixed-shorts-shelf') &&
+        !isRendered('shorts-nav-entry') &&
+        !isRendered('playables-section'),
+      'The Shorts-shelf switch restores shelves without changing navigation, Playables, or watch-page recommendations',
     );
 
     const offDynamicShelf = document.createElement('ytd-reel-shelf-renderer');
@@ -85,7 +108,57 @@
       'A Shorts shelf loaded while the switch is off remains rendered and unmarked',
     );
 
+    window.lab.policy.settings.youtubeShortsNavigation = false;
+    await send({ type: 'QB_REFRESH' });
+    await wait();
+    assert(
+      !document.querySelector('[data-qb-youtube-shorts-navigation-hidden]') &&
+        isRendered('shorts-nav-entry') &&
+        !isRendered('playables-nav-entry') &&
+        isRendered('generic-shorts-section'),
+      'The Shorts-tab switch restores only Shorts navigation',
+    );
+    const offDynamicShortsEntry = document.createElement('ytd-guide-entry-renderer');
+    offDynamicShortsEntry.id = 'off-dynamic-shorts-entry';
+    const offDynamicShortsHub = document.createElement('a');
+    offDynamicShortsHub.href = '/shorts/';
+    offDynamicShortsHub.textContent = 'Shorts hub loaded while setting is off';
+    offDynamicShortsEntry.append(offDynamicShortsHub);
+    document.body.append(offDynamicShortsEntry);
+    await wait();
+    assert(
+      !offDynamicShortsEntry.hasAttribute('data-qb-youtube-shorts-navigation-hidden') &&
+        isRendered('off-dynamic-shorts-entry'),
+      'A Shorts navigation entry loaded while its switch is off remains available and unmarked',
+    );
+
+    window.lab.policy.settings.youtubeShortsNavigation = true;
+    window.lab.policy.settings.youtubePlayables = false;
+    await send({ type: 'QB_REFRESH' });
+    await wait();
+    assert(
+      !isRendered('shorts-nav-entry') &&
+        isRendered('playables-nav-entry') &&
+        isRendered('playables-section') &&
+        isRendered('playable-card') &&
+        isRendered('playables-route') &&
+        isRendered('playable-game-route'),
+      'The Playables switch restores Playables without restoring the Shorts tab',
+    );
+    const offDynamicPlayable = document.createElement('ytd-browse');
+    offDynamicPlayable.id = 'off-dynamic-playable';
+    offDynamicPlayable.setAttribute('page-subtype', 'playables');
+    offDynamicPlayable.textContent = 'Playables loaded while setting is off';
+    document.body.append(offDynamicPlayable);
+    await wait();
+    assert(
+      !offDynamicPlayable.hasAttribute('data-qb-youtube-playables-hidden') &&
+        isRendered('off-dynamic-playable'),
+      'Playables loaded while their switch is off remain rendered and unmarked',
+    );
+
     window.lab.policy.settings.youtubeShortsRecommendations = true;
+    window.lab.policy.settings.youtubePlayables = true;
     window.lab.policy.settings.youtubeRecommendations = false;
     await send({ type: 'QB_REFRESH' });
     await wait();
@@ -111,6 +184,25 @@
       dynamicSection.hasAttribute('data-qb-youtube-shorts-hidden') &&
         !isRendered('dynamic-shorts-section'),
       'A lazily loaded Shorts shelf is hidden by the existing page observer',
+    );
+    const dynamicShortsEntry = document.createElement('ytd-mini-guide-entry-renderer');
+    dynamicShortsEntry.id = 'dynamic-shorts-entry';
+    const dynamicShortsHub = document.createElement('a');
+    dynamicShortsHub.href = '/shorts/';
+    dynamicShortsHub.textContent = 'Dynamically loaded Shorts hub';
+    dynamicShortsEntry.append(dynamicShortsHub);
+    const dynamicPlayable = document.createElement('ytd-browse');
+    dynamicPlayable.id = 'dynamic-playable';
+    dynamicPlayable.setAttribute('page-subtype', 'mini_app');
+    dynamicPlayable.textContent = 'Dynamically loaded Playable';
+    document.body.append(dynamicShortsEntry, dynamicPlayable);
+    await wait();
+    assert(
+      dynamicShortsEntry.hasAttribute('data-qb-youtube-shorts-navigation-hidden') &&
+        dynamicPlayable.hasAttribute('data-qb-youtube-playables-hidden') &&
+        !isRendered('dynamic-shorts-entry') &&
+        !isRendered('dynamic-playable'),
+      'Lazily loaded Shorts navigation and Playables are hidden by the page observer',
     );
 
     window.lab.policy.settings.youtubeRecommendations = true;
@@ -242,8 +334,10 @@
       !document.querySelector('[data-qb-reveal]') &&
         getComputedStyle(getElement('related')).display !== 'none' &&
         !document.querySelector('[data-qb-youtube-shorts-hidden]') &&
+        !document.querySelector('[data-qb-youtube-shorts-navigation-hidden]') &&
+        !document.querySelector('[data-qb-youtube-playables-hidden]') &&
         isRendered('disabled-shorts-shelf'),
-      'Show original restores existing shelves and leaves newly loaded Shorts untouched',
+      'Show original restores YouTube surfaces and leaves newly loaded Shorts untouched',
     );
     assert(
       getComputedStyle(getElement('mouseover-overlay')).visibility === 'visible',
