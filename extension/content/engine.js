@@ -413,6 +413,11 @@
         // remains available independently from this setting.
         if (youtubePath(anchor) === '/shorts') desired.add(navigationEntryFor(anchor));
       }
+      for (const entry of document.querySelectorAll(YOUTUBE_NAVIGATION_ENTRY)) {
+        const label = entry.getAttribute('aria-label') || entry.getAttribute('title');
+        if (youtubePath(entry) === '/shorts' || label?.trim().toLowerCase() === 'shorts')
+          desired.add(entry);
+      }
     }
     syncTrackedTargets(
       shortsNavigationEntries,
