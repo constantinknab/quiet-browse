@@ -5,8 +5,8 @@
 // to their focused controllers instead of combining all logic in one file.
 (() => {
   'use strict';
-  const INSTANCE = '__quietBrowseV11';
-  const ENGINE_VERSION = 11;
+  const INSTANCE = '__quietBrowseV12';
+  const ENGINE_VERSION = 12;
   if (globalThis[INSTANCE]) {
     globalThis[INSTANCE].refresh();
     return;
@@ -393,6 +393,14 @@
     return anchor.closest(YOUTUBE_NAVIGATION_ENTRY) || anchor;
   }
 
+  function youtubeNavigationLabel(entry) {
+    const explicitLabel = entry.getAttribute('aria-label') || entry.getAttribute('title');
+    if (explicitLabel) return explicitLabel.trim().toLowerCase();
+    // YouTube's expanded desktop guide can render the Shorts destination as a
+    // text-labelled entry without an href, aria-label, or title on the host.
+    return entry.textContent?.trim().toLowerCase() || '';
+  }
+
   function syncTrackedTargets(tracker, desired, attribute) {
     for (const [target, original] of tracker) {
       if (desired.has(target) && target.isConnected) continue;
@@ -414,8 +422,7 @@
         if (youtubePath(anchor) === '/shorts') desired.add(navigationEntryFor(anchor));
       }
       for (const entry of document.querySelectorAll(YOUTUBE_NAVIGATION_ENTRY)) {
-        const label = entry.getAttribute('aria-label') || entry.getAttribute('title');
-        if (youtubePath(entry) === '/shorts' || label?.trim().toLowerCase() === 'shorts')
+        if (youtubePath(entry) === '/shorts' || youtubeNavigationLabel(entry) === 'shorts')
           desired.add(entry);
       }
     }

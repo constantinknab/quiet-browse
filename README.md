@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.1 is the current GitHub release; version 0.5.7 remains public in the Chrome Web Store while the 1.0.1 update awaits live checks and store review. It is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.2 is the current GitHub release; version 0.5.7 remains public in the Chrome Web Store while the 1.0.2 update awaits live checks and store review. It is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -75,7 +75,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, readability policy, release gates, tests
-  dist/quiet-browse-1.0.1.zip ← generated extension-only archive
+  dist/quiet-browse-1.0.2.zip ← generated extension-only archive
 ```
 
 ## Developer commands
@@ -119,6 +119,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.1 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; version 0.5.7 is still public in the Chrome Web Store.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.2 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; version 0.5.7 is still public in the Chrome Web Store.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.

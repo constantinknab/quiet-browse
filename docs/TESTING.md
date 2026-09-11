@@ -1,6 +1,6 @@
 # Verification report and manual acceptance checklist
 
-Updated September 9, 2026. Tests are intentionally split by what they establish. Version 0.5.7 is public in the Chrome Web Store, and version 1.0.1 is the current GitHub release. Complete the live Chrome checks below before uploading its ZIP to the Web Store.
+Updated September 11, 2026. Tests are intentionally split by what they establish. Version 0.5.7 is public in the Chrome Web Store, and version 1.0.2 is the current GitHub release. Complete the live Chrome checks below before uploading its ZIP to the Web Store.
 
 ## Automated Node tests
 
@@ -35,6 +35,8 @@ Start `python3 scripts/serve_demo.py`. Open:
 
 **Observed 1.0.1 candidate result: all 240 checks passed across all 25 browser fixture pages in isolated headless Chrome.** Fixtures use real DOM/CSS/animation/media elements under a content security policy that forbids inline scripts and inline styles. Chrome messaging, permissions, fetch, and declarativeNetRequest are simulated; the YouTube and social fixtures use local markup and test-only host adapters. This does not prove compatibility with live platforms, the live lists, or a loaded Chrome extension.
 
+**Observed 1.0.2 patch result: all 37 YouTube adapter checks passed on the affected fixture page.** The focused regression covers the expanded desktop sidebar's text-only Shorts entry as well as the existing href-based entry. The unrelated fixture pages were not rerun for this single-selector patch.
+
 The additional lifecycle matrix at `/demo/lifecycle-<profile>.html` runs the production content controllers against local structural fixtures for Instagram, Facebook, TikTok, all eight built-in shopping hosts, and YouTube. Each profile tests every feature alone, unsupported-feature isolation, all features together, full restoration after the master switch is disabled, a reload while disabled with all settings retained, re-enabling without resubmitting settings, a reload while enabled, dynamic content while disabled, scheduled grayscale and social activation, and final restoration. It performs **457 assertions per profile across two real document reloads (5,484 total)**. The observed 1.0.1 candidate result was all 12 profiles passing in the isolated headless-Chrome gate. These are deterministic adapter tests with simulated policy messaging, not live-site or installed-extension results.
 
 The popup and schedule editor were inspected in the browser. Enabling a site, paging, the grayscale slider, effective-strength feedback, overnight-window creation, saving, host switching, and session pause/restore states were exercised with simulated Chrome APIs. These UI checks do not test Chrome's permission dialog.
@@ -44,7 +46,7 @@ The popup and schedule editor were inspected in the browser. Enabling a site, pa
 - [ ] Load `extension/` unpacked in current stable Chrome. Record the Chrome version and OS.
 - [ ] No manifest, service-worker, or content-script errors appear in `chrome://extensions`.
 - [ ] Review and accept the required exact built-in HTTPS hosts and declarativeNetRequest warning. Upgrade from v0.2.2 and verify Chrome's permission-change behavior.
-- [ ] On a fresh 1.0.1 install, verify the 12 disclosed profiles are seeded once. Upgrade from 0.5.7 and 1.0.0; verify existing choices remain intact and the two new YouTube controls begin hidden. Remove one profile, restart Chrome, and confirm it stays removed.
+- [ ] On a fresh 1.0.2 install, verify the 12 disclosed profiles are seeded once. Upgrade from 0.5.7, 1.0.0, or 1.0.1; verify existing choices remain intact and the YouTube controls remain enabled. Remove one profile, restart Chrome, and confirm it stays removed.
 - [ ] Deny the site-access prompt: the site remains unchanged.
 - [ ] Grant one host: the extension works there and remains inactive elsewhere.
 - [ ] Verify host permissions in Chrome. Confirm HTTP/HTTPS separation and all-port behavior.

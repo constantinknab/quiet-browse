@@ -125,7 +125,7 @@
   };
   let granted = isOptions;
   const page = {
-    engineVersion: stale ? 10 : 11,
+    engineVersion: stale ? 11 : 12,
     active: false,
     paused: false,
     covered: false,
@@ -308,7 +308,7 @@
       executeScript: async (options) => {
         if (options.files) {
           pageUnavailable = false;
-          page.engineVersion = 11;
+          page.engineVersion = 12;
           page.active = true;
         }
       },

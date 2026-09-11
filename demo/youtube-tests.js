@@ -49,9 +49,13 @@
     );
     assert(
       getElement('shorts-nav-entry').hasAttribute('data-qb-youtube-shorts-navigation-hidden') &&
+        getElement('shorts-text-only-nav-entry').hasAttribute(
+          'data-qb-youtube-shorts-navigation-hidden',
+        ) &&
         !isRendered('shorts-nav-entry') &&
+        !isRendered('shorts-text-only-nav-entry') &&
         isRendered('direct-short'),
-      'The Shorts hub entry is hidden by default without hiding a direct Shorts link',
+      'Href-based and text-only Shorts sidebar entries hide without hiding a direct Shorts link',
     );
     assert(
       getElement('playables-nav-entry').hasAttribute('data-qb-youtube-playables-hidden') &&
@@ -90,6 +94,7 @@
         isRendered('generic-shorts-section') &&
         isRendered('mixed-shorts-shelf') &&
         !isRendered('shorts-nav-entry') &&
+        !isRendered('shorts-text-only-nav-entry') &&
         !isRendered('playables-section'),
       'The Shorts-shelf switch restores shelves without changing navigation, Playables, or watch-page recommendations',
     );
@@ -114,6 +119,7 @@
     assert(
       !document.querySelector('[data-qb-youtube-shorts-navigation-hidden]') &&
         isRendered('shorts-nav-entry') &&
+        isRendered('shorts-text-only-nav-entry') &&
         !isRendered('playables-nav-entry') &&
         isRendered('generic-shorts-section'),
       'The Shorts-tab switch restores only Shorts navigation',
@@ -138,6 +144,7 @@
     await wait();
     assert(
       !isRendered('shorts-nav-entry') &&
+        !isRendered('shorts-text-only-nav-entry') &&
         isRendered('playables-nav-entry') &&
         isRendered('playables-section') &&
         isRendered('playable-card') &&

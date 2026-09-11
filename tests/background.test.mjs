@@ -32,7 +32,7 @@ function fakeChrome() {
   const messages = [];
   const alarms = new Map();
   let receiver = false;
-  let receiverVersion = 11;
+  let receiverVersion = 12;
   let failInjection = false;
   let failDynamicUpdate = false;
   const dynamicRules = new Map();
@@ -93,7 +93,7 @@ function fakeChrome() {
         if (options.files) {
           if (failInjection) throw new Error('Fixture injection failure');
           receiver = true;
-          receiverVersion = 11;
+          receiverVersion = 12;
         }
       },
     },
@@ -132,14 +132,14 @@ function fakeChrome() {
       alarms.clear();
       dynamicRules.clear();
       receiver = false;
-      receiverVersion = 11;
+      receiverVersion = 12;
       failInjection = false;
       failDynamicUpdate = false;
     },
     setData: (value) => {
       data = structuredClone(value);
     },
-    setReceiver: (value, version = 11) => {
+    setReceiver: (value, version = 12) => {
       receiver = value;
       receiverVersion = version;
     },

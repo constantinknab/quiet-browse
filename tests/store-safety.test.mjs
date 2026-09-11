@@ -502,7 +502,7 @@ test('public disclosures stay aligned with the package behavior and version', as
   );
   assert.ok(normalizedPublicPrivacy.includes('Chrome Web Store User Data Policy'));
   assert.ok(listing.includes('not affiliated with or endorsed by Google, Meta, TikTok'));
-  assert.ok(readme.includes('Version 1.0.1 is the current GitHub release'));
+  assert.ok(readme.includes('Version 1.0.2 is the current GitHub release'));
   assert.ok(!readme.includes('Version 1.0.0 is the current GitHub release'));
   assert.ok(readme.includes('version 0.5.7 remains public in the Chrome Web Store'));
 
