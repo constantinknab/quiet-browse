@@ -20,8 +20,34 @@
     return pathname.replace(/\/+$/, '') || '/';
   }
 
+  function tiktokUtilityPath(pathname) {
+    // Never infer a landing feed from a profile, shared item, or utility page,
+    // even if TikTok temporarily retains the previous homepage DOM during navigation.
+    return (
+      /\/(?:@|(?:search|tag|music|shop|upload|login|signup|embed|messages|inbox|settings|legal|business|creator-center|tiktokstudio|coin|api|app)(?:\/|$))/i.test(
+        pathname,
+      ) || /\/(?:video|photo)\//i.test(pathname)
+    );
+  }
+
+  function tiktokPath(pathname) {
+    let path;
+    try {
+      path = normalizedPath(decodeURIComponent(pathname));
+    } catch {
+      return normalizedPath(pathname); // Malformed escapes are not a reason to hide a page.
+    }
+    const segments = path.split('/');
+    if (tiktokUtilityPath('/' + segments[1])) return path;
+    // Match language prefixes with optional region/script subtags rather than
+    // maintaining a short list of countries. This also covers /en/ in Chrome.
+    if (/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(segments[1]))
+      return normalizedPath('/' + segments.slice(2).join('/'));
+    return path;
+  }
+
   function routeFor(name, pathname) {
-    const path = normalizedPath(pathname);
+    const path = name === 'tiktok' ? tiktokPath(pathname) : normalizedPath(pathname);
     if (name === 'instagram') {
       if (/^\/direct(?:\/|$)/.test(path)) return 'messages';
       if (/^\/(?:p|reel|tv|stories)\//.test(path)) return 'direct';
@@ -44,10 +70,11 @@
     if (name === 'tiktok') {
       if (/^\/messages(?:\/|$)/.test(path)) return 'messages';
       if (/^\/@[^/]+\/video\/[^/]+/.test(path)) return 'direct';
+      // For You aliases are also landing pages, not a separately routed feed.
+      if (path === '/' || /^\/(?:foryou|for-you|home)$/i.test(path)) return 'home';
       if (/^\/(?:foryou|following|live)(?:\/|$)/.test(path)) return 'short';
       if (/^\/(?:explore|discover)(?:\/|$)/.test(path)) return 'explore';
-      // The root stays a usable landing page. Its inner feed has a separate setting.
-      return path === '/' ? 'home' : 'other';
+      return 'other';
     }
     return 'other';
   }
@@ -57,7 +84,10 @@
   }
 
   function categoryForLink(name, pathname) {
-    const path = normalizedPath(pathname);
+    const path = name === 'tiktok' ? tiktokPath(pathname) : normalizedPath(pathname);
+    // Keep the landing navigation available even when the general short-video
+    // control is on. Its inner stream belongs to the dedicated landing switch.
+    if (name === 'tiktok' && routeFor(name, pathname) === 'home') return null;
     if (/^\/stories(?:\/|$)/.test(path)) return 'stories';
     if (name === 'instagram' && /^\/reels(?:\/|$)/.test(path)) return 'short';
     if (name === 'facebook' && /^\/(?:reels|watch)(?:\/|$)/.test(path)) return 'short';
@@ -73,6 +103,9 @@
     let originalRoute = null;
     let markedRoot = false;
     let notice = null;
+    const landingMedia = new Map();
+    const landingMediaEvents = ['play', 'playing', 'volumechange', 'loadedmetadata'];
+    let landingMediaBlocked = false;
 
     function navTarget(anchor) {
       return (
@@ -344,6 +377,106 @@
       }
       return null;
     }
+    function tiktokHomepage() {
+      return document.querySelector('[id^="main-content-homepage"]');
+    }
+    function currentRoute() {
+      const route = routeFor(name, location.pathname);
+      if (
+        name !== 'tiktok' ||
+        route !== 'other' ||
+        tiktokUtilityPath(tiktokPath(location.pathname))
+      )
+        return route;
+      // Unknown landing aliases need actual homepage evidence. Do not treat
+      // every unfamiliar TikTok URL as a homepage or hide its whole main shell.
+      if (tiktokHomepage()) return 'home';
+      const selectedHomeLink = Array.from(
+        document.querySelectorAll('a[aria-current="page"][href]'),
+      ).some((anchor) => {
+        try {
+          const url = new URL(anchor.getAttribute('href'), location.href);
+          return url.hostname === location.hostname && routeFor('tiktok', url.pathname) === 'home';
+        } catch {
+          return false;
+        }
+      });
+      return selectedHomeLink && tiktokLandingFeedSurfaces().size ? 'home' : route;
+    }
+    function tiktokLandingFeedSurfaces() {
+      const found = new Set();
+      const add = (element) => {
+        const target = safeSurface(element);
+        if (target) found.add(target);
+      };
+      explicitSurfaces('tiktokLanding').forEach(add);
+      if (found.size) return found;
+      // A virtualized stream may initially contain just one item. Its layout
+      // measurements also become zero after we hide it, so neither item count
+      // nor overflow measurements can decide whether to keep it hidden.
+      document.querySelectorAll('#column-list-container').forEach(add);
+      const feedItem = '[data-e2e="recommend-list-item-container"],[id^="one-column-item-"]';
+      for (const candidate of document.querySelectorAll('[data-e2e="recommend-list"]')) {
+        if (candidate.querySelector(feedItem)) add(candidate);
+      }
+      for (const candidate of tiktokHomepage()?.querySelectorAll('[role="feed"]') || []) {
+        if (candidate.querySelector('video,audio')) add(candidate);
+      }
+      // If the wrapper changes, hide every recognized media item. Only promote
+      // to its parent when that parent contains nothing but feed items/empty
+      // virtualized placeholders; neighboring search or navigation stays usable.
+      for (const item of document.querySelectorAll(feedItem)) {
+        if (
+          !item.querySelector('video,audio') ||
+          [...found].some((target) => target.contains(item))
+        )
+          continue;
+        const parent = safeSurface(item.parentElement);
+        const onlyFeedItems =
+          parent &&
+          Array.from(parent.children).every(
+            (child) =>
+              child.matches(feedItem) || (!child.childElementCount && !child.textContent.trim()),
+          );
+        add(onlyFeedItems ? parent : item);
+      }
+      return found;
+    }
+    function silenceLandingMedia(media) {
+      if (!landingMedia.has(media)) landingMedia.set(media, media.muted);
+      if (!media.muted) media.muted = true;
+      if (!media.paused) media.pause();
+    }
+    function guardLandingMedia(event) {
+      if (!landingMediaBlocked || currentRoute() !== 'home') return;
+      const media = event.target;
+      if (!media?.matches?.('video,audio')) return;
+      // Re-find the boundary because TikTok can replace the stream before the
+      // page observer's next scan. Media elsewhere on the page is untouched.
+      if ([...tiktokLandingFeedSurfaces()].some((target) => target.contains(media)))
+        silenceLandingMedia(media);
+    }
+    function syncLandingMedia(targets, blocked) {
+      const shouldBlock = name === 'tiktok' && blocked;
+      if (shouldBlock !== landingMediaBlocked) {
+        landingMediaBlocked = shouldBlock;
+        for (const event of landingMediaEvents) {
+          if (shouldBlock) document.addEventListener(event, guardLandingMedia, true);
+          else document.removeEventListener(event, guardLandingMedia, true);
+        }
+      }
+      const desired = new Set(
+        shouldBlock ? targets.flatMap((target) => [...target.querySelectorAll('video,audio')]) : [],
+      );
+      for (const [media, originalMuted] of landingMedia) {
+        if (desired.has(media) && media.isConnected) continue;
+        media.muted = originalMuted;
+        landingMedia.delete(media);
+        // Do not restart playback when revealing the stream or navigating away.
+        // The user or TikTok can start playback normally once the guard is removed.
+      }
+      desired.forEach(silenceLandingMedia);
+    }
     function instagramRoutedFeedSurfaces(route) {
       const found = new Set();
       const feed = safeSurface(document.querySelector('[role="feed"]'));
@@ -444,7 +577,7 @@
 
     function sync(settings = {}, now = new Date()) {
       if (!name) return;
-      const route = routeFor(name, location.pathname);
+      const route = currentRoute();
       const desired = new Map();
       const at = (key) =>
         globalThis.QuietBrowseComfort.settingAt(
@@ -488,10 +621,10 @@
       let blockedCategory = null;
       let noticeTarget = null;
       if (name === 'tiktok' && route === 'home' && enabled.tiktokLanding) {
-        const target = tiktokFeedContainer();
-        want(desired, target, 'tiktokLanding');
-        blockedCategory = target ? 'tiktokLanding' : null;
-        noticeTarget = target;
+        const surfaces = tiktokLandingFeedSurfaces();
+        surfaces.forEach((element) => want(desired, element, 'tiktokLanding'));
+        noticeTarget = surfaces.values().next().value || null;
+        blockedCategory = noticeTarget ? 'tiktokLanding' : null;
       } else if (route === 'home' && name !== 'tiktok' && enabled.home) {
         const surfaces = homeFeedSurfaces();
         surfaces.forEach((element) => want(desired, element, 'home'));
@@ -511,6 +644,12 @@
         );
       }
       reconcile(desired);
+      syncLandingMedia(
+        [...desired]
+          .filter(([, category]) => category === 'tiktokLanding')
+          .map(([target]) => target),
+        name === 'tiktok' && route === 'home' && enabled.tiktokLanding,
+      );
       showNotice(noticeTarget, blockedCategory);
       if (!markedRoot) {
         originalRoot = document.documentElement.getAttribute(ROOT);
@@ -522,6 +661,7 @@
     }
 
     function stop() {
+      syncLandingMedia([], false);
       reconcile(new Map());
       notice?.remove();
       notice = null;
@@ -539,7 +679,7 @@
       status: () => ({
         platform: name,
         hidden: changed.size,
-        route: routeFor(name, location.pathname),
+        route: currentRoute(),
       }),
     };
   }

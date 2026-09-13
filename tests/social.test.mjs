@@ -36,3 +36,49 @@ test('supported social hosts and routes preserve messages and direct items', () 
   assert.equal(routeFor('tiktok', '/following/'), 'short');
   assert.equal(routeFor('tiktok', '/explore/'), 'explore');
 });
+
+test('TikTok localized landing pages are home routes without blocking shared videos or utilities', () => {
+  // These are URL variants, not a country allowlist. Region/script suffixes,
+  // casing, escaped language codes, and trailing slashes must behave alike.
+  for (const landing of [
+    '/',
+    '/en',
+    '/en/',
+    '/en-US/',
+    '/ja-JP/',
+    '/zh-Hant-TW/',
+    '/pt-br/',
+    '/%65%6e/',
+    '/eng/',
+    '/foryou/',
+    '/en/foryou/',
+    '/en-US/for-you/',
+    '/en/home/',
+  ]) {
+    assert.equal(routeFor('tiktok', landing), 'home', landing);
+    assert.deepEqual(routeCategories('tiktok', landing), ['home'], landing);
+    assert.equal(categoryForLink('tiktok', landing), null, `${landing} keeps its navigation link`);
+  }
+  for (const prefix of ['', '/en', '/zh-Hant-TW']) {
+    assert.equal(routeFor('tiktok', `${prefix}/@user/video/123`), 'direct');
+    assert.equal(routeFor('tiktok', `${prefix}/messages/`), 'messages');
+    for (const utility of [
+      '/@user',
+      '/search',
+      '/tag',
+      '/music',
+      '/shop',
+      '/upload',
+      '/login',
+      '/embed',
+    ]) {
+      assert.equal(routeFor('tiktok', `${prefix}${utility}`), 'other', utility);
+    }
+    assert.equal(routeFor('tiktok', `${prefix}/following/`), 'short');
+    assert.equal(categoryForLink('tiktok', `${prefix}/following/`), 'short');
+  }
+  // A new, unknown path needs homepage DOM evidence; a route alone is not enough.
+  assert.equal(routeFor('tiktok', '/landing-experiment/'), 'other');
+  assert.equal(routeFor('tiktok', '/%broken/'), 'other');
+  assert.equal(routeFor('tiktok', '/%65%6e/%40user/video/123'), 'direct');
+});

@@ -1,0 +1,8 @@
+/* Model TikTok's measured-overflow stream, rather than the shared fixture's
+   explicit scroll overflow. Hiding it makes its layout measurements zero. */
+#column-list-container {
+  overflow-y: hidden;
+}
+.routed-feed-fixture #column-list-container {
+  overflow-y: scroll;
+}

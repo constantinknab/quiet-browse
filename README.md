@@ -1,6 +1,6 @@
 # Quiet Browse
 
-A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.2 is the current GitHub release; version 0.5.7 remains public in the Chrome Web Store while the 1.0.2 update awaits live checks and store review. It is not a legal certification or tamper-proof parental control.**
+A usable Chrome 123+ extension for calmer browsing. It combines local presentation controls, scheduled social-feed controls, and an optional adult content filter with a packaged fallback and three opt-in regional sources. **Version 1.0.3 is the current GitHub release; version 0.5.7 remains public in the Chrome Web Store until a newer update is submitted, reviewed, and published. It is not a legal certification or tamper-proof parental control.**
 
 [Website](https://constantinknab.github.io/quiet-browse/) · [Privacy](https://constantinknab.github.io/quiet-browse/privacy.html) · [Support](https://constantinknab.github.io/quiet-browse/support.html) · [GitHub releases](https://github.com/constantinknab/quiet-browse/releases)
 
@@ -41,7 +41,7 @@ No developer account, registration payment, API key, npm install, or Google revi
 | Social short video | On for built-in social profiles | Hides supported Reels, Watch, and TikTok short-video hubs and entry points, always or on a separate schedule. A direct item URL remains viewable. |
 | Social Explore | On for built-in social profiles | Hides supported Explore and Discover navigation and route feeds, always or on a separate schedule, while leaving search, profiles, and messages available. |
 | Social home feed | On for built-in Instagram and Facebook profiles | Hides individual supported home-feed posts without hiding the shared page container, so Stories and follow recommendations remain independently controllable. Direct items and conversations remain; marked continuation recommendations are removed. |
-| TikTok landing feed | On for the built-in TikTok profile | Hides only the supported vertically scrolling feed inside TikTok's `/` landing page. The landing page, navigation, messages, profiles, and direct links remain available. |
+| TikTok landing feed | On for the built-in TikTok profile | Hides and silences supported inner landing streams at `/`, localized URLs such as `/en/`, and For You aliases. Recognized homepage layouts also cover unknown landing aliases. The surrounding landing page, navigation, messages, profiles, and direct links remain available; turning the control off restores the original mute choice without automatically starting playback. |
 | Adult content filter | Off | Adds local Chrome request-blocking rules for a packaged starter list plus up to 500 user-entered hostnames. With separate consent, it downloads any selected bounded US-coverage, China-coverage, and Japan-coverage lists now and about weekly, retrying a failed refresh after about six hours. It only blocks top-level navigation and stores no visit log. |
 
 Built-in profiles start enabled for `www.instagram.com`, `www.facebook.com`, `www.tiktok.com`, `www.youtube.com`, `www.amazon.com`, `www.ebay.com`, `www.etsy.com`, `www.walmart.com`, `www.target.com`, `www.temu.com`, `us.shein.com`, and `www.aliexpress.com`. These exact HTTPS host permissions are required because automatic operation is a core feature. Other hosts remain off until separately authorized. Each profile can be turned off or removed.
@@ -75,7 +75,7 @@ quiet-browse/
   demo/                      local real-DOM fixtures; excluded from release ZIP
   scripts/                   checks, icon generation, packaging, local server
   docs/                      submission guide, readability policy, release gates, tests
-  dist/quiet-browse-1.0.2.zip ← generated extension-only archive
+  dist/quiet-browse-1.0.3.zip ← generated extension-only archive
 ```
 
 ## Developer commands
@@ -119,6 +119,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.2 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; version 0.5.7 is still public in the Chrome Web Store.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.3 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; version 0.5.7 is still public in the Chrome Web Store.
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.

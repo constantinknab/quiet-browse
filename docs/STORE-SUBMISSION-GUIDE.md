@@ -1,13 +1,14 @@
-# Quiet Browse 1.0.2 — complete Chrome Web Store submission guide
+# Quiet Browse 1.0.3 — complete Chrome Web Store submission guide
 
-Updated September 11, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
+Updated September 13, 2026. Check the live dashboard when its wording differs. Following this guide improves review clarity but cannot guarantee approval.
 
 ## What is ready
 
-- Store package: `dist/quiet-browse-1.0.2.zip`
-- SHA-256: `6f3bd714c22e6408516f97ef02a0bfc4954fdea0ae7c74f2cc29ec0fb521d9b1`
+- Store package: `dist/quiet-browse-1.0.3.zip`
+- SHA-256: `17d1f9b4b32b47838b47d12712ee027ca7e931141d82fc4713ef93e3d5395782`
 - Manifest V3, 21 packaged files, and no remote executable code
 - The 1.0.1 baseline passed 67 Node tests, 240 browser fixture checks, and 5,484 cross-site lifecycle assertions. For the isolated 1.0.2 Shorts-sidebar patch, the 37 affected YouTube fixture checks, 47 related Node checks, syntax/format checks, and ZIP integrity audit passed; unrelated suites were not rerun.
+- For 1.0.3, both social-route Node tests and all 62 affected TikTok fixture checks passed. The fixture also passed with autoplay allowed. The ZIP and local test folder match all 21 extension source files byte-for-byte; unrelated suites were not rerun. Constantin approved GitHub shipping on September 13, 2026.
 - Draft listing copy: `docs/STORE-LISTING.md`
 - Public website source: `website/`
 - Store icon and promotional tiles: `store-assets/`
@@ -51,9 +52,11 @@ The prepared repository uses:
 
 Creative Commons recommends software-specific licenses for software. Do not change the code to a CC license merely for branding consistency without understanding the compatibility and patent consequences. Publishing a permissive license grants rights to copies already received and is not a reversible trial.
 
-## Phase 3 — keep the candidate local while testing
+## Phase 3 — keep future candidates local while testing
 
-1. Work on the local `release/1.0.2` branch.
+The 1.0.3 TikTok patch received publisher approval for GitHub publication. Broader Web Store gates remain separate; the following process applies to future candidates.
+
+1. Work on the local `release/1.0.3` branch.
 2. Do not push, tag, create a GitHub release, or upload the ZIP while live testing is incomplete.
 3. Keep `docs/release.json` gates false until the corresponding work has actually happened.
 4. Run `git diff --check` after each fix and repeat the automated verification before testing again.
@@ -135,7 +138,7 @@ Suggested caption: **Optional local top-level blocking with selectable lists and
 - No personal accounts, messages, carts, orders, addresses, or payment details.
 - No fixture pages presented as the real extension.
 - No excessive platform logos or implication of affiliation.
-- No feature shown unless it exists in version 1.0.2.
+- No feature shown unless it exists in version 1.0.3.
 
 ## Phase 6 — prepare the promotional video
 
@@ -148,7 +151,7 @@ Google's current listing documentation asks for a YouTube promo-video URL. Make 
 5. 40–52 seconds: show the blocker settings using `example.com`, never an adult page.
 6. 52–60 seconds: disable the blocker and show that ordinary access returns.
 
-Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.2 — Chrome extension demonstration`. In the description, state that it shows version 1.0.2 and contains no paid endorsement.
+Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.3 — Chrome extension demonstration`. In the description, state that it shows version 1.0.3 and contains no paid endorsement.
 
 ## Phase 7 — register the Chrome Web Store developer account
 
@@ -183,13 +186,13 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.2 — Chrome ex
    git status --short
    git diff --cached --stat
    git diff --cached
-   git commit -m "Publish Quiet Browse 1.0.2"
+   git commit -m "Publish Quiet Browse 1.0.3"
    git switch main
-   git merge --ff-only release/1.0.2
+   git merge --ff-only release/1.0.3
    git push origin main
-   git tag -a v1.0.2 -m "Quiet Browse 1.0.2"
-   git push origin v1.0.2
-   gh release create v1.0.2 dist/quiet-browse-1.0.2.zip --title "Quiet Browse 1.0.2" --notes "Stable 1.0 release. See README and the Chrome Web Store listing for features, privacy details, and limitations."
+   git tag -a v1.0.3 -m "Quiet Browse 1.0.3"
+   git push origin v1.0.3
+   gh release create v1.0.3 dist/quiet-browse-1.0.3.zip dist/quiet-browse-1.0.3.zip.sha256 --title "Quiet Browse 1.0.3" --notes-file docs/RELEASE-NOTES-1.0.3.md
    ```
 
 5. Confirm the GitHub release page contains the exact extension-only ZIP. Do not attach a repository source archive as the Web Store upload.
@@ -202,11 +205,11 @@ Upload it as **Unlisted** on YouTube. Title it `Quiet Browse 1.0.2 — Chrome ex
 
 8. Do not add analytics, a contact form, advertising, a chat widget, or remote fonts between verification and submission. Those additions change the reviewed disclosures.
 
-## Phase 9 — upload version 1.0.2
+## Phase 9 — upload version 1.0.3
 
 1. Open the existing Quiet Browse item in the dashboard.
-2. Upload `dist/quiet-browse-1.0.2.zip` as an update to the existing item.
-3. Confirm the dashboard identifies Manifest V3 and version 1.0.2.
+2. Upload `dist/quiet-browse-1.0.3.zip` as an update to the existing item.
+3. Confirm the dashboard identifies Manifest V3 and version 1.0.3.
 4. Do not upload the source repository ZIP. The Web Store package must have `manifest.json` at its root.
 
 ## Phase 10 — Store Listing tab
@@ -277,7 +280,7 @@ Use the permission table in `docs/STORE-LISTING.md`. Mention that broad HTTP/HTT
 ## Phase 13 — submit safely
 
 1. Review every dashboard tab for warnings.
-2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 1.0.2.
+2. Confirm the package, listing, privacy answers, website, screenshots, video, and reviewer instructions all describe version 1.0.3.
 3. Choose **Submit for Review**.
 4. Disable automatic publication so approval produces a staged release.
 5. Monitor the verified publisher email.
