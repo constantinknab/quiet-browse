@@ -119,6 +119,6 @@ After installing this update, Chrome may require acceptance of the exact built-i
 
 ## Publishing
 
-Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.3 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; version 0.5.7 is still public in the Chrome Web Store.
+Read [the complete submission guide](docs/STORE-SUBMISSION-GUIDE.md), [the listing draft](docs/STORE-LISTING.md), [the code-readability policy](docs/CODE-READABILITY.md), [the verification report](docs/TESTING.md), and [the policy and legal review notes](docs/POLICY-AND-LEGAL.md). Version 1.0.3 is the current GitHub release. Live Chrome checks and Chrome Web Store review remain separate; 1.0.3 is on the Chrome Web store
 
 The extension can reduce certain presentation pressures; it cannot ensure that every website becomes non-predatory. Website terms, store approval, privacy obligations, and law are separate considerations.
